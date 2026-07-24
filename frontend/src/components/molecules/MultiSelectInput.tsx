@@ -51,7 +51,9 @@ export default function MultiSelectInput({
       onChange(value.filter(v => v !== opt));
       return;
     }
-    if (atLimit) {return;}
+    if (atLimit) {
+      return;
+    }
     onChange([...value, opt]);
     setSearch('');
   };
@@ -100,7 +102,9 @@ export default function MultiSelectInput({
               onKeyDown={e => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
-                  if (filtered.length > 0) {toggle(filtered[0]);}
+                  if (filtered.length > 0) {
+                    toggle(filtered[0]);
+                  }
                 } else if (e.key === 'Escape') {
                   setOpen(false);
                 }

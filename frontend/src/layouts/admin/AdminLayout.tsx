@@ -26,13 +26,13 @@ export default function AdminLayout() {
         </SheetContent>
       </Sheet>
 
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 min-w-0">
         <Topbar
           onMenuClick={() => {
             setMobileSidebarOpen(true);
           }}
         />
-        <main className="flex-1 overflow-y-auto no-scrollbar bg-background overflow-x-auto min-w-0">
+        <main className="flex-1 overflow-y-auto no-scrollbar bg-background overflow-x-hidden min-w-0">
           <Outlet />
         </main>
       </div>

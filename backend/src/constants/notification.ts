@@ -190,4 +190,19 @@ export const NOTIFICATION_TEMPLATES = {
     heading: "Reschedule Request Cancelled",
     message: `The pending reschedule request for booking **${bookingId}** has been cancelled.`,
   }),
+  WORKER_DOCUMENT_VERIFIED: (documentType: string) => ({
+    type: "worker_document_verified",
+    heading: "Document Verified",
+    message: `Your **${documentType}** has been **verified** successfully.`,
+  }),
+  WORKER_DOCUMENT_REJECTED: (documentType: string, reason: string) => ({
+    type: "worker_document_rejected",
+    heading: "Document Rejected",
+    message: `Your **${documentType}** has been **rejected**. Reason: **${reason}**.`,
+  }),
+  WORKER_DOCUMENT_IN_REVIEW: (documentType: string) => ({
+    type: "worker_document_in_review",
+    heading: "Document In Review",
+    message: `Your **${documentType}** is now **in review**.`,
+  }),
 };

@@ -77,10 +77,10 @@ const itemVariants: Variants = {
   },
 };
 
-export default function WorkerServiceGridSkeleton({ count = 6 }: { count?: number }) {
+export default function WorkerServiceGridSkeleton({ count = 7 }: { count?: number }) {
   return (
     <motion.div
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
       variants={containerVariants}
       initial="hidden"
       animate="show"

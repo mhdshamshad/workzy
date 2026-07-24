@@ -1,5 +1,8 @@
 import { StripeAccountStatus } from "@/constants";
-import { WorkerReviewRequestDTO } from "@/dtos/requests/admin/worker-review.dto";
+import {
+  WorkerDocumentReviewRequestDTO,
+  WorkerReviewRequestDTO,
+} from "@/dtos/requests/admin/worker-review.dto";
 import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
 import { WorkerListResponseDto } from "@/dtos/responses/admin/worker.dto";
@@ -49,4 +52,9 @@ export interface IWorkerService {
   getWorkerStats(workerId: string): Promise<WorkerStatsSummary>;
   getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics>;
   reviewWorker(workerId: string, data: WorkerReviewRequestDTO): Promise<WorkerDetailsResponseDto>;
+  reviewWorkerDocument(
+    workerId: string,
+    documentId: string,
+    data: WorkerDocumentReviewRequestDTO
+  ): Promise<WorkerDetailsResponseDto>;
 }

@@ -4,10 +4,6 @@ import {
   CheckCircle2,
   RefreshCcw,
   XCircle,
-  FileText,
-  IdCard,
-  Camera,
-  UserSquare2,
   ExternalLink,
   Check,
   X,
@@ -41,29 +37,8 @@ import type { WorkerProfileDetails } from '@/types/worker';
 import { handleApiError } from '@/utils/handleApiError';
 
 import { useReviewWorker } from '../hooks/useReviewWorker';
+import { getDocInfo } from '../utils/documentUtils';
 import { workerReviewSchema, type WorkerReviewFormType } from '../validation/workerReviewSchema';
-
-const DOCUMENT_INFO_MAP: Record<
-  string,
-  { label: string; icon: React.ComponentType<{ className?: string }> }
-> = {
-  aadhaar: { label: 'Aadhaar Card', icon: IdCard },
-  pan: { label: 'PAN Card', icon: FileText },
-  selfie_verification: { label: 'Selfie Verification', icon: Camera },
-  profile_photo: { label: 'Profile Photo', icon: UserSquare2 },
-};
-
-const getDocInfo = (type: string) => {
-  return (
-    DOCUMENT_INFO_MAP[type] || {
-      label: type
-        .split('_')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' '),
-      icon: FileText,
-    }
-  );
-};
 
 type UpdatableDocumentStatus = Exclude<DocumentStatus, typeof DOCUMENT_STATUS.PENDING>;
 

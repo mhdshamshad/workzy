@@ -4,14 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 import Button from '../atoms/Button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 
 import type React from 'react';
 
@@ -29,6 +22,7 @@ interface AppModalProps {
   cancelText?: string;
   className?: string;
   isConfirmLoading?: boolean;
+  isConfirmDisabled?: boolean;
   hideFooter?: boolean;
   footer?: React.ReactNode;
   canCloseOnOutsideClick?: boolean;
@@ -48,12 +42,13 @@ export function AppModal({
   buttonVariant,
   cancelText = 'Cancel',
   isConfirmLoading = false,
+  isConfirmDisabled = false,
   footer,
   canCloseOnOutsideClick = true,
   className = 'sm:max-w-lg',
 }: AppModalProps) {
   const DefaultFooter = !footer && (
-    <DialogFooter className="gap-2 pt-2">
+    <div className="flex items-center justify-end gap-3 w-full">
       <Button variant="outline" onClick={onClose} disabled={isConfirmLoading} size="sm">
         {cancelText}
       </Button>
@@ -61,14 +56,14 @@ export function AppModal({
         <Button
           variant={buttonVariant}
           onClick={onConfirm}
-          disabled={isConfirmLoading}
+          disabled={isConfirmLoading || isConfirmDisabled}
           loading={isConfirmLoading}
           size="sm"
         >
           {confirmText}
         </Button>
       )}
-    </DialogFooter>
+    </div>
   );
 
   const handleOpenChange = (next: boolean) => {

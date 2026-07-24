@@ -2,27 +2,31 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import AdminChatPage from '@/features/admin/chat/pages/AdminChatPage';
-import AdminDisputesPage from '@/features/admin/disputes/pages/AdminDisputesPage';
-import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
-import WorkerOverviewPage from '@/features/admin/worker/pages/WorkerOverviewPage';
+import AdminWorkerDocumentsPage from '@/features/admin/worker/pages/AdminWorkerDocumentsPage';
+import AdminWorkerServicesPage from '@/features/admin/worker/pages/AdminWorkerServicesPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
-const AdminDashboard = lazy(() => import('@/features/admin/dashboard/pages/AdminDashboard'));
 const AdminLayout = lazy(() => import('@/layouts/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('@/features/admin/dashboard/pages/AdminDashboard'));
 const UserManagementPage = lazy(() => import('@/features/admin/user/pages/UserMangementPage'));
 const UserDetailsLayout = lazy(() => import('@/features/admin/user/pages/UserDetailsLayout'));
-
-const WorkerManagementPage = lazy(
-  () => import('@/features/admin/worker/pages/WorkerMangementPage')
+const AdminWorkerManagementPage = lazy(
+  () => import('@/features/admin/worker/pages/AdminWorkerManagementPage')
 );
 const WorkerDetailsLayout = lazy(
   () => import('@/features/admin/worker/wrapper/WorkerDetailsLayout')
 );
+const AdminWorkerAboutPage = lazy(
+  () => import('@/features/admin/worker/pages/AdminWorkerAboutPage')
+);
+
 const CategoryManagementPage = lazy(
   () => import('@/features/admin/service/pages/CategoryManagementPage')
 );
+const AdminChatPage = lazy(() => import('@/features/admin/chat/pages/AdminChatPage'));
+const AdminDisputesPage = lazy(() => import('@/features/admin/disputes/pages/AdminDisputesPage'));
+const HomePageLayout = lazy(() => import('@/features/admin/home/layout/HomeLayout'));
 
 const HomeSectionPage = lazy(() => import('@/features/admin/home/pages/HomeSectionPage'));
 const HomeLayoutPage = lazy(() => import('@/features/admin/home/pages/HomeLayoutPage'));
@@ -47,16 +51,16 @@ export default function AdminRoutes() {
             </Route>
 
             <Route path="workers">
-              <Route index element={<WorkerManagementPage />} />
+              <Route index element={<AdminWorkerManagementPage />} />
               <Route path=":workerId" element={<WorkerDetailsLayout />}>
-                <Route index element={<WorkerOverviewPage />} />
-                <Route path="documents" element={<WorkerOverviewPage />} />
-                <Route path="services" element={<WorkerOverviewPage />} />
-                <Route path="bookings" element={<WorkerOverviewPage />} />
-                <Route path="reviews" element={<WorkerOverviewPage />} />
-                <Route path="quotes" element={<WorkerOverviewPage />} />
-                <Route path="disputes" element={<WorkerOverviewPage />} />
-                <Route path="payments" element={<WorkerOverviewPage />} />
+                <Route index element={<AdminWorkerAboutPage />} />
+                <Route path="documents" element={<AdminWorkerDocumentsPage />} />
+                <Route path="services" element={<AdminWorkerServicesPage />} />
+                <Route path="bookings" element={<AdminWorkerAboutPage />} />
+                <Route path="reviews" element={<AdminWorkerAboutPage />} />
+                <Route path="quotes" element={<AdminWorkerAboutPage />} />
+                <Route path="disputes" element={<AdminWorkerAboutPage />} />
+                <Route path="payments" element={<AdminWorkerAboutPage />} />
               </Route>
             </Route>
 

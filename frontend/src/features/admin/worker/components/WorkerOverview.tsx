@@ -4,13 +4,14 @@ import { NavLink, Outlet } from 'react-router-dom';
 
 import StatCard from '@/components/molecules/StatCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DOCUMENT_STATUS } from '@/constants';
 import { useWorkerStats } from '@/features/admin/worker/hooks/useWorkerStats';
 import { cn } from '@/lib/utils';
 import type { WorkerProfileDetails } from '@/types/worker';
 
 const TABS = [
-  { name: 'Overview', path: '' },
-  { name: 'Verification', path: 'documents' },
+  { name: 'About', path: '' },
+  { name: 'Documents', path: 'documents' },
   { name: 'Services', path: 'services' },
   { name: 'Bookings', path: 'bookings' },
   { name: 'Reviews', path: 'reviews' },
@@ -38,9 +39,14 @@ export default function WorkerOverview({ worker }: WorkerOverviewProps) {
     workerEarnings,
   } = stats ?? {};
 
+  const pendingDocumentsCount =
+    worker.documents?.filter(
+      doc => doc.status === DOCUMENT_STATUS.PENDING || doc.status === DOCUMENT_STATUS.IN_REVIEW
+    ).length ?? 0;
+
   return (
     <>
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4 max-w-7xl mx-auto px-4 mt-4 sm:px-8">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 w-full max-w-7xl mx-auto mt-4">
         {isStatsLoading ? (
           Array.from({ length: 8 }).map((_, i) => (
             <div
@@ -109,25 +115,32 @@ export default function WorkerOverview({ worker }: WorkerOverviewProps) {
         )}
       </section>
 
-      <div className="max-w-7xl mx-auto sm:px-6 pb-16 mt-4">
-        <div className="flex border-b border-border overflow-x-auto no-scrollbar mb-6">
-          {TABS.map(tab => (
-            <NavLink
-              key={tab.name}
-              to={tab.path}
-              end={tab.path === ''}
-              className={({ isActive }) =>
-                cn(
-                  'px-5 py-3 text-sm font-medium transition-all duration-150 border-b-2 whitespace-nowrap',
-                  isActive
-                    ? 'text-foreground font-semibold border-foreground'
-                    : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/40'
-                )
-              }
-            >
-              {tab.name}
-            </NavLink>
-          ))}
+      <div className="max-w-7xl mx-auto pb-16 mt-4">
+        <div className="overflow-x-auto no-scrollbar border-b border-border mb-6">
+          <div className="flex">
+            {TABS.map(tab => (
+              <NavLink
+                key={tab.name}
+                to={tab.path}
+                end={tab.path === ''}
+                className={({ isActive }) =>
+                  cn(
+                    'px-5 py-3 text-sm font-medium transition-all duration-150 border-b-2 whitespace-nowrap flex items-center gap-2',
+                    isActive
+                      ? 'text-foreground font-semibold border-foreground'
+                      : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/40'
+                  )
+                }
+              >
+                {tab.name}
+                {tab.name === 'Documents' && pendingDocumentsCount > 0 && (
+                  <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
+                    {pendingDocumentsCount}
+                  </span>
+                )}
+              </NavLink>
+            ))}
+          </div>
         </div>
         <motion.div
           key={worker.id}

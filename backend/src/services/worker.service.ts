@@ -22,7 +22,10 @@ import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
-import { WorkerReviewRequestDTO } from "@/dtos/requests/admin/worker-review.dto";
+import {
+  WorkerDocumentReviewRequestDTO,
+  WorkerReviewRequestDTO,
+} from "@/dtos/requests/admin/worker-review.dto";
 import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
 import { WorkerListResponseDto } from "@/dtos/responses/admin/worker.dto";
@@ -368,5 +371,64 @@ export class WorkerService implements IWorkerService {
       );
     }
     return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+  }
+
+  async reviewWorkerDocument(
+    workerId: string,
+    documentId: string,
+    data: WorkerDocumentReviewRequestDTO
+  ): Promise<WorkerDetailsResponseDto> {
+    const { status, rejectReason } = data;
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+    const document = worker.documents.find((doc) => doc._id?.toString() === documentId);
+
+    if (!document) {
+      throw new CustomError(WORKER.DOCUMENT_NOTFOUND);
+    }
+    const isVerified = status === DOCUMENT_STATUS.VERIFIED;
+    const isRejected = status === DOCUMENT_STATUS.REJECTED;
+
+    if (document.status === DOCUMENT_STATUS.VERIFIED) {
+      throw new CustomError(WORKER.DOCUMENT_ALREADY_VERIFIED);
+    }
+    if (document.status === DOCUMENT_STATUS.REJECTED) {
+      throw new CustomError(WORKER.DOCUMENT_ALREADY_REJECTED);
+    }
+
+    const updatedDocuments = worker.documents.map((doc) => {
+      if (doc._id?.toString() === documentId) {
+        return {
+          _id: doc._id,
+          type: doc.type,
+          url: doc.url,
+          uploadedAt: doc.uploadedAt,
+          verifiedAt: isVerified ? new Date() : doc.verifiedAt,
+          status: data.status,
+          rejectReason: data.rejectReason,
+        };
+      }
+      return doc;
+    });
+
+    const updatedWorker = await this._workerRepository.findByIdAndUpdate(workerId, {
+      documents: updatedDocuments,
+    });
+
+    if (!updatedWorker) {
+      throw new CustomError(WORKER.DOCUMENT_UPDATE_ERROR);
+    }
+
+    void this._notificationService.createNotification(
+      worker.userId.toString(),
+      isVerified
+        ? NOTIFICATION_TEMPLATES.WORKER_DOCUMENT_VERIFIED(document.type)
+        : isRejected
+          ? NOTIFICATION_TEMPLATES.WORKER_DOCUMENT_REJECTED(
+              document.type,
+              rejectReason ?? "No reason provided"
+            )
+          : NOTIFICATION_TEMPLATES.WORKER_DOCUMENT_IN_REVIEW(document.type)
+    );
+    return await WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
   }
 }

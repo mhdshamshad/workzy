@@ -15,9 +15,12 @@ import {
   DESCRIPTION_REGEX,
   DOCUMENT_STATUS,
   DOCUMENT_TYPE,
+  DocumentStatus,
   WORKER_STATUS,
   WorkerStatus,
 } from "@/constants";
+
+type UpdatableDocumentStatus = Exclude<DocumentStatus, typeof DOCUMENT_STATUS.PENDING>;
 
 class WorkerDocumentDTO {
   @IsMongoId()
@@ -27,7 +30,7 @@ class WorkerDocumentDTO {
   type!: string;
 
   @IsEnum([DOCUMENT_STATUS.VERIFIED, DOCUMENT_STATUS.REJECTED, DOCUMENT_STATUS.IN_REVIEW])
-  status!: string;
+  status!: UpdatableDocumentStatus;
 
   @ValidateIf((o) => o.status === DOCUMENT_STATUS.REJECTED)
   @IsString()
@@ -63,4 +66,18 @@ export class WorkerReviewRequestDTO {
     WORKER_STATUS.REJECTED,
   ])
   status!: WorkerStatus;
+}
+
+export class WorkerDocumentReviewRequestDTO {
+  @IsEnum([DOCUMENT_STATUS.VERIFIED, DOCUMENT_STATUS.REJECTED, DOCUMENT_STATUS.IN_REVIEW])
+  status!: UpdatableDocumentStatus;
+
+  @ValidateIf((o) => o.status === DOCUMENT_STATUS.REJECTED)
+  @IsString()
+  @MinLength(10, { message: "Reason minimum 10 characters" })
+  @MaxLength(500, { message: "Reason cannot exceed 500 characters" })
+  @Matches(DESCRIPTION_REGEX, {
+    message: "Reason contains invalid characters",
+  })
+  rejectReason?: string;
 }

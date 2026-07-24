@@ -17,7 +17,7 @@ import { useAdminWorkers } from '../hooks/useAdminWorkers';
 
 const CUSTOM_PARAMS = [{ key: 'stripStatus', defaultValue: 'all' }];
 
-export default function WorkerManagementPage() {
+export default function AdminWorkerManagementPage() {
   const navigate = useNavigate();
   const { pageIndex, pageSize, search, status, updateParams, stripStatus } = useUrlFilterParams<{
     stripStatus: string;
@@ -52,15 +52,15 @@ export default function WorkerManagementPage() {
     <main className="p-4 lg:p-6">
       <PageHeader title="Worker Management" description="Manage your platform Workers" />
       <div className="bg-card border rounded-xl p-6 pb-0 mt-12">
-        <div className="grid sm:grid-cols-12 gap-4">
-          <div className="sm:col-span-5">
+        <div className="grid grid-cols-2 sm:grid-cols-12 gap-4">
+          <div className="col-span-2 sm:col-span-5">
             <SearchInput
               placeholder="Search by name or email..."
               value={search}
               onChange={handleSearchChange}
             />
           </div>
-          <div className="sm:col-span-3">
+          <div className="col-span-1 sm:col-span-3">
             <Select
               placeholder="All Status"
               value={status}
@@ -75,7 +75,7 @@ export default function WorkerManagementPage() {
               ]}
             />
           </div>
-          <div className="sm:col-span-4">
+          <div className="col-span-1 sm:col-span-4">
             <Select
               placeholder="All Status"
               value={stripStatus}

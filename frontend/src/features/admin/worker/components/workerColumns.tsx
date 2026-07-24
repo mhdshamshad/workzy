@@ -75,23 +75,23 @@ const workerColumns = (
   },
   {
     id: 'stripStatus',
-    header: 'stripStatus',
+    header: 'Stripe Status',
     accessorKey: 'stripStatus',
     cell: ({ row }) => {
-      const stripSstatus = row.original.stripeAccountStatus;
+      const stripeStatus = row.original.stripeAccountStatus;
       return (
         <Badge
           variant={
-            stripSstatus === 'active' ? 'green' : stripSstatus === 'pending' ? 'blue' : 'amber'
+            stripeStatus === 'active' ? 'green' : stripeStatus === 'pending' ? 'blue' : 'amber'
           }
         >
-          {stripSstatus}
+          {stripeStatus}
         </Badge>
       );
     },
-    showInMobileHeader: true,
-    mobileOrder: 2,
-    mobileLabel: 'Worker Status',
+    showInMobileHeader: false,
+    mobileOrder: 4,
+    mobileLabel: 'Stripe Status',
     width: 120,
   },
   {
@@ -110,8 +110,10 @@ const workerColumns = (
   {
     id: 'actions',
     header: 'Actions',
+    mobileOrder: 99,
+    hideOnSmall: false,
     cell: ({ row }) => (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 w-full justify-end">
         <Button
           size="sm"
           variant="outline"

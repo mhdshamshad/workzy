@@ -40,6 +40,11 @@ export const NOTIFICATION_CONFIG: Record<string, NotificationConfig> = {
   worker_verified: { icon: 'ShieldCheck', color: '#10b981' },
   worker_revision: { icon: 'FileWarning', color: '#f59e0b' },
   worker_rejected: { icon: 'ShieldAlert', color: '#ef4444' },
+
+  //worker document verification
+  worker_document_verified: { icon: 'ShieldCheck', color: '#10b981' },
+  worker_document_rejected: { icon: 'ShieldAlert', color: '#ef4444' },
+  worker_document_in_review: { icon: 'FileWarning', color: '#f59e0b' },
 };
 
 export function getNotificationConfig(type: string): NotificationConfig {
