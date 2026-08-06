@@ -40,8 +40,7 @@ export class BookingController implements IBookingController {
 
   getBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const query = this.parseQuery(req);
-    const userId = req.query.userId as string | undefined;
-    const workerId = req.query.workerId as string | undefined;
+    const { userId, workerId } = this.resolveActorIds(req);
     const paymentStatus = (req.query.paymentStatus as BookingPaymentStatus) || "all";
     const { data, nextCursor } = await this._bookingService.getBookings({
       ...query,
@@ -49,20 +48,6 @@ export class BookingController implements IBookingController {
       userId,
       workerId,
     });
-    res.status(HTTPSTATUS.OK).json({ bookings: data, nextCursor });
-  });
-
-  getUserBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = this.requireUserId(req);
-    const query = this.parseQuery(req);
-    const { data, nextCursor } = await this._bookingService.getBookings({ userId, ...query });
-    res.status(HTTPSTATUS.OK).json({ bookings: data, nextCursor });
-  });
-
-  getWorkerBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const workerId = this.requireWorkerId(req);
-    const query = this.parseQuery(req);
-    const { data, nextCursor } = await this._bookingService.getBookings({ workerId, ...query });
     res.status(HTTPSTATUS.OK).json({ bookings: data, nextCursor });
   });
 
@@ -205,6 +190,21 @@ export class BookingController implements IBookingController {
       fromDate,
       toDate,
     };
+  }
+
+  private resolveActorIds(req: Request): { userId?: string; workerId?: string } {
+    const role = req.user?.role;
+    if (role === ROLE.ADMIN) {
+      return {
+        userId: req.query.userId as string | undefined,
+        workerId: req.query.workerId as string | undefined,
+      };
+    }
+
+    if (role === ROLE.USER) return { userId: this.requireUserId(req) };
+    if (role === ROLE.WORKER) return { workerId: this.requireWorkerId(req) };
+
+    return {};
   }
 
   private requireUserId(req: Request): string {

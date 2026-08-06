@@ -351,16 +351,12 @@ export class PaymentService implements IPaymentService {
       slotId: string;
       workerId: string;
     };
-    await Promise.all([
-      this._bookingPaymentHandler.confirmBookingAfterPayment(bookingId, slotId, workerId),
-      this._paymentRepo.findOneAndUpdate(
-        { sessionId: session.id },
-        {
-          status: PAYMENT_STATUS.SUCCEEDED,
-          paymentIntentId: session.payment_intent as string,
-        }
-      ),
-    ]);
+    await this._bookingPaymentHandler.confirmBookingAfterPayment(
+      bookingId,
+      slotId,
+      workerId,
+      session.payment_intent as string
+    );
   }
 
   async verifySession(sessionId: string): Promise<VerifySessionType> {

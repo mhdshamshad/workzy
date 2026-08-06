@@ -3,16 +3,19 @@ import { Types, UpdateQuery } from "mongoose";
 
 import logger from "@/config/logger";
 import {
+  BILL_TYPE,
   BOOKING,
   BOOKING_PAYMENT_STATUS,
   BOOKING_STATUS,
   BOOKING_STATUS_MESSAGES,
   NOTIFICATION_TEMPLATES,
+  PAYMENT_STATUS,
   QUOTE_STATUS,
   ROLE,
   SLOT_STATUS,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
+import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -29,6 +32,7 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 export class BookingPaymentHandlerService implements IBookingPaymentHandler {
   constructor(
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
+    @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
     @inject(TYPES.SlotRepository) private _slotRepository: ISlotRepository,
     @inject(TYPES.QuoteRepository) private _quoteRepository: IQuoteRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
@@ -58,7 +62,8 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
   async confirmBookingAfterPayment(
     bookingId: string,
     slotId: string,
-    workerId: string
+    workerId: string,
+    paymentIntentId: string
   ): Promise<void> {
     const booking = await this.getBookingOrThrow(bookingId);
 
@@ -137,9 +142,14 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
       }
       await this._bookingRepository.findByIdAndUpdate(bookingId, bookingUpdateData, options);
       await this._workerRepository.findByIdAndUpdate(workerId, workerUpdateData, options);
+      await this._paymentRepository.findOneAndUpdate(
+        { bookingId: new Types.ObjectId(bookingId), billType: BILL_TYPE.BOOKING },
+        { status: PAYMENT_STATUS.SUCCEEDED, paymentIntentId },
+        options
+      );
     });
 
-    await this.sendBookingEvent(booking, chatMessage);
+    void this.sendBookingEvent(booking, chatMessage);
     notifyAction();
   }
 

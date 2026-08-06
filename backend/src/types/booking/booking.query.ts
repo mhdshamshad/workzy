@@ -2,6 +2,8 @@ import { BookingPaymentStatus, BookingStatus } from "@/constants";
 
 import { Cursor } from "../common/query";
 
+import { IBookingSlot, IBookingStatusHistory } from "./booking.entity";
+
 export type ListingStatus = BookingStatus | "all" | "upcoming";
 
 export interface BookingListQuery {
@@ -14,4 +16,11 @@ export interface BookingListQuery {
   toDate?: string;
   limit: number;
   cursor?: Cursor | null;
+}
+
+export interface IAcceptRescheduleData {
+  oldSlotDate: Date;
+  newSlot: IBookingSlot;
+  historyEntry: IBookingStatusHistory;
+  newStatus: BookingStatus;
 }

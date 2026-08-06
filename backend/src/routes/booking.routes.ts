@@ -21,7 +21,7 @@ import { validateDto } from "@/middlewares/validate-dto.middleware";
 const router = Router();
 const controller = container.get<IBookingController>(TYPES.BookingController);
 
-router.get("/", authenticate([ROLE.ADMIN]), controller.getBookings);
+router.get("/", authenticate([ROLE.ADMIN, ROLE.USER, ROLE.WORKER]), controller.getBookings);
 
 router.post(
   "/",
@@ -29,8 +29,6 @@ router.post(
   validateDto(CreatebookingDTO),
   controller.createBooking
 );
-router.get("/user", authenticate([ROLE.USER, ROLE.WORKER]), controller.getUserBookings);
-router.get("/worker", authenticate([ROLE.USER, ROLE.WORKER]), controller.getWorkerBookings);
 router.get("/:bookingId", controller.getBookingById);
 
 router.patch("/:bookingId/accept", authenticate([ROLE.WORKER]), controller.acceptBooking);

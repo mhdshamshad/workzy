@@ -4,7 +4,6 @@ export interface IBookingController {
   getBookings: RequestHandler;
   createBooking: RequestHandler;
   getBookingById: RequestHandler;
-  getUserBookings: RequestHandler;
 
   cancelBooking: RequestHandler;
   approveBooking: RequestHandler;
@@ -15,7 +14,6 @@ export interface IBookingController {
   markEnRoute: RequestHandler;
   markReached: RequestHandler;
   rejectBooking: RequestHandler;
-  getWorkerBookings: RequestHandler;
   startJob: RequestHandler;
   completeJob: RequestHandler;
   requestExtraCharge: RequestHandler;

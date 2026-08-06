@@ -10,11 +10,12 @@ import {
 } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
+import { RepositoryOptions } from "@/core/types/repository";
 import Booking from "@/models/booking.model";
 import { CategoryDistributionItem, RevenueChartItem, TopWorkerItem } from "@/types/admin.dashboard";
 import { IBooking } from "@/types/booking/booking.entity";
 import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
-import { BookingListQuery } from "@/types/booking/booking.query";
+import { BookingListQuery, IAcceptRescheduleData } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { WorkerRevenueStats } from "@/types/worker/worker.projection";
 import { MonthlyEarningStat, WorkerDashboardAnalytics } from "@/types/worker/workerDashboard.types";
@@ -111,6 +112,40 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       data: docs,
       nextCursor: nextCursor,
     };
+  }
+
+  async acceptReschedule(
+    bookingId: string,
+    { newSlot, oldSlotDate, historyEntry, newStatus }: IAcceptRescheduleData,
+    options?: RepositoryOptions
+  ): Promise<boolean> {
+    const session = options?.session;
+
+    const result = await this.model.bulkWrite(
+      [
+        {
+          updateOne: {
+            filter: { _id: new Types.ObjectId(bookingId) },
+            update: { $pull: { dates: { date: oldSlotDate } } },
+          },
+        },
+        {
+          updateOne: {
+            filter: { _id: new Types.ObjectId(bookingId) },
+            update: {
+              $push: {
+                dates: { $each: [newSlot], $sort: { date: 1 } },
+                statusHistory: historyEntry,
+              },
+              $set: { status: newStatus },
+              $unset: { rescheduleRequest: 1 },
+            },
+          },
+        },
+      ],
+      { session }
+    );
+    return result.modifiedCount === 2;
   }
 
   async getExpiredBookings(): Promise<IBooking[]> {
