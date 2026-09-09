@@ -1,9 +1,16 @@
-import { BookingPaymentStatus, BookingStatus, PricingMode, ServiceType } from "@/constants";
+import {
+  BookingPaymentStatus,
+  BookingStatus,
+  BookingType,
+  PricingMode,
+  ServiceType,
+} from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import {
   ExtraChargeStatus,
   IBookingLocation,
   IBookingStatusHistory,
+  IDailyLog,
   IEvidence,
   IExtraCharge,
   IRescheduleRequest,
@@ -16,6 +23,7 @@ export class BookingListItemDTO {
   bookingId!: string;
   quoteId?: string;
   serviceId!: string;
+  bookingType!: BookingType;
   user!: {
     id: string;
     name: string;
@@ -73,6 +81,7 @@ export class BookingListItemDTO {
     dto.id = entity._id.toString();
     dto.quoteId = entity.quoteId ? entity.quoteId._id.toString() : undefined;
     dto.bookingId = entity.bookingId;
+    dto.bookingType = entity.bookingType;
     dto.serviceId = entity.serviceId._id.toString();
     dto.user = {
       ...user,
@@ -126,6 +135,7 @@ export class BookingListItemDTO {
 export class BookingResponseDTO {
   id!: string;
   bookingId!: string;
+  bookingType!: BookingType;
   serviceId!: string;
   user!: {
     id: string;
@@ -154,6 +164,7 @@ export class BookingResponseDTO {
     startTime: string;
     endTime: string;
   }[];
+  dailyLogs?: IDailyLog[];
   totalDays!: number;
   date!: Date;
   endDate!: Date;
@@ -199,6 +210,7 @@ export class BookingResponseDTO {
 
     dto.id = entity._id.toString();
     dto.bookingId = entity.bookingId;
+    dto.bookingType = entity.bookingType;
     dto.serviceId = entity.serviceId._id.toString();
     dto.user = {
       ...user,
@@ -218,6 +230,7 @@ export class BookingResponseDTO {
       ...category,
     };
     dto.dates = entity.dates || [];
+    dto.dailyLogs = entity.dailyLogs;
     dto.date = first.date;
     dto.endDate = last.date;
     dto.startTime = first.startTime;

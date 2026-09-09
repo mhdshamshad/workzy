@@ -40,6 +40,7 @@ import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
@@ -85,6 +86,7 @@ export class BookingService implements IBookingService {
     @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository,
     @inject(TYPES.MessageService) private _messageService: IMessageService,
+    @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
 
@@ -385,6 +387,7 @@ export class BookingService implements IBookingService {
 
   async markReached(bookingId: string, workerId: string): Promise<void> {
     const otp = this._otpService.generateOTP();
+    logger.info(`Generated OTP ${otp} for booking ${bookingId}`);
     const booking = await this._bookingRepository.findOneAndUpdate(
       {
         _id: new Types.ObjectId(bookingId),
@@ -393,7 +396,6 @@ export class BookingService implements IBookingService {
       },
       {
         status: BOOKING_STATUS.REACHED,
-        otp,
         $push: {
           statusHistory: this.createStatusHistoryEntry(
             BOOKING_STATUS.REACHED,
@@ -410,26 +412,29 @@ export class BookingService implements IBookingService {
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
-    logger.info(`Generated OTP ${otp} for booking ${bookingId}`);
-    await this._emailService.sendEmail(user.email, otp);
+    const redisKey = `booking-otp:${bookingId}`;
+    await Promise.all([
+      this._redisService.setWithTTL(redisKey, otp, 3600),
+      this._emailService.sendEmail(user.email, otp),
+    ]);
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.WORKER_REACHED(booking.snapshot.worker.name, booking.bookingId)
     );
   }
-
   async startJob(bookingId: string, workerId: string, otp: string): Promise<void> {
     const booking = await this.getBookingOrThrow(bookingId);
     this.assertWorkerOwnership(booking, workerId);
     if (booking.status !== BOOKING_STATUS.REACHED) {
       throw new CustomError(BOOKING.CANNOT_START(booking.status), HTTPSTATUS.BAD_REQUEST);
     }
-    if (!booking.otp || booking.otp !== otp) {
+    const redisKey = `booking-otp:${bookingId}`;
+    const storedOtp = await this._redisService.get(redisKey);
+    if (!storedOtp || storedOtp !== otp) {
       throw new CustomError(BOOKING.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
     }
     await this._bookingRepository.update(bookingId, {
       status: BOOKING_STATUS.IN_PROGRESS,
-      $unset: { otp: "" },
       $push: {
         statusHistory: this.createStatusHistoryEntry(
           BOOKING_STATUS.IN_PROGRESS,
@@ -438,6 +443,7 @@ export class BookingService implements IBookingService {
         ),
       },
     });
+    void this._redisService.delete(redisKey);
     void this.sendBookingEvent(booking, `Work has started for booking ${booking.bookingId}`);
     void this._notificationService.createNotification(
       booking.userId.toString(),

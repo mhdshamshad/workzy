@@ -20,7 +20,7 @@ import { Link } from 'react-router-dom';
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { Badge } from '@/components/ui/badge';
-import { BOOKING_STATUS, ROLE, SERVICE_TYPE } from '@/constants';
+import { BOOKING_STATUS, BOOKING_TYPE, ROLE, SERVICE_TYPE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
 import { cn } from '@/lib/utils';
 import type { BookingDetails, BookingListItem } from '@/types/booking';
@@ -361,37 +361,41 @@ export default function BookingCard({
                   </>
                 )}
 
-                {b.status === BOOKING_STATUS.CONFIRMED && !b.isRescheduleRequested && (
-                  <Button
-                    variant="blue"
-                    size="sm"
-                    iconLeft={<Navigation size={12} />}
-                    onClick={() => handlers?.onEnRoute?.(b.id)}
-                  >
-                    On My Way
-                  </Button>
-                )}
+                {b.bookingType === BOOKING_TYPE.INSTANT && (
+                  <>
+                    {b.status === BOOKING_STATUS.CONFIRMED && !b.isRescheduleRequested && (
+                      <Button
+                        variant="blue"
+                        size="sm"
+                        iconLeft={<Navigation size={12} />}
+                        onClick={() => handlers?.onEnRoute?.(b.id)}
+                      >
+                        On My Way
+                      </Button>
+                    )}
 
-                {b.status === BOOKING_STATUS.EN_ROUTE && !b.isRescheduleRequested && (
-                  <Button
-                    variant="blue"
-                    size="sm"
-                    iconLeft={<CheckCircle size={12} />}
-                    onClick={() => handlers?.onReached?.(b.id)}
-                  >
-                    I've Arrived
-                  </Button>
-                )}
+                    {b.status === BOOKING_STATUS.EN_ROUTE && !b.isRescheduleRequested && (
+                      <Button
+                        variant="blue"
+                        size="sm"
+                        iconLeft={<CheckCircle size={12} />}
+                        onClick={() => handlers?.onReached?.(b.id)}
+                      >
+                        I've Arrived
+                      </Button>
+                    )}
 
-                {b.status === BOOKING_STATUS.REACHED && (
-                  <Button
-                    variant="blue"
-                    size="sm"
-                    iconLeft={<PlayCircle size={12} />}
-                    onClick={() => handlers?.onStart?.(b)}
-                  >
-                    Enter OTP & Start Job
-                  </Button>
+                    {b.status === BOOKING_STATUS.REACHED && (
+                      <Button
+                        variant="blue"
+                        size="sm"
+                        iconLeft={<PlayCircle size={12} />}
+                        onClick={() => handlers?.onStart?.(b)}
+                      >
+                        Enter OTP & Start Job
+                      </Button>
+                    )}
+                  </>
                 )}
 
                 {!isQuoteBased(b.category.serviceType) &&

@@ -3,6 +3,8 @@ import { Types } from "mongoose";
 
 import {
   BOOKING,
+  BOOKING_DAY_STATUS,
+  BOOKING_TYPE,
   CATEGORY,
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
@@ -25,6 +27,7 @@ import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
 import { CreateQuoteDto, UpdateQuoteDto } from "@/dtos/requests/quote.dto";
 import { QuoteListItemDto, WorkerQuoteStatsDto } from "@/dtos/responses/quote.dto";
+import { IDailyLog } from "@/types/booking/booking.entity";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { IQuote } from "@/types/quote/quote.entity";
 import { QuoteListQuery } from "@/types/quote/quote.query";
@@ -120,8 +123,16 @@ export class QuoteService implements IQuoteService {
     const workerAmount = quote.totalPrice - platformFee;
 
     const { category: snapshotCategory } = booking.snapshot;
+    const dailyLogs: IDailyLog[] = quote.dates.map((val, index) => {
+      return {
+        dayIndex: index + 1,
+        date: val.date,
+        status: BOOKING_DAY_STATUS.PENDING,
+      };
+    });
     const newBooking = await this._bookingRepository.create({
       bookingId: generateTxnCode("BKG"),
+      bookingType: BOOKING_TYPE.PROJECT,
       userId: new Types.ObjectId(userId),
       workerId: new Types.ObjectId(quote.workerId),
       serviceId: new Types.ObjectId(quote.serviceId),
@@ -140,6 +151,7 @@ export class QuoteService implements IQuoteService {
       platformFeePercent,
       platformFee,
       total: quote.totalPrice,
+      dailyLogs,
       snapshot: {
         ...booking.snapshot,
         category: {

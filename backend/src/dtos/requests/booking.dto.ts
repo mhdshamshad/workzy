@@ -72,7 +72,7 @@ export class RejectBookingDTO {
 
 export class VerifyBookingOtpDTO {
   @IsString()
-  @Length(6, 6, { message: "OTP must be exactly 4 digits" })
+  @Length(6, 6, { message: "OTP must be exactly 6 digits" })
   otp!: string;
 }
 
@@ -154,4 +154,14 @@ export class RespondRescheduleDto {
 export class CancelRescheduleDto {
   @IsEnum(ROLE)
   requestedBy!: Role;
+}
+
+export class DayCompleteDTO {
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @ValidateNested()
+  @Type(() => EvidenceDTO)
+  evidence!: EvidenceDTO;
 }

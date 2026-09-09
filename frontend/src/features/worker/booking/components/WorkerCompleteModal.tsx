@@ -24,6 +24,7 @@ interface WorkerCompleteModalProps {
   onSubmit: (data: BookigCompleteForm) => Promise<void>;
   bookingId: string | null;
   isSubmitting?: boolean;
+  title?: string;
 }
 
 export default function WorkerCompleteModal({
@@ -32,6 +33,7 @@ export default function WorkerCompleteModal({
   onSubmit,
   bookingId,
   isSubmitting = false,
+  title = 'Complete Job',
 }: WorkerCompleteModalProps) {
   const [note, setNote] = useState('');
   const [beforeEvidence, setBeforeEvidence] = useState<EvidenceItemForm[]>([]);
@@ -93,7 +95,7 @@ export default function WorkerCompleteModal({
     <AppModal
       open={open}
       onClose={onClose}
-      title="Complete Job"
+      title={title}
       canCloseOnOutsideClick={!isSubmitting}
       className="max-w-2xl"
       footer={footer}

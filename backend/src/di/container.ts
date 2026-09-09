@@ -6,6 +6,7 @@ import { AdminUserController } from "@/controllers/admin/admin-user.controller";
 import { AdminWorkerController } from "@/controllers/admin/admin-worker.controller";
 import { AdminController } from "@/controllers/admin/admin.controller";
 import { AuthController } from "@/controllers/auth.controller";
+import { BookingDayController } from "@/controllers/booking-day.controller";
 import { BookingController } from "@/controllers/booking.controller";
 import { CategoryController } from "@/controllers/category.controller";
 import { ChatSocketController } from "@/controllers/chat-socket.controller";
@@ -31,6 +32,7 @@ import { IAdminUserController } from "@/core/interfaces/controllers/admin/IAdmin
 import { IAdminWorkerController } from "@/core/interfaces/controllers/admin/IAdminWorkerController";
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
+import { IBookingDayController } from "@/core/interfaces/controllers/IBookingDayController";
 import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
 import { IChatController } from "@/core/interfaces/controllers/IChatController";
 import { IChatSocketController } from "@/core/interfaces/controllers/IChatSocketController";
@@ -67,6 +69,7 @@ import { IAdminBookingService } from "@/core/interfaces/services/admin/IAdminBoo
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
 import { IAdminService } from "@/core/interfaces/services/IAdminService";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
+import { IBookingDayService } from "@/core/interfaces/services/IBookingDayService";
 import { IBookingPaymentHandler } from "@/core/interfaces/services/IBookingPaymentHandler";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
@@ -117,6 +120,7 @@ import { AuthService } from "@/services/auth/auth.service";
 import { EmailService } from "@/services/auth/email.service";
 import { OTPService } from "@/services/auth/otp.service";
 import { TokenService } from "@/services/auth/token.service";
+import { BookingDayService } from "@/services/booking-day.service";
 import { BookingPaymentHandlerService } from "@/services/booking-payment-handler.service";
 import { BookingService } from "@/services/booking.service";
 import { CategoryService } from "@/services/category.service";
@@ -212,6 +216,9 @@ container.bind<IBookingService>(TYPES.BookingService).to(BookingService);
 container
   .bind<IBookingPaymentHandler>(TYPES.BookingPaymentHandler)
   .to(BookingPaymentHandlerService);
+
+container.bind<IBookingDayService>(TYPES.BookingDayService).to(BookingDayService);
+container.bind<IBookingDayController>(TYPES.BookingDayController).to(BookingDayController);
 
 container.bind<IReviewController>(TYPES.ReviewController).to(ReviewController);
 container.bind<IReviewService>(TYPES.ReviewService).to(ReviewService);

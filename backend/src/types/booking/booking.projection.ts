@@ -7,6 +7,7 @@ export type BookingListItem = Omit<
     IBooking,
     | "_id"
     | "bookingId"
+    | "bookingType"
     | "dates"
     | "duration"
     | "itemCount"

@@ -87,7 +87,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     const docs = await this.model
       .find(query)
       .select(
-        "bookingId dates duration rescheduleRequest snapshot address total completedAt itemCount status paymentStatus createdAt workerId userId serviceId categoryId hasVisibleReview reviewId completedAt userNote quoteId extraCharge"
+        "bookingId bookingType dates duration rescheduleRequest snapshot address total completedAt itemCount status paymentStatus createdAt workerId userId serviceId categoryId hasVisibleReview reviewId completedAt userNote quoteId extraCharge"
       )
       .populate("workerId", "profileImage")
       .populate("userId", "profileImage")

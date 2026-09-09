@@ -1,10 +1,12 @@
 import { model, Schema } from "mongoose";
 
 import {
+  BOOKING_DAY_STATUS,
   BOOKING_PAYMENT_STATUS,
   BOOKING_PAYMENT_STATUS_VALUES,
   BOOKING_STATUS,
   BOOKING_STATUS_VALUES,
+  BOOKING_TYPE,
   PRICING_MODE_VALUES,
   ROLE_VALUES,
   SERVICE_TYPE_VALUES,
@@ -13,6 +15,7 @@ import {
   IBooking,
   IBookingSnapshot,
   IBookingStatusHistory,
+  IDailyLog,
   IEvidence,
   IExtraCharge,
 } from "@/types/booking/booking.entity";
@@ -76,6 +79,25 @@ const EvidenceSchema = new Schema<IEvidence>(
     before: { type: [EvidenceItemSchema], default: [] },
     after: { type: [EvidenceItemSchema], default: [] },
     uploadedAt: { type: Date },
+  },
+  { _id: false }
+);
+
+const DailyLogSchema = new Schema<IDailyLog>(
+  {
+    dayIndex: { type: Number, required: true },
+    date: { type: Date, required: true },
+    status: {
+      type: String,
+      enum: Object.values(BOOKING_DAY_STATUS),
+      default: BOOKING_DAY_STATUS.PENDING,
+      required: true,
+    },
+    checkInTime: { type: Date },
+    checkOutTime: { type: Date },
+    evidence: { type: EvidenceSchema },
+    workerNote: { type: String, trim: true },
+    skippedReason: { type: String, trim: true },
   },
   { _id: false }
 );
@@ -195,6 +217,15 @@ const BookingSchema: Schema<IBooking> = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Quote",
     },
+    bookingType: {
+      type: String,
+      enum: Object.values(BOOKING_TYPE),
+      default: BOOKING_TYPE.INSTANT,
+    },
+    dailyLogs: {
+      type: [DailyLogSchema],
+      default: [],
+    },
     reviewId: {
       type: Schema.Types.ObjectId,
       ref: "Review",
@@ -268,9 +299,6 @@ const BookingSchema: Schema<IBooking> = new Schema(
       default: 0,
     },
     total: { type: Number, required: true, min: 0 },
-    otp: {
-      type: String,
-    },
     extraCharge: { type: ExtraChargeSchema, default: null },
     evidence: { type: EvidenceSchema, default: null },
     hasVisibleReview: { type: Boolean, default: false },
