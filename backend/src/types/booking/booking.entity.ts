@@ -1,6 +1,14 @@
 import { Document, Types } from "mongoose";
 
-import { BookingPaymentStatus, BookingStatus, PricingMode, Role, ServiceType } from "@/constants";
+import {
+  BookingPaymentStatus,
+  BookingStatus,
+  BookingDayStatus,
+  PricingMode,
+  Role,
+  ServiceType,
+  BookingType,
+} from "@/constants";
 
 import { ICategory } from "../category";
 import { IService } from "../service/service.entity";
@@ -8,12 +16,24 @@ import { ILocation } from "../user/user.entity";
 
 export type ExtraChargeStatus = "pending" | "approved" | "rejected";
 
+export interface IDailyLog {
+  dayIndex: number;
+  date: Date;
+  status: BookingDayStatus;
+  checkInTime?: Date;
+  checkOutTime?: Date;
+  evidence?: IEvidence;
+  workerNote?: string;
+  skippedReason?: string;
+}
+
 export interface IBookingLocation {
   label: string;
   location: ILocation;
 }
 
 export interface IBookingSlot {
+  // slotId: Types.ObjectId;
   date: Date;
   startTime: string;
   endTime: string;
@@ -80,6 +100,9 @@ export interface IBooking extends Document<string> {
   categoryId: Types.ObjectId;
   quoteId?: Types.ObjectId;
 
+  bookingType: BookingType;
+  dailyLogs?: IDailyLog[];
+
   // Schedule
   dates: IBookingSlot[];
   duration: number; //0 for full day
@@ -98,9 +121,6 @@ export interface IBooking extends Document<string> {
 
   extraCharge?: IExtraCharge;
   evidence?: IEvidence;
-
-  otp?: string;
-
   snapshot: IBookingSnapshot;
 
   paymentStatus: BookingPaymentStatus;

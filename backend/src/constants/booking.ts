@@ -29,13 +29,13 @@ export const BOOKING_TYPE = {
 } as const;
 export type BookingType = (typeof BOOKING_TYPE)[keyof typeof BOOKING_TYPE];
 
-export const DAY_STATUS = {
+export const BOOKING_DAY_STATUS = {
   PENDING: "pending",
   CHECKED_IN: "checked_in",
   COMPLETED: "completed",
   SKIPPED: "skipped",
 } as const;
-export type DayStatus = (typeof DAY_STATUS)[keyof typeof DAY_STATUS];
+export type BookingDayStatus = (typeof BOOKING_DAY_STATUS)[keyof typeof BOOKING_DAY_STATUS];
 
 export const PAYMENT_SCHEDULE_STATUS = {
   PENDING: "pending",
@@ -65,7 +65,7 @@ export const ALLOWED_BOOKING_TRANSITIONS: Record<string, string[]> = {
   rejected: [],
 };
 
-export const DAY_TRANSITIONS: Record<DayStatus, DayStatus[]> = {
+export const BOOKING_DAY_TRANSITIONS: Record<BookingDayStatus, BookingDayStatus[]> = {
   pending: ["checked_in", "skipped"],
   checked_in: ["completed", "skipped"],
   completed: [],

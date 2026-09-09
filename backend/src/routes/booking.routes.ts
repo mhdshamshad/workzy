@@ -18,6 +18,8 @@ import {
 import { authenticate } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 
+import bookingDayRouter from "./booking-day.routes";
+
 const router = Router();
 const controller = container.get<IBookingController>(TYPES.BookingController);
 
@@ -86,4 +88,5 @@ router.delete(
   controller.cancelReschedule
 );
 
+router.use("/:bookingId/day", bookingDayRouter);
 export default router;
