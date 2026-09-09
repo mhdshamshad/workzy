@@ -71,6 +71,7 @@ import { IAdminService } from "@/core/interfaces/services/IAdminService";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IBookingDayService } from "@/core/interfaces/services/IBookingDayService";
 import { IBookingPaymentHandler } from "@/core/interfaces/services/IBookingPaymentHandler";
+import { IBookingPricingService } from "@/core/interfaces/services/IBookingPricingService";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { IChatService } from "@/core/interfaces/services/IChatService";
@@ -120,6 +121,7 @@ import { AuthService } from "@/services/auth/auth.service";
 import { EmailService } from "@/services/auth/email.service";
 import { OTPService } from "@/services/auth/otp.service";
 import { TokenService } from "@/services/auth/token.service";
+import { BookingPricingService } from "@/services/booking/booking-pricing.service";
 import { BookingDayService } from "@/services/booking-day.service";
 import { BookingPaymentHandlerService } from "@/services/booking-payment-handler.service";
 import { BookingService } from "@/services/booking.service";
@@ -212,6 +214,7 @@ container.bind<ILeaveRepository>(TYPES.LeaveRepository).to(LeaveRepository);
 
 container.bind<IBookingController>(TYPES.BookingController).to(BookingController);
 container.bind<IBookingRepository>(TYPES.BookingRepository).to(BookingRepository);
+container.bind<IBookingPricingService>(TYPES.BookingPricingService).to(BookingPricingService);
 container.bind<IBookingService>(TYPES.BookingService).to(BookingService);
 container
   .bind<IBookingPaymentHandler>(TYPES.BookingPaymentHandler)

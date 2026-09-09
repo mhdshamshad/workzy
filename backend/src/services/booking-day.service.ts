@@ -2,7 +2,8 @@ import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
 import logger from "@/config/logger";
-import { BOOKING, BOOKING_STATUS, BOOKING_DAY_STATUS, HTTPSTATUS, AUTH } from "@/constants";
+import { BOOKING, BOOKING_STATUS, BOOKING_DAY_STATUS, HTTPSTATUS } from "@/constants";
+import { REDIS_KEYS } from "@/constants/redis";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
@@ -14,8 +15,8 @@ import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { DayCompleteDTO } from "@/dtos/requests/booking.dto";
 import { IBooking, IDailyLog, IEvidence } from "@/types/booking/booking.entity";
+import { assertWorkerOwnership, getBookingOrThrow } from "@/utils/booking.helper";
 import CustomError from "@/utils/customError";
-import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
 export class BookingDayService implements IBookingDayService {
@@ -30,15 +31,15 @@ export class BookingDayService implements IBookingDayService {
   ) {}
 
   async checkInDay(bookingId: string, dayIndex: number, workerId: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    this.assertWorkerOwnership(booking, workerId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
     const log = this.getDayLogOrThrow(booking, dayIndex);
 
     if (log.status === BOOKING_DAY_STATUS.CHECKED_IN) {
       throw new CustomError(BOOKING.DAY_ALREADY_CHECKED_IN, HTTPSTATUS.BAD_REQUEST);
     }
     const otp = this._otpService.generateOTP();
-    const redisKey = this.otpRedisKey(bookingId, dayIndex);
+    const redisKey = REDIS_KEYS.BOOKING.DAY_OTP(bookingId, dayIndex);
     const [user] = await Promise.all([
       this._userRepository.findById(booking.userId.toString()),
       this._redisService.setWithTTL(redisKey, otp, 3600),
@@ -60,11 +61,11 @@ export class BookingDayService implements IBookingDayService {
     workerId: string,
     otp: string
   ): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    this.assertWorkerOwnership(booking, workerId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
     this.getDayLogOrThrow(booking, dayIndex);
 
-    const redisKey = this.otpRedisKey(bookingId, dayIndex);
+    const redisKey = REDIS_KEYS.BOOKING.DAY_OTP(bookingId, dayIndex);
     const cachedOtp = await this._redisService.get(redisKey);
 
     if (!cachedOtp || cachedOtp !== otp) {
@@ -103,8 +104,8 @@ export class BookingDayService implements IBookingDayService {
     data: DayCompleteDTO
   ): Promise<void> {
     const { evidence, note } = data;
-    const booking = await this.getBookingOrThrow(bookingId);
-    this.assertWorkerOwnership(booking, workerId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
     const log = this.getDayLogOrThrow(booking, dayIndex);
 
     if (log.status !== BOOKING_DAY_STATUS.CHECKED_IN) {
@@ -163,8 +164,8 @@ export class BookingDayService implements IBookingDayService {
     workerId: string,
     reason: string
   ): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    this.assertWorkerOwnership(booking, workerId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
     const log = this.getDayLogOrThrow(booking, dayIndex);
 
     const dailyLogs = (booking.dailyLogs || []).map((d) =>
@@ -205,24 +206,11 @@ export class BookingDayService implements IBookingDayService {
     });
   }
 
-  private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
-    return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
-  }
-
-  private assertWorkerOwnership(booking: IBooking, workerId: string): void {
-    if (booking.workerId.toString() !== workerId) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-  }
   private getDayLogOrThrow(booking: IBooking, dayIndex: number) {
     const log = booking.dailyLogs?.find((d) => d.dayIndex === dayIndex);
     if (!log) {
       throw new CustomError(BOOKING.DAY_INDEX_OUT_OF_RANGE, HTTPSTATUS.BAD_REQUEST);
     }
     return log;
-  }
-
-  private otpRedisKey(bookingId: string, dayIndex: number): string {
-    return `booking-day-otp:${bookingId}:${dayIndex}`;
   }
 }

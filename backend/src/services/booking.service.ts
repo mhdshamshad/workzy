@@ -10,30 +10,23 @@ import {
   BOOKING_STATUS,
   BOOKING_STATUS_MESSAGES,
   BookingStatus,
-  CATEGORY,
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
   PRICING_MODE,
-  PricingMode,
   Role,
   ROLE,
-  SERVICE,
   SERVICE_TYPE,
   SLOT,
   SLOT_STATUS,
-  STRIPE_ACCOUNT_STATUS,
   USER,
-  WORKER,
-  WORKER_STATUS,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
-import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository";
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
-import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { IBookingPricingService } from "@/core/interfaces/services/IBookingPricingService";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
@@ -53,19 +46,11 @@ import {
   RespondRescheduleDto,
 } from "@/dtos/requests/booking.dto";
 import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
-import {
-  BookingContext,
-  IBooking,
-  IBookingSlot,
-  IEvidence,
-  IExtraCharge,
-} from "@/types/booking/booking.entity";
+import { IBooking, IBookingSlot, IEvidence, IExtraCharge } from "@/types/booking/booking.entity";
 import { BookingListQuery } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
-import { BulkDiscountType } from "@/types/service/service.entity";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
-import { calculateDistanceKm } from "@/utils/geo";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { formatTimeRange } from "@/utils/time.utils";
 
@@ -73,13 +58,12 @@ import { formatTimeRange } from "@/utils/time.utils";
 export class BookingService implements IBookingService {
   constructor(
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
-    @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository,
     @inject(TYPES.SlotRepository) private _slotRepository: ISlotRepository,
     @inject(TYPES.QuoteRepository) private _quoteRepository: IQuoteRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
-    @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
+    @inject(TYPES.BookingPricingService) private _pricingService: IBookingPricingService,
     @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
@@ -132,7 +116,7 @@ export class BookingService implements IBookingService {
       throw new CustomError(SLOT.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
     const { category, worker, workerStripeId, service, platformFeePercent, rate, travelCost } =
-      await this.getBookingContext(
+      await this._pricingService.getBookingContext(
         workerId,
         serviceId,
         address.location.coordinates[1],
@@ -145,7 +129,7 @@ export class BookingService implements IBookingService {
       .format("HH:mm");
 
     const discountPercent =
-      this.getBestDiscount(service?.bulkDiscounts ?? null, itemCount)?.percent ?? 0;
+      this._pricingService.getBestDiscount(service?.bulkDiscounts ?? null, itemCount)?.percent ?? 0;
     const discountAmount = Math.round((subtotal * discountPercent) / 100);
     const chargeableAmount = subtotal - discountAmount;
     const platformFee = Math.floor((chargeableAmount * platformFeePercent) / 100);
@@ -970,77 +954,6 @@ export class BookingService implements IBookingService {
 
   private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
     return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
-  }
-
-  private getBestDiscount(discounts: BulkDiscountType[] | null, count: number) {
-    if (!discounts || !discounts?.length) {
-      return null;
-    }
-    const eligible = discounts.filter((d) => count >= d.count);
-    if (!eligible.length) {
-      return null;
-    }
-    return eligible.reduce((a, b) => (a.percent > b.percent ? a : b));
-  }
-
-  private async getBookingContext(
-    workerId: string,
-    serviceId: string,
-    lat: number,
-    lng: number
-  ): Promise<BookingContext> {
-    const [service, worker] = await Promise.all([
-      this._serviceRepository.findById(serviceId),
-      this._workerRepository.findById(workerId),
-    ]);
-    if (!service) {
-      throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    if (!worker || worker.status !== WORKER_STATUS.VERIFIED) {
-      throw new CustomError(WORKER.NOT_AVAILABLE, HTTPSTATUS.BAD_REQUEST);
-    }
-    const category = await this._categoryRepository.findById(service.categoryId);
-    if (!category) {
-      throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    const workerStripeId = worker.stripeAccountId;
-    if (!workerStripeId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
-      throw new CustomError(WORKER.STRIPE_NOT_ACTIVE, HTTPSTATUS.BAD_REQUEST);
-    }
-
-    const rate = service.rate ?? category.baseRate;
-    const estimatedDuration = service.estimatedDuration ?? category.estimatedDuration ?? 60;
-    const bufferTime = service.bufferTime ?? category.bufferTime ?? 15;
-    const platformFeePercent = category.platformFee ?? 0;
-    const travelRatePerKM = category.travelRatePerKM ?? 0;
-    const pricingMode = category.pricingMode as PricingMode;
-
-    const distanceKm = calculateDistanceKm(
-      { lat: worker.location.coordinates[1], lng: worker.location.coordinates[0] },
-      { lat, lng }
-    );
-    const travelCost = Math.min(
-      Math.round(distanceKm * (travelRatePerKM ?? 0)),
-      service.maxTravelCost ?? Infinity
-    );
-
-    return {
-      worker: {
-        name: worker.displayName,
-        phone: worker.phone,
-      },
-      service,
-      category,
-      pricingMode,
-      rate,
-      workerStripeId,
-      estimatedDuration,
-      bufferTime,
-      platformFeePercent,
-      travelRatePerKM,
-      distanceKm,
-      travelCost,
-    };
   }
 
   private async sendBookingEvent(booking: IBooking, content: string): Promise<void> {

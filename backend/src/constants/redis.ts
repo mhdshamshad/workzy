@@ -29,6 +29,12 @@ export const REDIS_KEYS = {
     PHONE: (phone: string) => `otp:phone:${phone}`,
   },
 
+  // Booking
+  BOOKING: {
+    OTP: (bookingId: string) => `booking-otp:${bookingId}`,
+    DAY_OTP: (bookingId: string, dayIndex: number) => `booking-day-otp:${bookingId}:${dayIndex}`,
+  },
+
   // Auth
   //   AUTH: {
   //     REFRESH_TOKEN: (userId: string) =>
