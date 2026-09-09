@@ -19,7 +19,6 @@ import {
   Star,
   Timer,
   Users,
-  Video,
   Wallet,
   Zap,
   User,
@@ -33,17 +32,18 @@ import { useState } from 'react';
 import { Navigate, useParams, useNavigate, Link } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
+import { MediaThumbnailGrid } from '@/components/molecules/MediaThumbnailGrid';
 import ProfileImage from '@/components/molecules/ProfileImage';
-import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BOOKING_STATUS, ROLE } from '@/constants';
+import { BOOKING_STATUS, BOOKING_TYPE, ROLE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
+import { ProjectDayTimeline } from '@/features/booking/components/projectTracker/ProjectDayTimeline';
 import { useGetOrCreateChat } from '@/features/chat/hooks/useChats';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { cn } from '@/lib/utils';
 import PageError from '@/pages/PageError';
-import type { BookingDetails, EvidenceItem, ExtraChargeStatus } from '@/types/booking';
+import type { BookingDetails, ExtraChargeStatus } from '@/types/booking';
 import { formatCurrency } from '@/utils/currency';
 import { formatDuration, formatSmartDateTime, formatTime12 } from '@/utils/time.format';
 
@@ -442,7 +442,10 @@ export default function BookingDetailsPage({
           className="grid gap-5 lg:grid-cols-3"
         >
           {/* Status Timeline */}
-          <motion.div variants={fadeUp} className="lg:col-span-2">
+          <motion.div variants={fadeUp} className="lg:col-span-2 space-y-5">
+            {b.dailyLogs && b.dailyLogs.length > 0 && (
+              <ProjectDayTimeline bookingId={b.id} dailyLogs={b.dailyLogs} role={role} />
+            )}
             <GlassCard title="Status Timeline" icon={CheckCircle2}>
               <StatusTimeline history={b.statusHistory} />
             </GlassCard>
@@ -500,8 +503,8 @@ export default function BookingDetailsPage({
             {/* Evidence */}
             {b.evidence && (
               <GlassCard title="Evidence" icon={ImageIcon}>
-                <EvidenceSection label="Before" items={b.evidence.before} />
-                <EvidenceSection label="After" items={b.evidence.after} />
+                <MediaThumbnailGrid label="Before" items={b.evidence.before} />
+                <MediaThumbnailGrid label="After" items={b.evidence.after} />
                 {!b.evidence.before?.length && !b.evidence.after?.length && (
                   <EmptySection icon={ImageIcon} label="No evidence uploaded" />
                 )}
@@ -619,32 +622,36 @@ function ActionPanel({
               />
             </div>
           )}
-          {b.status === BOOKING_STATUS.CONFIRMED && (
-            <ActionBtn
-              icon={Navigation}
-              label="On My Way"
-              accent="sky"
-              onClick={() => handlers?.onEnRoute?.(b.id)}
-              full
-            />
-          )}
-          {b.status === BOOKING_STATUS.EN_ROUTE && (
-            <ActionBtn
-              icon={CheckCircle}
-              label="I've Arrived"
-              accent="sky"
-              onClick={() => handlers?.onReached?.(b.id)}
-              full
-            />
-          )}
-          {b.status === BOOKING_STATUS.REACHED && (
-            <ActionBtn
-              icon={PlayCircle}
-              label="Enter OTP & Start"
-              accent="violet"
-              onClick={() => handlers?.onStart?.(b)}
-              full
-            />
+          {b.bookingType === BOOKING_TYPE.INSTANT && (
+            <>
+              {b.status === BOOKING_STATUS.CONFIRMED && (
+                <ActionBtn
+                  icon={Navigation}
+                  label="On My Way"
+                  accent="sky"
+                  onClick={() => handlers?.onEnRoute?.(b.id)}
+                  full
+                />
+              )}
+              {b.status === BOOKING_STATUS.EN_ROUTE && (
+                <ActionBtn
+                  icon={CheckCircle}
+                  label="I've Arrived"
+                  accent="sky"
+                  onClick={() => handlers?.onReached?.(b.id)}
+                  full
+                />
+              )}
+              {b.status === BOOKING_STATUS.REACHED && (
+                <ActionBtn
+                  icon={PlayCircle}
+                  label="Enter OTP & Start"
+                  accent="violet"
+                  onClick={() => handlers?.onStart?.(b)}
+                  full
+                />
+              )}
+            </>
           )}
         </>
       )}
@@ -739,65 +746,6 @@ function StatusTimeline({
         );
       })}
     </div>
-  );
-}
-
-function EvidenceSection({ label, items }: { label: string; items: EvidenceItem[] }) {
-  const [viewerIdx, setViewerIdx] = useState<number | null>(null);
-
-  if (!items?.length) {
-    return null;
-  }
-
-  const mediaItems: MediaItem[] = items.map(i => ({
-    url: i.url,
-    type: i.type,
-    caption: `${label} — ${i.type}`,
-  }));
-
-  return (
-    <>
-      <div>
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-          {label}
-        </p>
-        <div className="grid grid-cols-3 gap-1.5">
-          {items.map((item, i) => (
-            <button
-              key={i}
-              onClick={() => setViewerIdx(i)}
-              className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {item.type === 'image' ? (
-                <img
-                  src={item.url}
-                  alt=""
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-muted">
-                  <Video className="h-5 w-5 text-muted-foreground" />
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {viewerIdx !== null && (
-          <MediaViewer
-            item={mediaItems[viewerIdx]}
-            hasPrev={viewerIdx > 0}
-            hasNext={viewerIdx < mediaItems.length - 1}
-            counter={`${viewerIdx + 1} / ${mediaItems.length}`}
-            onClose={() => setViewerIdx(null)}
-            onPrev={() => setViewerIdx(v => (v !== null && v > 0 ? v - 1 : v))}
-            onNext={() => setViewerIdx(v => (v !== null && v < mediaItems.length - 1 ? v + 1 : v))}
-          />
-        )}
-      </AnimatePresence>
-    </>
   );
 }
 

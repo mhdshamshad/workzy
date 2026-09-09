@@ -25,4 +25,8 @@ export const BOOKING_API = {
 
   RESCHEDULE: (id: string) => booking(`/${id}/reschedule`),
   RESCHEDULE_RESPOND: (id: string) => booking(`/${id}/reschedule/respond`),
+  DAY_CHECK_IN: (id: string, dayIndex: number) => booking(`/${id}/day/${dayIndex}/check-in`),
+  DAY_VERIFY_OTP: (id: string, dayIndex: number) => booking(`/${id}/day/${dayIndex}/verify-otp`),
+  DAY_COMPLETE: (id: string, dayIndex: number) => booking(`/${id}/day/${dayIndex}/complete`),
+  DAY_SKIP: (id: string, dayIndex: number) => booking(`/${id}/day/${dayIndex}/skip`),
 } as const;

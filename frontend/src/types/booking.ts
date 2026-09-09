@@ -1,7 +1,9 @@
 import type {
+  BookingDayStatus,
   BookingFilterStatus,
   BookingPaymentStatus,
   BookingStatus,
+  BookingType,
   PricingMode,
   Role,
   ServiceType,
@@ -10,6 +12,17 @@ import type {
 import type { Location } from './user';
 
 export type ExtraChargeStatus = 'pending' | 'approved' | 'rejected';
+
+export interface DailyLog {
+  dayIndex: number;
+  date: Date;
+  status: BookingDayStatus;
+  checkInTime?: Date;
+  checkOutTime?: Date;
+  evidence: Evidence;
+  workerNote?: string;
+  skippedReason?: string;
+}
 
 export interface PaymentDetails {
   success: boolean;
@@ -59,7 +72,7 @@ export interface BookingSnapshot {
 export interface ExtraCharge {
   amount: number;
   reason: string;
-  evidenceUrl?: string; // receipt photo
+  evidenceUrl?: string;
   status: ExtraChargeStatus;
   requestedAt: Date;
   respondedAt?: Date;
@@ -117,6 +130,9 @@ export interface Booking {
   categoryId: string;
   quoteId?: string;
 
+  bookingType: BookingType;
+  dailyLogs?: DailyLog[];
+
   // Schedule
   dates: BookingSlot[];
   duration: number;
@@ -158,6 +174,7 @@ export interface Booking {
 export type BookingListItem = {
   id: string;
   bookingId: string;
+  bookingType: BookingType;
   serviceId: string;
   quoteId?: string;
   user: UserSnapshot;

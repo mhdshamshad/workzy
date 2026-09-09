@@ -83,6 +83,14 @@ export function useExtraCharge() {
 }
 
 export function useWorkerBookingHandler() {
+  const [acceptBId, setAcceptBId] = useState<string | null>(null);
+  const [rejectBId, setRejectBId] = useState<string | null>(null);
+  const [finishBId, setFinishBId] = useState<string | null>(null);
+  const [extraChargeBId, setExtraChargeBId] = useState<string | null>(null);
+  const [startB, setStartB] = useState<BookingListItem | BookingDetails | null>(null);
+  const [reviewData, setReviewData] = useState<{ id: string; reviewId?: string } | null>(null);
+  const [enRouteBId, setEnRouteBId] = useState<string | null>(null);
+  const [reachedBId, setReachedBId] = useState<string | null>(null);
   const { mutateAsync: accept, isPending: isAccepting } = useAcceptBooking();
   const { mutateAsync: startJobMutate, isPending: isStarting } = useStartJob();
   const { mutateAsync: rejectBookingMutate, isPending: isRejecting } = useRejectBooking();
@@ -92,15 +100,6 @@ export function useWorkerBookingHandler() {
   const { mutateAsync: replyToReview, isPending: isReplying } = useAddReviewReply();
   const { mutateAsync: markEnRoute, isPending: isEnRoutePending } = useMarkEnRoute();
   const { mutateAsync: markReached, isPending: isReachedPending } = useMarkReached();
-
-  const [acceptBId, setAcceptBId] = useState<string | null>(null);
-  const [rejectBId, setRejectBId] = useState<string | null>(null);
-  const [finishBId, setFinishBId] = useState<string | null>(null);
-  const [extraChargeBId, setExtraChargeBId] = useState<string | null>(null);
-  const [startB, setStartB] = useState<BookingListItem | BookingDetails | null>(null);
-  const [reviewData, setReviewData] = useState<{ id: string; reviewId?: string } | null>(null);
-  const [enRouteBId, setEnRouteBId] = useState<string | null>(null);
-  const [reachedBId, setReachedBId] = useState<string | null>(null);
 
   async function handleAcceptBooking(id: string) {
     const res = await accept(id);

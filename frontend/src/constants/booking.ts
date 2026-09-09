@@ -15,6 +15,20 @@ export const STEP_LABELS: Record<BookingStep, string> = {
   review: 'Review',
 };
 
+export const BOOKING_TYPE = {
+  INSTANT: 'instant',
+  PROJECT: 'project',
+} as const;
+export type BookingType = (typeof BOOKING_TYPE)[keyof typeof BOOKING_TYPE];
+
+export const BOOKING_DAY_STATUS = {
+  PENDING: 'pending',
+  CHECKED_IN: 'checked_in',
+  COMPLETED: 'completed',
+  SKIPPED: 'skipped',
+} as const;
+export type BookingDayStatus = (typeof BOOKING_DAY_STATUS)[keyof typeof BOOKING_DAY_STATUS];
+
 export const BOOKING_STATUS = {
   PENDING: 'pending',
   CONFIRMED: 'confirmed',
