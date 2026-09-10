@@ -70,6 +70,7 @@ import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICa
 import { IAdminService } from "@/core/interfaces/services/IAdminService";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IBookingDayService } from "@/core/interfaces/services/IBookingDayService";
+import { IBookingExtraChargeService } from "@/core/interfaces/services/IBookingExtraChargeService";
 import { IBookingPaymentHandler } from "@/core/interfaces/services/IBookingPaymentHandler";
 import { IBookingPricingService } from "@/core/interfaces/services/IBookingPricingService";
 import { IBookingRescheduleService } from "@/core/interfaces/services/IBookingRescheduleService";
@@ -122,6 +123,7 @@ import { AuthService } from "@/services/auth/auth.service";
 import { EmailService } from "@/services/auth/email.service";
 import { OTPService } from "@/services/auth/otp.service";
 import { TokenService } from "@/services/auth/token.service";
+import { BookingExtraChargeService } from "@/services/booking/booking-extra-charge.service";
 import { BookingPricingService } from "@/services/booking/booking-pricing.service";
 import { BookingRescheduleService } from "@/services/booking/booking-reschedule.service";
 import { BookingDayService } from "@/services/booking-day.service";
@@ -220,6 +222,9 @@ container.bind<IBookingPricingService>(TYPES.BookingPricingService).to(BookingPr
 container
   .bind<IBookingRescheduleService>(TYPES.BookingRescheduleService)
   .to(BookingRescheduleService);
+container
+  .bind<IBookingExtraChargeService>(TYPES.BookingExtraChargeService)
+  .to(BookingExtraChargeService);
 container.bind<IBookingService>(TYPES.BookingService).to(BookingService);
 container
   .bind<IBookingPaymentHandler>(TYPES.BookingPaymentHandler)

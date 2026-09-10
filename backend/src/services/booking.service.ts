@@ -9,11 +9,9 @@ import {
   BOOKING_PAYMENT_STATUS,
   BOOKING_STATUS,
   BOOKING_STATUS_MESSAGES,
-  BookingStatus,
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
   PRICING_MODE,
-  Role,
   ROLE,
   SERVICE_TYPE,
   SLOT,
@@ -25,6 +23,7 @@ import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository"
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { IBookingExtraChargeService } from "@/core/interfaces/services/IBookingExtraChargeService";
 import { IBookingPricingService } from "@/core/interfaces/services/IBookingPricingService";
 import { IBookingRescheduleService } from "@/core/interfaces/services/IBookingRescheduleService";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
@@ -46,12 +45,17 @@ import {
   RespondRescheduleDto,
 } from "@/dtos/requests/booking.dto";
 import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
-import { IBooking, IEvidence, IExtraCharge } from "@/types/booking/booking.entity";
+import { IBooking, IEvidence } from "@/types/booking/booking.entity";
 import { BookingListQuery } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
+import {
+  assertWorkerOwnership,
+  createStatusHistoryEntry,
+  getBookingOrThrow,
+  sendBookingEvent,
+} from "@/utils/booking.helper";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
-import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -63,6 +67,8 @@ export class BookingService implements IBookingService {
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
     @inject(TYPES.BookingPricingService) private _pricingService: IBookingPricingService,
     @inject(TYPES.BookingRescheduleService) private _rescheduleService: IBookingRescheduleService,
+    @inject(TYPES.BookingExtraChargeService)
+    private _extraChargeService: IBookingExtraChargeService,
     @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
@@ -185,7 +191,7 @@ export class BookingService implements IBookingService {
   }
 
   async cancelBooking(bookingId: string, userId: string, reason: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
 
     if (booking.userId.toString() !== userId) {
       throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
@@ -211,11 +217,7 @@ export class BookingService implements IBookingService {
             paymentStatus,
           },
           $push: {
-            statusHistory: this.createStatusHistoryEntry(
-              BOOKING_STATUS.CANCELLED,
-              ROLE.USER,
-              reason
-            ),
+            statusHistory: createStatusHistoryEntry(BOOKING_STATUS.CANCELLED, ROLE.USER, reason),
           },
         },
         options
@@ -230,7 +232,8 @@ export class BookingService implements IBookingService {
       );
     });
 
-    void this.sendBookingEvent(
+    void sendBookingEvent(
+      this._messageService,
       booking,
       `Booking ${booking.bookingId} has been cancelled by the user`
     );
@@ -252,7 +255,7 @@ export class BookingService implements IBookingService {
         {
           status: BOOKING_STATUS.CONFIRMED,
           $push: {
-            statusHistory: this.createStatusHistoryEntry(
+            statusHistory: createStatusHistoryEntry(
               BOOKING_STATUS.CONFIRMED,
               ROLE.WORKER,
               BOOKING_STATUS_MESSAGES.CONFIRMED
@@ -272,7 +275,8 @@ export class BookingService implements IBookingService {
       return updated;
     });
 
-    void this.sendBookingEvent(
+    void sendBookingEvent(
+      this._messageService,
       booking,
       `Booking ${booking.bookingId} has been confirmed by the worker`
     );
@@ -288,8 +292,8 @@ export class BookingService implements IBookingService {
     reason: string;
   }): Promise<void> {
     const { bookingId, workerId, reason } = data;
-    const booking = await this.getBookingOrThrow(bookingId);
-    this.assertWorkerOwnership(booking, workerId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
     if (booking.status !== BOOKING_STATUS.PENDING) {
       throw new CustomError(BOOKING.CANNOT_REJECT(booking.status), HTTPSTATUS.BAD_REQUEST);
     }
@@ -308,11 +312,7 @@ export class BookingService implements IBookingService {
           status: BOOKING_STATUS.REJECTED,
           paymentStatus,
           $push: {
-            statusHistory: this.createStatusHistoryEntry(
-              BOOKING_STATUS.REJECTED,
-              ROLE.WORKER,
-              reason
-            ),
+            statusHistory: createStatusHistoryEntry(BOOKING_STATUS.REJECTED, ROLE.WORKER, reason),
           },
         },
         options
@@ -327,7 +327,8 @@ export class BookingService implements IBookingService {
       );
     });
 
-    void this.sendBookingEvent(
+    void sendBookingEvent(
+      this._messageService,
       booking,
       `Booking ${booking.bookingId} has been rejected by the worker${reason ? `: ${reason}` : ""}`
     );
@@ -351,7 +352,7 @@ export class BookingService implements IBookingService {
       {
         status: BOOKING_STATUS.EN_ROUTE,
         $push: {
-          statusHistory: this.createStatusHistoryEntry(
+          statusHistory: createStatusHistoryEntry(
             BOOKING_STATUS.EN_ROUTE,
             ROLE.WORKER,
             BOOKING_STATUS_MESSAGES.EN_ROUTE
@@ -380,7 +381,7 @@ export class BookingService implements IBookingService {
       {
         status: BOOKING_STATUS.REACHED,
         $push: {
-          statusHistory: this.createStatusHistoryEntry(
+          statusHistory: createStatusHistoryEntry(
             BOOKING_STATUS.REACHED,
             ROLE.WORKER,
             BOOKING_STATUS_MESSAGES.REACHED
@@ -406,8 +407,8 @@ export class BookingService implements IBookingService {
     );
   }
   async startJob(bookingId: string, workerId: string, otp: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    this.assertWorkerOwnership(booking, workerId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
     if (booking.status !== BOOKING_STATUS.REACHED) {
       throw new CustomError(BOOKING.CANNOT_START(booking.status), HTTPSTATUS.BAD_REQUEST);
     }
@@ -419,7 +420,7 @@ export class BookingService implements IBookingService {
     await this._bookingRepository.update(bookingId, {
       status: BOOKING_STATUS.IN_PROGRESS,
       $push: {
-        statusHistory: this.createStatusHistoryEntry(
+        statusHistory: createStatusHistoryEntry(
           BOOKING_STATUS.IN_PROGRESS,
           ROLE.WORKER,
           BOOKING_STATUS_MESSAGES.IN_PROGRESS
@@ -427,7 +428,11 @@ export class BookingService implements IBookingService {
       },
     });
     void this._redisService.delete(redisKey);
-    void this.sendBookingEvent(booking, `Work has started for booking ${booking.bookingId}`);
+    void sendBookingEvent(
+      this._messageService,
+      booking,
+      `Work has started for booking ${booking.bookingId}`
+    );
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.JOB_STARTED(booking.bookingId)
@@ -454,7 +459,7 @@ export class BookingService implements IBookingService {
           workerNote: note,
           completedAt: new Date(),
           $push: {
-            statusHistory: this.createStatusHistoryEntry(
+            statusHistory: createStatusHistoryEntry(
               BOOKING_STATUS.COMPLETED,
               ROLE.WORKER,
               BOOKING_STATUS_MESSAGES.COMPLETED
@@ -481,7 +486,11 @@ export class BookingService implements IBookingService {
       return updated;
     });
 
-    void this.sendBookingEvent(booking, `Work has been completed for booking ${booking.bookingId}`);
+    void sendBookingEvent(
+      this._messageService,
+      booking,
+      `Work has been completed for booking ${booking.bookingId}`
+    );
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.JOB_COMPLETED(booking.bookingId, booking.snapshot.worker.name)
@@ -489,7 +498,7 @@ export class BookingService implements IBookingService {
   }
 
   async approveBooking(bookingId: string, userId: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
     if (booking.userId.toString() !== userId) {
       throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
     }
@@ -508,7 +517,7 @@ export class BookingService implements IBookingService {
       paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
       completedAt: new Date(),
       $push: {
-        statusHistory: this.createStatusHistoryEntry(
+        statusHistory: createStatusHistoryEntry(
           BOOKING_STATUS.APPROVED,
           ROLE.USER,
           BOOKING_STATUS_MESSAGES.APPROVED
@@ -516,7 +525,8 @@ export class BookingService implements IBookingService {
       },
     });
 
-    void this.sendBookingEvent(
+    void sendBookingEvent(
+      this._messageService,
       booking,
       `Booking ${booking.bookingId} has been approved by the user`
     );
@@ -527,46 +537,11 @@ export class BookingService implements IBookingService {
   }
 
   async payExtraCharge(bookingId: string, userId: string): Promise<{ url: string }> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    if (booking.userId.toString() !== userId) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-    if (booking.status !== BOOKING_STATUS.COMPLETED) {
-      throw new CustomError(BOOKING.EXTRA_CHARGE_INVALID_STATUS, HTTPSTATUS.BAD_REQUEST);
-    }
-    if (!booking.extraCharge || booking.extraCharge.status !== "pending") {
-      throw new CustomError(BOOKING.EXTRA_CHARGE_NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    const url = await this._paymentService.createExtraChargeCheckout({
-      userId,
-      booking,
-      amount: booking.extraCharge.amount,
-    });
-    return { url };
+    return this._extraChargeService.payExtraCharge(bookingId, userId);
   }
 
   async rejectExtraCharge(bookingId: string, userId: string): Promise<void> {
-    const booking = await this._bookingRepository.findOneAndUpdate(
-      {
-        _id: new Types.ObjectId(bookingId),
-        userId: new Types.ObjectId(userId),
-        "extraCharge.status": "pending",
-      },
-      {
-        "extraCharge.status": "rejected",
-        "extraCharge.respondedAt": new Date(),
-      }
-    );
-    if (!booking) {
-      throw new CustomError(BOOKING.EXTRA_CHARGE_NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    void this._notificationService.createNotification(
-      booking.workerId.toString(),
-      NOTIFICATION_TEMPLATES.EXTRA_CHARGE_REJECTED(
-        booking.bookingId,
-        booking.extraCharge?.amount ?? 0
-      )
-    );
+    return this._extraChargeService.rejectExtraCharge(bookingId, userId);
   }
 
   async requestExtraCharge(
@@ -574,40 +549,7 @@ export class BookingService implements IBookingService {
     workerId: string,
     data: ExtraChargeDTO
   ): Promise<void> {
-    const { amount, reason, evidenceUrl } = data;
-    const extraCharge: IExtraCharge = {
-      amount,
-      reason,
-      status: "pending",
-      evidenceUrl,
-      requestedAt: new Date(),
-    };
-    const [booking, updated] = await Promise.all([
-      this._bookingRepository.findById(bookingId),
-      this._bookingRepository.findOneAndUpdate(
-        {
-          _id: new Types.ObjectId(bookingId),
-          workerId: new Types.ObjectId(workerId),
-          status: { $in: [BOOKING_STATUS.IN_PROGRESS, BOOKING_STATUS.COMPLETED] },
-          $or: [
-            { extraCharge: { $exists: false } },
-            { extraCharge: null },
-            { "extraCharge.status": { $in: ["pending", "rejected"] } },
-          ],
-        },
-        { extraCharge }
-      ),
-    ]);
-    const isEdit = !!booking?.extraCharge;
-    if (!updated) {
-      throw new CustomError(BOOKING.EXTRA_CHARGE_INVALID_STATUS, HTTPSTATUS.BAD_REQUEST);
-    }
-    void this._notificationService.createNotification(
-      updated.userId.toString(),
-      isEdit
-        ? NOTIFICATION_TEMPLATES.EXTRA_CHARGE_UPDATED(amount, updated.bookingId)
-        : NOTIFICATION_TEMPLATES.EXTRA_CHARGE_REQUESTED(amount, updated.bookingId)
-    );
+    return this._extraChargeService.requestExtraCharge(bookingId, workerId, data);
   }
 
   async expireBooking(): Promise<void> {
@@ -663,7 +605,7 @@ export class BookingService implements IBookingService {
                 ? BOOKING_PAYMENT_STATUS.REFUNDED
                 : booking.paymentStatus,
             $push: {
-              statusHistory: this.createStatusHistoryEntry(
+              statusHistory: createStatusHistoryEntry(
                 BOOKING_STATUS.EXPIRED,
                 ROLE.SYSTEM,
                 BOOKING_STATUS_MESSAGES.EXPIRED
@@ -693,39 +635,6 @@ export class BookingService implements IBookingService {
     } catch (error) {
       logger.error(`Failed to expire booking ${booking._id}:`, error);
       throw error;
-    }
-  }
-
-  private assertWorkerOwnership(booking: IBooking, workerId: string): void {
-    if (booking.workerId.toString() !== workerId) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-  }
-
-  private createStatusHistoryEntry(status: BookingStatus, changedBy: Role, reason?: string) {
-    return {
-      status,
-      changedBy,
-      reason,
-      changedAt: new Date(),
-    };
-  }
-
-  private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
-    return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
-  }
-
-  private async sendBookingEvent(booking: IBooking, content: string): Promise<void> {
-    try {
-      await this._messageService.saveBookingEvent({
-        userId: booking.userId.toString(),
-        workerId: booking.workerId.toString(),
-        bookingId: booking._id.toString(),
-        content,
-      });
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : "Failed to send BookingEvent";
-      logger.error(`Failed to save booking event message -${booking.bookingId} - ${msg}`);
     }
   }
 }

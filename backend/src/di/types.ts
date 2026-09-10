@@ -80,6 +80,7 @@ const TYPES = {
   BookingService: Symbol.for("BookingService"),
   BookingPricingService: Symbol.for("BookingPricingService"),
   BookingRescheduleService: Symbol.for("BookingRescheduleService"),
+  BookingExtraChargeService: Symbol.for("BookingExtraChargeService"),
   BookingRepository: Symbol.for("BookingRepository"),
   BookingPaymentHandler: Symbol.for("BookingPaymentHandler"),
   BookingDayController: Symbol.for("BookingDayController"),
