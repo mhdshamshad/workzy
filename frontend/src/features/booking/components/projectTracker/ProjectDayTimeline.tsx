@@ -18,7 +18,6 @@ import {
   useVerifyDayOtp,
 } from '../../hooks/useBookingDayQuery';
 
-
 interface ProjectDayTimelineProps {
   bookingId: string;
   dailyLogs: DailyLog[];
@@ -238,16 +237,22 @@ export function ProjectDayTimeline({ bookingId, dailyLogs, role }: ProjectDayTim
       <OtpModal
         open={otpDay !== null}
         onOpenChange={v => {
-          if (!v) {setOtpDay(null);}
+          if (!v) {
+            setOtpDay(null);
+          }
         }}
         loading={isVerifying}
         onVerify={async otp => {
-          if (otpDay === null) {return;}
+          if (otpDay === null) {
+            return;
+          }
           await verifyOtp({ bookingId, dayIndex: otpDay, otp });
           setOtpDay(null);
         }}
         onResend={async () => {
-          if (otpDay === null) {return;}
+          if (otpDay === null) {
+            return;
+          }
           await checkIn({ bookingId, dayIndex: otpDay });
         }}
       />
@@ -259,7 +264,9 @@ export function ProjectDayTimeline({ bookingId, dailyLogs, role }: ProjectDayTim
         isSubmitting={isCompleting}
         title={`Complete Day ${activeAction?.dayIndex}`}
         onSubmit={async data => {
-          if (activeAction?.type !== 'complete') {return;}
+          if (activeAction?.type !== 'complete') {
+            return;
+          }
           await completeDay({ bookingId, dayIndex: activeAction.dayIndex, data });
           setActiveAction(null);
         }}
