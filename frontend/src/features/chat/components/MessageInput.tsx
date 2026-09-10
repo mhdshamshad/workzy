@@ -9,6 +9,7 @@ import {
   Pencil,
   Send,
   Shield,
+  Smile,
   Trash2,
   X,
 } from 'lucide-react';
@@ -29,6 +30,8 @@ import {
 import { useAudioRecorder, formatDuration } from '../hooks/useAudioRecorder';
 import { useChatMediaUpload } from '../hooks/useChatMediaUpload';
 import { messageInputSchema, type MessageInputFormValues } from '../validation/messageInputSchema';
+
+import EmojiPickerPopover from './EmojiPickerPopover';
 
 export interface SentMessagePayload {
   type: MessageType;
@@ -169,6 +172,7 @@ export default function MessageInput({
   const [sending, setSending] = useState(false);
   const [pendingAttachment, setPendingAttachment] = useState<PendingAttachment | null>(null);
   const [attachOpen, setAttachOpen] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
 
   const isEditing = Boolean(editingMessageId);
   const isAdmin = role === ROLE.ADMIN;
@@ -272,6 +276,7 @@ export default function MessageInput({
     }
 
     setSending(true);
+    setEmojiOpen(false);
     try {
       if (pendingAttachment) {
         const { file, type, duration } = pendingAttachment;
@@ -511,6 +516,32 @@ export default function MessageInput({
                 )}
               </div>
             )}
+
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                disabled={isBusy}
+                onClick={e => {
+                  e.stopPropagation();
+                  setEmojiOpen(v => !v);
+                  setAttachOpen(false);
+                }}
+                aria-label="Insert emoji"
+                className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-muted disabled:opacity-50"
+              >
+                <Smile size={18} />
+              </button>
+              {emojiOpen && (
+                <EmojiPickerPopover
+                  onSelectEmoji={emoji => {
+                    const current = watch('content') || '';
+                    setValue('content', current + emoji, { shouldValidate: true });
+                    textareaRef.current?.focus();
+                  }}
+                  onClose={() => setEmojiOpen(false)}
+                />
+              )}
+            </div>
 
             <textarea
               rows={1}
