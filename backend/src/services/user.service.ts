@@ -4,7 +4,6 @@ import { Types } from "mongoose";
 import validator from "validator";
 
 import logger from "@/config/logger";
-import redisClient from "@/config/redisClient";
 import {
   AUTH,
   EMAIL,
@@ -13,6 +12,7 @@ import {
   NOTIFICATION_TEMPLATES,
   USER,
 } from "@/constants";
+import { REDIS_KEYS } from "@/constants/redis";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IDisputeRepository } from "@/core/interfaces/repositories/IDisputeRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
@@ -210,7 +210,11 @@ export class UserService implements IUserService {
     const otp = this._otpService.generateOTP();
     logger.info(`otp:${otp}`);
     await Promise.all([
-      redisClient.set(`otp:${email}`, JSON.stringify({ email, otp }), { EX: EMAIL_OTP_EXPIRY }),
+      this._redisService.setWithTTL(
+        REDIS_KEYS.AUTH.OTP(email),
+        JSON.stringify({ email, otp }),
+        EMAIL_OTP_EXPIRY
+      ),
       this._emailService.sendEmail(email, otp),
     ]);
     return true;
@@ -218,7 +222,7 @@ export class UserService implements IUserService {
 
   async resendOtp(userId: string, type: "email" | "phone", value: string): Promise<boolean> {
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
-    const existingData = await this._redisService.get(`otp:${value}`);
+    const existingData = await this._redisService.get(REDIS_KEYS.AUTH.OTP(value));
     if (!existingData) {
       throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }
@@ -226,7 +230,7 @@ export class UserService implements IUserService {
     logger.info(`newOtp:${newOtp}`);
 
     await this._redisService.setWithTTL(
-      `otp:${value}`,
+      REDIS_KEYS.AUTH.OTP(value),
       JSON.stringify({ otp: newOtp, type: value }),
       EMAIL_OTP_EXPIRY
     );

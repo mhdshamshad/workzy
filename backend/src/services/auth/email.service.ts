@@ -1,9 +1,10 @@
 import { inject, injectable } from "inversify";
 
 import { transporter } from "@/config/nodemailer";
-import redisClient from "@/config/redisClient";
 import { AUTH, CLIENT_URL, EMAIL_OTP_EXPIRY, HTTPSTATUS, NODEMAILER_EMAIL } from "@/constants";
+import { REDIS_KEYS } from "@/constants/redis";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { TYPES } from "@/di/types";
 import { RegisterRequestDTO } from "@/dtos/requests/auth.dto";
@@ -13,12 +14,19 @@ import CustomError from "@/utils/customError";
 
 @injectable()
 export class EmailService implements IEmailService {
-  constructor(@inject(TYPES.TokenService) private _tokenService: ITokenService) {}
+  constructor(
+    @inject(TYPES.TokenService) private _tokenService: ITokenService,
+    @inject(TYPES.RedisService) private _redisService: IRedisService
+  ) {}
 
   async sendOtpEmail(userData: RegisterRequestDTO, otp: string): Promise<void> {
     const data = JSON.stringify({ userData, otp });
 
-    await redisClient.set(`otp:${userData.email}`, data, { EX: EMAIL_OTP_EXPIRY });
+    await this._redisService.setWithTTL(
+      REDIS_KEYS.AUTH.OTP(userData.email),
+      data,
+      EMAIL_OTP_EXPIRY
+    );
     try {
       await transporter.sendMail({
         from: NODEMAILER_EMAIL,
@@ -35,7 +43,11 @@ export class EmailService implements IEmailService {
   async sendResetEmailWithToken(email: string): Promise<void> {
     const token = this._tokenService.generateToken();
 
-    await redisClient.set(`forgotPassword:${email}`, token, { EX: EMAIL_OTP_EXPIRY });
+    await this._redisService.setWithTTL(
+      REDIS_KEYS.AUTH.FORGOT_PASSWORD(email),
+      token,
+      EMAIL_OTP_EXPIRY
+    );
 
     const resetLink = `${CLIENT_URL}/reset-password?token=${token}&email=${email}`;
 

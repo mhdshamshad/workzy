@@ -35,29 +35,11 @@ export const REDIS_KEYS = {
     DAY_OTP: (bookingId: string, dayIndex: number) => `booking-day-otp:${bookingId}:${dayIndex}`,
   },
 
-  // Auth
-  //   AUTH: {
-  //     REFRESH_TOKEN: (userId: string) =>
-  //       `auth:refreshToken:${userId}`,
-
-  //     BLACKLIST_TOKEN: (tokenId: string) =>
-  //       `auth:blacklist:${tokenId}`,
-  //   },
-
-  //   // Chat
-  //   CHAT: {
-  //     UNREAD_COUNT: (userId: string) =>
-  //       `chat:unread:${userId}`,
-
-  //     CONVERSATION: (conversationId: string) =>
-  //       `chat:conversation:${conversationId}`,
-  //   },
-
-  //   // Notifications
-  //   NOTIFICATION: {
-  //     UNREAD_COUNT: (userId: string) =>
-  //       `notification:unread:${userId}`,
-  //   },
+  AUTH: {
+    OTP: (email: string) => `otp:${email}`,
+    FORGOT_PASSWORD: (email: string) => `forgotPassword:${email}`,
+    BLOCKED_USER: (userId: string) => `blocked_user:${userId}`,
+  },
 
   //   // Rate Limiting
   //   RATE_LIMIT: {

@@ -3,29 +3,33 @@ import crypto from "crypto";
 import { inject, injectable } from "inversify";
 
 import logger from "@/config/logger";
-import redisClient from "@/config/redisClient";
 import { AUTH, HTTPSTATUS } from "@/constants";
+import { REDIS_KEYS } from "@/constants/redis";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { TYPES } from "@/di/types";
 import { RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import CustomError from "@/utils/customError";
 
 @injectable()
 export class OTPService implements IOTPService {
-  constructor(@inject(TYPES.EmailService) private _emailService: IEmailService) {}
+  constructor(
+    @inject(TYPES.EmailService) private _emailService: IEmailService,
+    @inject(TYPES.RedisService) private _redisService: IRedisService
+  ) {}
 
-  // Generate a random 6-digit OTP
   generateOTP(): string {
     return crypto.randomInt(100000, 999999).toString();
   }
 
   // Resend OTP to the user's email
   async resendOtp(email: string): Promise<void> {
-    const existingData = JSON.parse((await redisClient.get(`otp:${email}`)) as string);
-    if (!existingData) {
+    const rawData = await this._redisService.get(REDIS_KEYS.AUTH.OTP(email));
+    if (!rawData) {
       throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }
+    const existingData = JSON.parse(rawData);
     const newOtp = this.generateOTP();
 
     logger.info(`newOtp:${newOtp}`);
@@ -34,7 +38,7 @@ export class OTPService implements IOTPService {
   }
 
   async verifyAndRetrieveUser(key: string, otp: string): Promise<RegisterRequestDTO> {
-    const storedData = await redisClient.get(`otp:${key}`);
+    const storedData = await this._redisService.get(REDIS_KEYS.AUTH.OTP(key));
     if (!storedData) {
       throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }
