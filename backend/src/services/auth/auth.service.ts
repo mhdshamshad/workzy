@@ -2,10 +2,11 @@ import { compare, hash } from "bcryptjs";
 import { plainToInstance } from "class-transformer";
 import { inject, injectable } from "inversify";
 
-import redisClient from "@/config/redisClient";
 import { AUTH, HTTPSTATUS, ROLE, Role, USER, WORKER_STATUS } from "@/constants";
+import { REDIS_KEYS } from "@/constants/redis";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
@@ -20,7 +21,8 @@ export class AuthService implements IAuthService {
   constructor(
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.WorkerService) private _workerService: IWorkerService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
 
   async findUserByEmail(email: string): Promise<boolean> {
@@ -41,7 +43,7 @@ export class AuthService implements IAuthService {
     const userData = plainToInstance(RegisterResponseDTO, user, {
       excludeExtraneousValues: true,
     });
-    await redisClient.del(`otp:${email}`);
+    await this._redisService.delete(REDIS_KEYS.AUTH.OTP(email));
 
     return userData;
   }
@@ -97,7 +99,7 @@ export class AuthService implements IAuthService {
     user.password = hashedPassword;
     await user.save();
 
-    await redisClient.del(`forgotPassword${email}`);
+    await this._redisService.delete(REDIS_KEYS.AUTH.FORGOT_PASSWORD(email));
   }
 
   async handleGoogleUser(googleData: {
@@ -121,6 +123,7 @@ export class AuthService implements IAuthService {
         role: "user",
       });
     }
+
     const userObj = user.toObject();
 
     if (user.role === ROLE.WORKER) {

@@ -1,7 +1,6 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import redisClient from "@/config/redisClient";
 import { HOME_LAYOUT, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
 import { HomeSectionType, SINGLETON_HOME_TYPES } from "@/constants/home";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
@@ -21,14 +20,18 @@ export class HomeLayoutService implements IHomeLayoutService {
   ) {}
   async getLayout(): Promise<HomeLayoutResponseDTO> {
     const cacheKey = "layout:admin";
-    const cachedData = await redisClient.get(cacheKey);
+    const cachedData = await this._redisService.get(cacheKey);
 
     if (cachedData) {
       return JSON.parse(cachedData);
     }
     const homeLayout = await this._layoutRepo.getLayout();
     const response = HomeLayoutResponseDTO.fromEntity(homeLayout);
-    await redisClient.set(cacheKey, JSON.stringify(response), { EX: REFRESH_TOKEN_TTL_SECONDS });
+    await this._redisService.setWithTTL(
+      cacheKey,
+      JSON.stringify(response),
+      REFRESH_TOKEN_TTL_SECONDS
+    );
     return response;
   }
   async saveLayout(items: SaveItem[]): Promise<HomeLayoutResponseDTO> {

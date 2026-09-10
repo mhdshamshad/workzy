@@ -63,6 +63,7 @@ const TYPES = {
   PaymentController: Symbol.for("PaymentController"),
   PaymentRepository: Symbol.for("PaymentRepository"),
   PaymentService: Symbol.for("PaymentService"),
+  PaymentGateway: Symbol.for("PaymentGateway"),
 
   SlotController: Symbol.for("SlotController"),
   SlotRepository: Symbol.for("SlotRepository"),
@@ -78,6 +79,10 @@ const TYPES = {
 
   BookingController: Symbol.for("BookingController"),
   BookingService: Symbol.for("BookingService"),
+  BookingPricingService: Symbol.for("BookingPricingService"),
+  BookingRescheduleService: Symbol.for("BookingRescheduleService"),
+  BookingExtraChargeService: Symbol.for("BookingExtraChargeService"),
+  BookingLifecycleService: Symbol.for("BookingLifecycleService"),
   BookingRepository: Symbol.for("BookingRepository"),
   BookingPaymentHandler: Symbol.for("BookingPaymentHandler"),
   BookingDayController: Symbol.for("BookingDayController"),

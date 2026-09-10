@@ -70,7 +70,11 @@ import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICa
 import { IAdminService } from "@/core/interfaces/services/IAdminService";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IBookingDayService } from "@/core/interfaces/services/IBookingDayService";
+import { IBookingExtraChargeService } from "@/core/interfaces/services/IBookingExtraChargeService";
+import { IBookingLifecycleService } from "@/core/interfaces/services/IBookingLifecycleService";
 import { IBookingPaymentHandler } from "@/core/interfaces/services/IBookingPaymentHandler";
+import { IBookingPricingService } from "@/core/interfaces/services/IBookingPricingService";
+import { IBookingRescheduleService } from "@/core/interfaces/services/IBookingRescheduleService";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { IChatService } from "@/core/interfaces/services/IChatService";
@@ -83,6 +87,7 @@ import { ILeaveService } from "@/core/interfaces/services/ILeaveService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { IPaymentGateway } from "@/core/interfaces/services/IPaymentGateway";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
@@ -120,6 +125,10 @@ import { AuthService } from "@/services/auth/auth.service";
 import { EmailService } from "@/services/auth/email.service";
 import { OTPService } from "@/services/auth/otp.service";
 import { TokenService } from "@/services/auth/token.service";
+import { BookingExtraChargeService } from "@/services/booking/booking-extra-charge.service";
+import { BookingLifecycleService } from "@/services/booking/booking-lifecycle.service";
+import { BookingPricingService } from "@/services/booking/booking-pricing.service";
+import { BookingRescheduleService } from "@/services/booking/booking-reschedule.service";
 import { BookingDayService } from "@/services/booking-day.service";
 import { BookingPaymentHandlerService } from "@/services/booking-payment-handler.service";
 import { BookingService } from "@/services/booking.service";
@@ -130,6 +139,7 @@ import { HomeService } from "@/services/home.service";
 import { LeaveService } from "@/services/leave.service";
 import { MessageService } from "@/services/message.service";
 import { NotificationService } from "@/services/notification.service";
+import { StripePaymentGateway } from "@/services/payment/stripe-payment-gateway.service";
 import { PaymentService } from "@/services/payment.service";
 import { PresenceService } from "@/services/presence.service";
 import { QuoteService } from "@/services/quote.service";
@@ -196,6 +206,7 @@ container.bind<IHomeSectionRepository>(TYPES.HomeSectionRepository).to(HomeSecti
 
 container.bind<IPaymentController>(TYPES.PaymentController).to(PaymentController);
 container.bind<IPaymentRepository>(TYPES.PaymentRepository).to(PaymentRepository);
+container.bind<IPaymentGateway>(TYPES.PaymentGateway).to(StripePaymentGateway);
 container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService);
 
 container.bind<ISlotController>(TYPES.SlotController).to(SlotController);
@@ -212,6 +223,14 @@ container.bind<ILeaveRepository>(TYPES.LeaveRepository).to(LeaveRepository);
 
 container.bind<IBookingController>(TYPES.BookingController).to(BookingController);
 container.bind<IBookingRepository>(TYPES.BookingRepository).to(BookingRepository);
+container.bind<IBookingPricingService>(TYPES.BookingPricingService).to(BookingPricingService);
+container
+  .bind<IBookingRescheduleService>(TYPES.BookingRescheduleService)
+  .to(BookingRescheduleService);
+container
+  .bind<IBookingExtraChargeService>(TYPES.BookingExtraChargeService)
+  .to(BookingExtraChargeService);
+container.bind<IBookingLifecycleService>(TYPES.BookingLifecycleService).to(BookingLifecycleService);
 container.bind<IBookingService>(TYPES.BookingService).to(BookingService);
 container
   .bind<IBookingPaymentHandler>(TYPES.BookingPaymentHandler)

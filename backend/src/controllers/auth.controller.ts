@@ -5,13 +5,14 @@ import { Profile } from "passport";
 import validator from "validator";
 
 import logger from "@/config/logger";
-import redisClient from "@/config/redisClient";
 import { AUTH, CLIENT_URL, EMAIL, HTTPSTATUS, ROLE, Role, USER, WORKER } from "@/constants";
+import { REDIS_KEYS } from "@/constants/redis";
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
@@ -32,7 +33,8 @@ export class AuthController implements IAuthController {
     @inject(TYPES.TokenService) private _tokenService: ITokenService,
     @inject(TYPES.WorkerService) private _workerService: IWorkerService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
-    @inject(TYPES.PresenceService) private _presenceService: IPresenceService
+    @inject(TYPES.PresenceService) private _presenceService: IPresenceService,
+    @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
 
   // Register a new user
@@ -130,7 +132,7 @@ export class AuthController implements IAuthController {
     const userId = decodedToken.user.id;
     const role = decodedToken.user.role;
 
-    const isBlocked = await redisClient.get(`blocked_user:${userId}`);
+    const isBlocked = await this._redisService.get(REDIS_KEYS.AUTH.BLOCKED_USER(userId));
     if (isBlocked) {
       clearRefreshTokenCookie(res);
       res.status(HTTPSTATUS.FORBIDDEN).json({ success: false, message: USER.BLOCKED });
@@ -212,7 +214,7 @@ export class AuthController implements IAuthController {
       name: googleProfile.displayName,
       profile: jsonData?.picture || "",
     });
-    const isBlocked = await redisClient.get(`blocked_user:${user.id}`);
+    const isBlocked = await this._redisService.get(REDIS_KEYS.AUTH.BLOCKED_USER(user.id));
     if (isBlocked) {
       return res.redirect(`${CLIENT_URL}/auth/google/callback?error=blocked`);
     }

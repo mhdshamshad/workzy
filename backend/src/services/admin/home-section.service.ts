@@ -1,7 +1,6 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import redisClient from "@/config/redisClient";
 import { HOME_SECTION, HTTPSTATUS, PURPOSE_POLICY, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
@@ -166,7 +165,7 @@ export class HomeSectionService implements IHomeSectionService {
     type: ListType
   ): Promise<ListSectionsResult> {
     const cacheKey = `sections:list:${type}:${status}:${page}:${limit}:${search}`;
-    const cachedData = await redisClient.get(cacheKey);
+    const cachedData = await this._redisService.get(cacheKey);
     if (cachedData) {
       return JSON.parse(cachedData);
     }
@@ -182,7 +181,11 @@ export class HomeSectionService implements IHomeSectionService {
       sections: HomeSectionResponseDTO.fromEntities(rows),
       total,
     };
-    await redisClient.set(cacheKey, JSON.stringify(response), { EX: REFRESH_TOKEN_TTL_SECONDS });
+    await this._redisService.setWithTTL(
+      cacheKey,
+      JSON.stringify(response),
+      REFRESH_TOKEN_TTL_SECONDS
+    );
     return response;
   }
 

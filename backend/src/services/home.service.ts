@@ -1,11 +1,11 @@
 import { inject, injectable } from "inversify";
 
-import redisClient from "@/config/redisClient";
 import { REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
 import { HOME_SECTION_TYPE } from "@/constants/home";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
 import { IHomeService } from "@/core/interfaces/services/IHomeService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { TYPES } from "@/di/types";
 import { PublicHomeResponseDTO } from "@/dtos/responses/home.response.dto";
 import { IHomeSectionWithOrder } from "@/types/home";
@@ -14,12 +14,13 @@ import { IHomeSectionWithOrder } from "@/types/home";
 export class HomeService implements IHomeService {
   constructor(
     @inject(TYPES.HomeLayoutRepository) private _layoutRepo: IHomeLayoutRepository,
-    @inject(TYPES.HomeSectionRepository) private readonly _sectionRepo: IHomeSectionRepository
+    @inject(TYPES.HomeSectionRepository) private readonly _sectionRepo: IHomeSectionRepository,
+    @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
 
   async getHome(): Promise<PublicHomeResponseDTO> {
     const cacheKey = "home:public";
-    const cachedData = await redisClient.get(cacheKey);
+    const cachedData = await this._redisService.get(cacheKey);
 
     if (cachedData) {
       return JSON.parse(cachedData);
@@ -45,9 +46,11 @@ export class HomeService implements IHomeService {
     fullSections.sort((a, b) => a.order - b.order);
 
     const response = PublicHomeResponseDTO.fromEntities(fullSections);
-    await redisClient.set(cacheKey, JSON.stringify(response), {
-      EX: REFRESH_TOKEN_TTL_SECONDS,
-    });
+    await this._redisService.setWithTTL(
+      cacheKey,
+      JSON.stringify(response),
+      REFRESH_TOKEN_TTL_SECONDS
+    );
     return response;
   }
 }

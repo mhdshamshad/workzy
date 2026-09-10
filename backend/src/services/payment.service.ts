@@ -1,13 +1,10 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
-import Stripe from "stripe";
 
-import { stripe } from "@/config/stripe";
 import {
   BILL_TYPE,
   BOOKING_PAYMENT_STATUS,
   BOOKING_STATUS,
-  CLIENT_URL,
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
   PAYMENT,
@@ -21,8 +18,10 @@ import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepos
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IBookingPaymentHandler } from "@/core/interfaces/services/IBookingPaymentHandler";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
+import { IPaymentGateway } from "@/core/interfaces/services/IPaymentGateway";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
+import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { PaymentAdminDto, PaymentUserDto, PaymentWorkerDto } from "@/dtos/responses/payment.dto";
 import { IBooking } from "@/types/booking/booking.entity";
@@ -42,7 +41,9 @@ export class PaymentService implements IPaymentService {
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     @inject(TYPES.BookingPaymentHandler) private _bookingPaymentHandler: IBookingPaymentHandler,
-    @inject(TYPES.SlotService) private _slotService: ISlotService
+    @inject(TYPES.SlotService) private _slotService: ISlotService,
+    @inject(TYPES.PaymentGateway) private _gateway: IPaymentGateway,
+    @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
 
   async createBookingPaymentCheckout(data: BookingCheckoutParams): Promise<string> {
@@ -59,38 +60,13 @@ export class PaymentService implements IPaymentService {
       workerAmount,
     } = data;
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "inr",
-            product_data: { name: serviceName },
-            unit_amount: amount * 100,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      payment_intent_data: {
-        transfer_group: bookingId,
-        metadata: {
-          type: "BOOKING",
-          bookingId,
-          slotId,
-          workerId,
-          userId,
-        },
-      },
-      success_url: `${CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${CLIENT_URL}/payment/cancelled`,
-      metadata: {
-        type: "BOOKING",
-        bookingId,
-        workerId,
-        slotId,
-        userId,
-      },
+    const session = await this._gateway.createBookingCheckoutSession({
+      userId,
+      bookingId,
+      amount,
+      slotId,
+      serviceName,
+      workerId,
     });
 
     await this._paymentRepo.create({
@@ -110,7 +86,8 @@ export class PaymentService implements IPaymentService {
       workerName,
       userName,
     });
-    return session.url!;
+
+    return session.url;
   }
 
   async createExtraChargeCheckout(data: {
@@ -129,37 +106,14 @@ export class PaymentService implements IPaymentService {
     if (!workerStripeId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
       throw new CustomError(WORKER.STRIPE_NOT_ACTIVE, HTTPSTATUS.BAD_REQUEST);
     }
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "inr",
-            product_data: { name: "Additional Service Charge" },
-            unit_amount: amount * 100,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      payment_intent_data: {
-        transfer_data: {
-          destination: workerStripeId,
-        },
-        metadata: {
-          type: "EXTRA_CHARGE",
-          bookingId: booking._id.toString(),
-          userId,
-        },
-      },
-      success_url: `${CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${CLIENT_URL}/payment/cancelled`,
-      metadata: {
-        type: "EXTRA_CHARGE",
-        bookingId: booking._id.toString(),
-        userId,
-      },
+
+    const session = await this._gateway.createExtraChargeCheckoutSession({
+      userId,
+      bookingId: booking._id.toString(),
+      workerStripeAccountId: workerStripeId,
+      amount,
     });
+
     await this._paymentRepo.create({
       transactionId: generateTxnCode("TXN"),
       title: booking.snapshot.category.name + " - Extra Charge",
@@ -175,14 +129,15 @@ export class PaymentService implements IPaymentService {
       userName: booking.snapshot.user.name,
       workerName: booking.snapshot.worker.name,
     });
-    return session.url!;
+
+    return session.url;
   }
 
   async releaseBookingPayment(booking: IBooking, customAmount?: number): Promise<void> {
     const payment = await this._paymentRepo.findOne({
       bookingId: new Types.ObjectId(booking._id.toString()),
       billType: BILL_TYPE.BOOKING,
-      status: { $in: [PAYMENT_STATUS.SUCCEEDED, PAYMENT_STATUS.REFUNDED] },
+      status: PAYMENT_STATUS.SUCCEEDED,
     });
     if (!payment) {
       throw new CustomError(PAYMENT.PAYMENT_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
@@ -202,33 +157,19 @@ export class PaymentService implements IPaymentService {
     if (payment.workerAmount === undefined || payment?.workerAmount === null) {
       throw new CustomError(PAYMENT.WORKER_AMOUNT_MISSING, HTTPSTATUS.BAD_REQUEST);
     }
-    const destinationAccount = await stripe.accounts.retrieve(workerStripeId);
-    const transferCurrency = destinationAccount.default_currency || "inr";
+
+    const transferCurrency = await this._gateway.getAccountDefaultCurrency(workerStripeId);
     let transferAmount = customAmount !== undefined ? customAmount : payment.workerAmount;
     if (payment.currency === "inr" && transferCurrency === "aed") {
       transferAmount = transferAmount * 0.044;
     }
 
-    try {
-      await stripe.transfers.create({
-        amount: Math.round(transferAmount * 100),
-        currency: transferCurrency,
-        destination: workerStripeId,
-        transfer_group: booking._id.toString(),
-      });
-    } catch (err: unknown) {
-      // if (
-      //   typeof err === "object" &&
-      //   err !== null &&
-      //   "code" in err &&
-      //   (err as { code?: unknown }).code === "balance_insufficient"
-      // ) {
-      //   console.warn("Stripe insufficient balance — bypassing in test mode.");
-      // } else {
-      //   throw err;
-      // }
-      console.log(err);
-    }
+    await this._gateway.createTransfer({
+      bookingId: booking._id.toString(),
+      workerStripeAccountId: workerStripeId,
+      amount: transferAmount,
+      currency: transferCurrency,
+    });
 
     await this._paymentRepo.findOneAndUpdate(
       { _id: payment._id },
@@ -239,67 +180,109 @@ export class PaymentService implements IPaymentService {
     );
   }
 
-  async handleWebhookEvent(event: Stripe.Event): Promise<void> {
+  async handleWebhookEvent(rawBody: Buffer, signature: string): Promise<void> {
+    const event = this._gateway.constructAndVerifyWebhookEvent(rawBody, signature);
+
     switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const type = session.metadata?.type;
-        if (type === "BOOKING") {
-          await this.handleBookingPaid(session);
-        } else if (type === "EXTRA_CHARGE") {
-          await this.handleExtraChargePaid(session);
-        }
+      case "booking.paid": {
+        await this._bookingPaymentHandler.confirmBookingAfterPayment(
+          event.bookingId,
+          event.slotId,
+          event.workerId,
+          event.paymentIntentId
+        );
         break;
       }
-
-      case "payment_intent.payment_failed": {
-        await this.handlePaymentFailed(event.data.object as Stripe.PaymentIntent);
-        break;
-      }
-      case "checkout.session.expired": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        if (session.metadata?.type === "BOOKING") {
-          await this.handleBookingCheckoutExpired(session);
-        }
-        break;
-      }
-
-      case "account.updated": {
-        const account = event.data.object as Stripe.Account;
-        if (account.payouts_enabled) {
-          await this._workerRepository.findOneAndUpdate(
-            { stripeAccountId: account.id },
-            { stripeAccountStatus: "active" }
+      case "extra_charge.paid": {
+        await this._unitOfWork.execute(async (options) => {
+          await this._bookingPaymentHandler.handleExtraChargeAfterPayment(event.bookingId);
+          await this._paymentRepo.findOneAndUpdate(
+            { sessionId: event.sessionId },
+            {
+              status: PAYMENT_STATUS.SUCCEEDED,
+              paymentIntentId: event.paymentIntentId,
+            },
+            options
           );
-        }
+        });
         break;
       }
+      case "payment.failed": {
+        const { bookingId, userId, slotId, paymentIntentId, reason } = event;
+        if (!bookingId) break;
+        await this._unitOfWork.execute(async (options) => {
+          await this._bookingRepository.findByIdAndUpdate(
+            bookingId,
+            {
+              paymentStatus: BOOKING_PAYMENT_STATUS.FAILED,
+              status: BOOKING_STATUS.CANCELLED,
+            },
+            options
+          );
+          await this._paymentRepo.findOneAndUpdate(
+            { bookingId: new Types.ObjectId(bookingId), billType: BILL_TYPE.BOOKING },
+            {
+              status: PAYMENT_STATUS.FAILED,
+              paymentIntentId,
+              failureReason: reason,
+            },
+            options
+          );
+          if (slotId && userId) {
+            await this._slotService.releaseSlot(slotId, userId);
+          }
+        });
+        void this._notificationService.createNotification(
+          userId,
+          NOTIFICATION_TEMPLATES.PAYMENT_FAILED(bookingId)
+        );
+        break;
+      }
+      case "checkout.expired": {
+        const { bookingId, slotId, userId, sessionId } = event;
+        await this._unitOfWork.execute(async (options) => {
+          await this._bookingRepository.findByIdAndUpdate(
+            bookingId,
+            {
+              paymentStatus: BOOKING_PAYMENT_STATUS.CANCELLED,
+              status: BOOKING_STATUS.CANCELLED,
+            },
+            options
+          );
+          await this._paymentRepo.findOneAndUpdate(
+            { sessionId },
+            { status: PAYMENT_STATUS.CANCELLED },
+            options
+          );
+          if (slotId && userId) {
+            await this._slotService.releaseSlot(slotId, userId);
+          }
+        });
+        break;
+      }
+      case "account.payouts_enabled": {
+        await this._workerRepository.findOneAndUpdate(
+          { stripeAccountId: event.stripeAccountId },
+          { stripeAccountStatus: "active" }
+        );
+        break;
+      }
+      case "unhandled":
+        break;
     }
   }
 
   async createStripeConnectLink(worker: IWorker): Promise<string> {
     let accountId = worker?.stripeAccountId;
     if (!accountId) {
-      const account = await stripe.accounts.create({
-        type: "express",
-        country: "AE",
-        capabilities: {
-          transfers: { requested: true },
-        },
-      });
-      accountId = account.id;
+      const { accountId: newAccountId } = await this._gateway.createExpressAccount();
+      accountId = newAccountId;
       await this._workerRepository.update(worker._id, {
         stripeAccountId: accountId,
         stripeAccountStatus: STRIPE_ACCOUNT_STATUS.PENDING,
       });
     }
-    const link = await stripe.accountLinks.create({
-      account: accountId,
-      refresh_url: `${CLIENT_URL}/worker/profile/account?stripe=refresh`,
-      return_url: `${CLIENT_URL}/worker/profile/account?stripe=success`,
-      type: "account_onboarding",
-    });
-    return link.url;
+    return await this._gateway.createAccountOnboardingLink(accountId);
   }
 
   async refundBookingPayment(bookingId: string, amount?: number): Promise<void> {
@@ -315,14 +298,11 @@ export class PaymentService implements IPaymentService {
       throw new CustomError(PAYMENT.PAYMENT_INTENT_MISSING, HTTPSTATUS.BAD_REQUEST);
     }
 
-    const refundParams: Stripe.RefundCreateParams = {
-      payment_intent: payment.paymentIntentId,
-    };
-    if (amount !== undefined) {
-      refundParams.amount = Math.round(amount * 100);
-    }
+    await this._gateway.createRefund({
+      paymentIntentId: payment.paymentIntentId,
+      amount,
+    });
 
-    await stripe.refunds.create(refundParams);
     await this._paymentRepo.findOneAndUpdate(
       { _id: new Types.ObjectId(payment._id) },
       {
@@ -332,105 +312,8 @@ export class PaymentService implements IPaymentService {
     );
   }
 
-  private async handleExtraChargePaid(session: Stripe.Checkout.Session): Promise<void> {
-    const { bookingId } = session.metadata as { bookingId: string };
-    await Promise.all([
-      this._bookingPaymentHandler.handleExtraChargeAfterPayment(bookingId),
-      this._paymentRepo.findOneAndUpdate(
-        { sessionId: session.id },
-        {
-          status: PAYMENT_STATUS.SUCCEEDED,
-          paymentIntentId: session.payment_intent as string,
-        }
-      ),
-    ]);
-  }
-
-  private async handleBookingPaid(session: Stripe.Checkout.Session) {
-    const { bookingId, slotId, workerId } = session.metadata as {
-      bookingId: string;
-      slotId: string;
-      workerId: string;
-    };
-    await this._bookingPaymentHandler.confirmBookingAfterPayment(
-      bookingId,
-      slotId,
-      workerId,
-      session.payment_intent as string
-    );
-  }
-
   async verifySession(sessionId: string): Promise<VerifySessionType> {
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["payment_intent.latest_charge", "line_items"],
-    });
-    const type = session.metadata?.type;
-    const success =
-      type === "BOOKING"
-        ? session.status === "complete"
-        : session.payment_status === "paid" && session.status === "complete";
-    if (!success) return { success: false };
-    const paymentIntent = session.payment_intent as Stripe.PaymentIntent;
-    const charge = paymentIntent?.latest_charge as Stripe.Charge;
-    const lineItem = session.line_items?.data?.[0];
-
-    return {
-      success,
-      type,
-      transactionId: paymentIntent?.id ?? session.id,
-      productName: lineItem?.description ?? "Payment",
-      amountPaid: (session.amount_total ?? 0) / 100,
-      paymentMethod:
-        session.payment_method_types?.[0] === "card"
-          ? "Credit / Debit Card"
-          : (session.payment_method_types?.[0] ?? "Card"),
-      date: new Date(session.created * 1000).toISOString(),
-      receiptUrl: charge?.receipt_url ?? undefined,
-    };
-  }
-
-  private async handlePaymentFailed(pi: Stripe.PaymentIntent) {
-    const { type, bookingId, userId, slotId } = pi.metadata;
-    if (type !== "BOOKING" || !bookingId) return;
-    await Promise.all([
-      this._bookingRepository.findByIdAndUpdate(bookingId, {
-        paymentStatus: BOOKING_PAYMENT_STATUS.FAILED,
-        status: BOOKING_STATUS.CANCELLED,
-      }),
-      this._paymentRepo.findOneAndUpdate(
-        { bookingId: new Types.ObjectId(bookingId), billType: BILL_TYPE.BOOKING },
-        {
-          status: PAYMENT_STATUS.FAILED,
-          paymentIntentId: pi.id,
-          failureReason: pi.last_payment_error?.message,
-        }
-      ),
-      ...(slotId && userId ? [this._slotService.releaseSlot(slotId, userId)] : []),
-    ]);
-    void this._notificationService.createNotification(
-      userId,
-      NOTIFICATION_TEMPLATES.PAYMENT_FAILED(bookingId)
-    );
-  }
-
-  private async handleBookingCheckoutExpired(session: Stripe.Checkout.Session) {
-    const { bookingId, slotId, userId } = session.metadata as {
-      bookingId: string;
-      slotId: string;
-      userId: string;
-    };
-
-    await Promise.all([
-      this._bookingRepository.findByIdAndUpdate(bookingId, {
-        paymentStatus: BOOKING_PAYMENT_STATUS.CANCELLED,
-        status: BOOKING_STATUS.CANCELLED,
-      }),
-      this._paymentRepo.findOneAndUpdate(
-        { sessionId: session.id },
-        { status: PAYMENT_STATUS.CANCELLED }
-      ),
-      ...(slotId && userId ? [this._slotService.releaseSlot(slotId, userId)] : []),
-    ]);
+    return this._gateway.retrieveSession(sessionId);
   }
 
   async getPayments(input: PaymentListQuery): Promise<CursorPaginatedResult<PaymentAdminDto>> {

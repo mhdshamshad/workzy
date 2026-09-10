@@ -1,10 +1,8 @@
 import { inject, injectable } from "inversify";
 import { Types, UpdateQuery } from "mongoose";
 
-import logger from "@/config/logger";
 import {
   BILL_TYPE,
-  BOOKING,
   BOOKING_PAYMENT_STATUS,
   BOOKING_STATUS,
   BOOKING_STATUS_MESSAGES,
@@ -26,7 +24,7 @@ import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { IBooking } from "@/types/booking/booking.entity";
 import { IWorker } from "@/types/worker/worker.entity";
-import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
+import { getBookingOrThrow, sendBookingEvent } from "@/utils/booking.helper";
 
 @injectable()
 export class BookingPaymentHandlerService implements IBookingPaymentHandler {
@@ -41,31 +39,13 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
     @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
 
-  private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
-    return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
-  }
-
-  private async sendBookingEvent(booking: IBooking, content: string): Promise<void> {
-    try {
-      await this._messageService.saveBookingEvent({
-        userId: booking.userId.toString(),
-        workerId: booking.workerId.toString(),
-        bookingId: booking._id.toString(),
-        content,
-      });
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : "Failed to send BookingEvent";
-      logger.error(`Failed to save booking event message -${booking.bookingId} - ${msg}`);
-    }
-  }
-
   async confirmBookingAfterPayment(
     bookingId: string,
     slotId: string,
     workerId: string,
     paymentIntentId: string
   ): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
 
     let bookingUpdateData: UpdateQuery<IBooking>;
     let workerUpdateData: UpdateQuery<IWorker>;
@@ -149,12 +129,12 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
       );
     });
 
-    void this.sendBookingEvent(booking, chatMessage);
+    void sendBookingEvent(this._messageService, booking, chatMessage);
     notifyAction();
   }
 
   async handleExtraChargeAfterPayment(bookingId: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
     await this._bookingRepository.findByIdAndUpdate(bookingId, {
       "extraCharge.status": "approved",
       "extraCharge.respondedAt": new Date(),
