@@ -1,5 +1,3 @@
-import Stripe from "stripe";
-
 import { PaymentAdminDto, PaymentUserDto, PaymentWorkerDto } from "@/dtos/responses/payment.dto";
 import { IBooking } from "@/types/booking/booking.entity";
 import { CursorPaginatedResult } from "@/types/common/pagination";
@@ -8,7 +6,7 @@ import { PaymentListQuery } from "@/types/payment/payment.query";
 import { IWorker } from "@/types/worker/worker.entity";
 
 export interface IPaymentService {
-  handleWebhookEvent(event: Stripe.Event): Promise<void>;
+  handleWebhookEvent(rawBody: Buffer, signature: string): Promise<void>;
   verifySession(sessionId: string): Promise<VerifySessionType>;
   createBookingPaymentCheckout(data: BookingCheckoutParams): Promise<string>;
   createStripeConnectLink(worker: IWorker): Promise<string>;

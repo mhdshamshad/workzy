@@ -87,6 +87,7 @@ import { ILeaveService } from "@/core/interfaces/services/ILeaveService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { IPaymentGateway } from "@/core/interfaces/services/IPaymentGateway";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
@@ -138,6 +139,7 @@ import { HomeService } from "@/services/home.service";
 import { LeaveService } from "@/services/leave.service";
 import { MessageService } from "@/services/message.service";
 import { NotificationService } from "@/services/notification.service";
+import { StripePaymentGateway } from "@/services/payment/stripe-payment-gateway.service";
 import { PaymentService } from "@/services/payment.service";
 import { PresenceService } from "@/services/presence.service";
 import { QuoteService } from "@/services/quote.service";
@@ -204,6 +206,7 @@ container.bind<IHomeSectionRepository>(TYPES.HomeSectionRepository).to(HomeSecti
 
 container.bind<IPaymentController>(TYPES.PaymentController).to(PaymentController);
 container.bind<IPaymentRepository>(TYPES.PaymentRepository).to(PaymentRepository);
+container.bind<IPaymentGateway>(TYPES.PaymentGateway).to(StripePaymentGateway);
 container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService);
 
 container.bind<ISlotController>(TYPES.SlotController).to(SlotController);
