@@ -7,20 +7,25 @@ import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { authenticate, validateRefreshToken } from "@/middlewares/auth.middleware";
+import {
+  authLimiter,
+  otpResendLimiter,
+  otpVerifyLimiter,
+} from "@/middlewares/rateLimit.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 
 const router = Router();
 
 const authController = container.get<IAuthController>(TYPES.AuthController);
 
-router.post("/register", validateDto(RegisterRequestDTO), authController.register);
-router.post("/verify-otp", authController.verifyOTP);
-router.post("/resend-otp", authController.resendOtp);
-router.post("/login", validateDto(LoginRequestDTO), authController.login);
+router.post("/register", authLimiter, validateDto(RegisterRequestDTO), authController.register);
+router.post("/verify-otp", otpVerifyLimiter, authController.verifyOTP);
+router.post("/resend-otp", otpResendLimiter, authController.resendOtp);
+router.post("/login", authLimiter, validateDto(LoginRequestDTO), authController.login);
 router.post("/logout", authController.logout);
 
-router.post("/forgot-password", authController.forgotPassword);
-router.post("/reset-password", authController.resetPassword);
+router.post("/forgot-password", otpResendLimiter, authController.forgotPassword);
+router.post("/reset-password", authLimiter, authController.resetPassword);
 
 router.post("/refresh-token", validateRefreshToken, authController.refreshToken);
 router.post("/switch-role", authenticate([ROLE.USER, ROLE.WORKER]), authController.switchRole);

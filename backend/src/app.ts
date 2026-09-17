@@ -12,6 +12,7 @@ import { startCleanupJob } from "./jobs/cleanup-slots";
 import { startQuoteExpiryJob } from "./jobs/quote-expiry";
 import { apiLogger } from "./middlewares/apiLogger";
 import errorMiddleware from "./middlewares/errorMiddleware";
+import { globalLimiter } from "./middlewares/rateLimit.middleware";
 import apiRouter from "./routes";
 import webhookRouter from "./routes/webhook.routes";
 
@@ -50,7 +51,7 @@ app.use((req, _res, next) => {
 app.use(cookieParser());
 app.use(passport.initialize());
 
-app.use("/api", apiRouter);
+app.use("/api", globalLimiter, apiRouter);
 
 app.use(errorMiddleware);
 
