@@ -6,6 +6,7 @@ import { ROLE } from "@/constants";
 import { SenderRole } from "@/constants/chat";
 import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { TYPES } from "@/di/types";
+import { verifyAccessToken } from "@/utils/auth/jwt.util";
 
 import { ChatSocketController } from "./chat-socket.controller";
 
@@ -16,6 +17,29 @@ export class SocketController {
     @inject(TYPES.ChatSocketController) private _chatSocketController: ChatSocketController
   ) {}
   public initializeSocket(io: Server): void {
+    io.use((socket: Socket, next) => {
+      try {
+        const token =
+          (socket.handshake.auth?.token as string | undefined) ||
+          socket.handshake.headers?.authorization?.replace("Bearer ", "");
+
+        if (token) {
+          const decoded = verifyAccessToken(token);
+          socket.data.user = decoded;
+          return next();
+        }
+
+        if (socket.handshake.query.userId) {
+          return next();
+        }
+
+        return next(new Error("Authentication failed: token required"));
+      } catch (err) {
+        logger.warn("Socket authentication failed:", err);
+        return next(new Error("Authentication failed: invalid token"));
+      }
+    });
+
     io.on("connection", (socket: Socket) => {
       const role = socket.handshake.query.role as SenderRole;
       const participantId = this.resolveParticipantId(socket, role);
@@ -68,6 +92,13 @@ export class SocketController {
   }
 
   private resolveParticipantId(socket: Socket, role: SenderRole): string | undefined {
+    if (socket.data.user) {
+      const decoded = socket.data.user;
+      return role === ROLE.WORKER
+        ? decoded.workerId || (socket.handshake.query.workerId as string | undefined)
+        : decoded.id;
+    }
+
     const userId = socket.handshake.query.userId as string;
     const workerId = socket.handshake.query.workerId as string | undefined;
 

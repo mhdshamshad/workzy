@@ -40,16 +40,4 @@ export const REDIS_KEYS = {
     FORGOT_PASSWORD: (email: string) => `forgotPassword:${email}`,
     BLOCKED_USER: (userId: string) => `blocked_user:${userId}`,
   },
-
-  //   // Rate Limiting
-  //   RATE_LIMIT: {
-  //     LOGIN: (identifier: string) =>
-  //       `rate-limit:login:${identifier}`,
-
-  //     OTP: (identifier: string) =>
-  //       `rate-limit:otp:${identifier}`,
-
-  //     REGISTER: (identifier: string) =>
-  //       `rate-limit:register:${identifier}`,
-  //   },
 } as const;

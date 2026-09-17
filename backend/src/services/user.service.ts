@@ -3,7 +3,6 @@ import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 import validator from "validator";
 
-import logger from "@/config/logger";
 import {
   AUTH,
   EMAIL,
@@ -187,7 +186,6 @@ export class UserService implements IUserService {
       throw new CustomError(AUTH.PHONE_BELONG_ANOTHER, HTTPSTATUS.BAD_REQUEST);
     }
     const otp = this._otpService.generateOTP();
-    logger.info(`otp:${otp}`);
     await Promise.all([
       this._redisService.setWithTTL(
         `otp:${phone}`,
@@ -208,7 +206,6 @@ export class UserService implements IUserService {
       throw new CustomError(EMAIL.BELONG_ANOTHER, HTTPSTATUS.BAD_REQUEST);
     }
     const otp = this._otpService.generateOTP();
-    logger.info(`otp:${otp}`);
     await Promise.all([
       this._redisService.setWithTTL(
         REDIS_KEYS.AUTH.OTP(email),
@@ -227,7 +224,6 @@ export class UserService implements IUserService {
       throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }
     const newOtp = this._otpService.generateOTP();
-    logger.info(`newOtp:${newOtp}`);
 
     await this._redisService.setWithTTL(
       REDIS_KEYS.AUTH.OTP(value),

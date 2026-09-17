@@ -48,7 +48,7 @@ function findChat(old: ChatsPage | undefined, chatId: string): Chat | undefined 
 }
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
-  const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
+  const { user, isAuthenticated, accessToken } = useAppSelector((s: RootState) => s.auth);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const [lastSeenMap, setLastSeenMap] = useState<Map<string, string | null>>(new Map());
   const queryClient = useQueryClient();
@@ -63,13 +63,16 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     return io(baseUrl, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
+      auth: {
+        token: accessToken,
+      },
       query: {
         userId: user.id,
         role: user.role,
         ...(user.worker?.id ? { workerId: user.worker.id } : {}),
       },
     });
-  }, [isAuthenticated, user?.id, user?.role, user?.worker?.id]);
+  }, [isAuthenticated, user?.id, user?.role, user?.worker?.id, accessToken]);
 
   useEffect(() => {
     if (!socket) {

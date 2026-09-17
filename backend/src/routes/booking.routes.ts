@@ -16,6 +16,7 @@ import {
   CancelRescheduleDto,
 } from "@/dtos/requests/booking.dto";
 import { authenticate } from "@/middlewares/auth.middleware";
+import { bookingLimiter } from "@/middlewares/rateLimit.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 
 import bookingDayRouter from "./booking-day.routes";
@@ -27,11 +28,16 @@ router.get("/", authenticate([ROLE.ADMIN, ROLE.USER, ROLE.WORKER]), controller.g
 
 router.post(
   "/",
+  bookingLimiter,
   authenticate([ROLE.USER, ROLE.WORKER]),
   validateDto(CreatebookingDTO),
   controller.createBooking
 );
-router.get("/:bookingId", controller.getBookingById);
+router.get(
+  "/:bookingId",
+  authenticate([ROLE.ADMIN, ROLE.USER, ROLE.WORKER]),
+  controller.getBookingById
+);
 
 router.patch("/:bookingId/accept", authenticate([ROLE.WORKER]), controller.acceptBooking);
 router.use(authenticate([ROLE.USER, ROLE.WORKER]));

@@ -2,7 +2,6 @@ import crypto from "crypto";
 
 import { inject, injectable } from "inversify";
 
-import logger from "@/config/logger";
 import { AUTH, HTTPSTATUS } from "@/constants";
 import { REDIS_KEYS } from "@/constants/redis";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
@@ -31,8 +30,6 @@ export class OTPService implements IOTPService {
     }
     const existingData = JSON.parse(rawData);
     const newOtp = this.generateOTP();
-
-    logger.info(`newOtp:${newOtp}`);
 
     await this._emailService.sendOtpEmail(existingData.userData, newOtp);
   }
