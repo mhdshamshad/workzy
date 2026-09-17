@@ -53,7 +53,13 @@ export class BookingController implements IBookingController {
 
   getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
+    if (req.user?.role === ROLE.WORKER) {
+      this.requireWorkerId(req);
+    } else {
+      this.requireUserId(req);
+    }
     const result = await this._bookingService.getBookingDetails(bookingId);
+
     res.status(HTTPSTATUS.OK).json(new ApiResponse(result));
   });
 

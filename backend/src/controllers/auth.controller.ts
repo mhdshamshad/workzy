@@ -50,7 +50,7 @@ export class AuthController implements IAuthController {
 
     await this._emailService.sendOtpEmail(userData, otp);
 
-    logger.info(`user: ${userData.email} , otp:${otp}`);
+    logger.info(`OTP sent to user: ${userData.email}`);
 
     res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.OTP_SENT));
   });

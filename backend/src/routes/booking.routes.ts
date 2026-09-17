@@ -31,7 +31,11 @@ router.post(
   validateDto(CreatebookingDTO),
   controller.createBooking
 );
-router.get("/:bookingId", controller.getBookingById);
+router.get(
+  "/:bookingId",
+  authenticate([ROLE.ADMIN, ROLE.USER, ROLE.WORKER]),
+  controller.getBookingById
+);
 
 router.patch("/:bookingId/accept", authenticate([ROLE.WORKER]), controller.acceptBooking);
 router.use(authenticate([ROLE.USER, ROLE.WORKER]));
