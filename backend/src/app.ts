@@ -1,7 +1,10 @@
 import "reflect-metadata";
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import mongoSanitize from "express-mongo-sanitize";
+import helmet from "helmet";
 
 import passport from "./config/passport";
 import { CLIENT_URL, DUMMY_URL } from "./constants";
@@ -27,11 +30,23 @@ const corsOptions = {
 
 app.use("/api/webhook", express.raw({ type: "*/*" }), webhookRouter);
 
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  })
+);
+app.use(compression());
 app.use(cors(corsOptions));
 
 app.use(apiLogger);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use((req, _res, next) => {
+  if (req.body) mongoSanitize.sanitize(req.body);
+  if (req.params) mongoSanitize.sanitize(req.params);
+  next();
+});
 app.use(cookieParser());
 app.use(passport.initialize());
 
