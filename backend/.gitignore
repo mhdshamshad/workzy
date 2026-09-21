@@ -4,4 +4,3 @@ node_modules
 logs
 dist
 build
-package-lock.json
