@@ -11,8 +11,7 @@ import type { MenuItem } from '@/types/navigation';
 import type { User } from '@/types/user';
 import { syncUserLocation } from '@/utils/locationSync';
 
-import workzyLogo from '../../assets/icons/logo-icon.jpg';
-import workzyIcon from '../../assets/icons/logo-icon.jpg';
+import workzyLogo from '../../assets/icons/logo_image.svg';
 import ProfileImage from '../molecules/ProfileImage';
 import { SidebarItem } from '../molecules/SidebarItem';
 import {
@@ -87,7 +86,7 @@ export function BaseSidebar({
         className={cn('flex items-center p-4', collapsed ? 'justify-center' : 'justify-between')}
       >
         <div className="flex items-center gap-3">
-          <img src={collapsed ? workzyIcon : workzyLogo} className="h-10" />
+          <img src={workzyLogo} alt='workzy-logo' className="h-10" />
           {!collapsed && <span className="text-lg font-semibold">WorkZy</span>}
         </div>
 

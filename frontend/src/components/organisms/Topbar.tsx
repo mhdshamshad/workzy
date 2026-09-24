@@ -1,6 +1,6 @@
 import { Bell, Sun, Moon, Menu } from 'lucide-react';
 
-import workzyLogo from '@/assets/icons/logo-icon.jpg';
+import workzyLogo from '@/assets/icons/logo_image.svg';
 import { useTheme } from '@/context/theme/use-theme';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
