@@ -100,7 +100,7 @@ export function AppModal({
               className="flex flex-col max-h-[90vh]"
             >
               {!isTitleHidden && (
-                <DialogHeader className="flex-shrink-0 px-6 pt-5 pb-4 border-b border-border">
+                <DialogHeader className="shrink-0 px-6 pt-5 pb-4 border-b border-border">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       {isTitleHidden ? (
@@ -132,7 +132,7 @@ export function AppModal({
               </div>
 
               {!hideFooter && (footer || DefaultFooter) && (
-                <div className="flex-shrink-0 px-6 py-4 border-t border-border bg-muted/30">
+                <div className="shrink-0 px-6 py-4 border-t border-border bg-muted/30">
                   {footer || DefaultFooter}
                 </div>
               )}

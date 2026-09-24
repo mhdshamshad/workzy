@@ -145,7 +145,7 @@ export default function WorkerExtraChargeModal({
           </div>
         ) : (
           <div className="flex gap-3 p-3 rounded-xl border bg-amber-500/15 text-amber-500 border-amber-500/30">
-            <AlertTriangle size={15} className="flex-shrink-0 mt-0.5" />
+            <AlertTriangle size={15} className="shrink-0 mt-0.5" />
             <p className="text-sm leading-relaxed">
               Extra charges must be reviewed and approved by the client.{' '}
               <strong>Minimum amount is ₹60</strong> (Stripe requirement). Provide a clear reason

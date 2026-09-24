@@ -62,7 +62,7 @@ export default function DataTableMobileCard<TData extends RowWithAnyId>({
               return (
                 <div key={column.id} className={rowClassName}>
                   {column.mobileLabel && (
-                    <div className="text-xs text-muted-foreground uppercase font-bold w-28 flex-shrink-0 pt-0.5">
+                    <div className="text-xs text-muted-foreground uppercase font-bold w-28 shrink-0 pt-0.5">
                       {column.mobileLabel}:
                     </div>
                   )}
@@ -73,7 +73,7 @@ export default function DataTableMobileCard<TData extends RowWithAnyId>({
             return (
               <div key={column.id} className={rowClassName}>
                 {column.mobileLabel && (
-                  <div className="text-xs text-muted-foreground uppercase font-bold w-28 flex-shrink-0">
+                  <div className="text-xs text-muted-foreground uppercase font-bold w-28 shrink-0">
                     {column.mobileLabel}:
                   </div>
                 )}
@@ -85,7 +85,7 @@ export default function DataTableMobileCard<TData extends RowWithAnyId>({
           })}
         </div>
 
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+        <div className="flex flex-col items-end gap-1 shrink-0">
           {statusColumn && <div className="mb-2">{renderColumnContent(statusColumn)}</div>}
 
           {detailColumns.length > 0 && (

@@ -43,7 +43,6 @@ import { logoutService, switchRoleService } from '@/services/auth.service';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearUser, setCredentials } from '@/store/slices/authSlice';
 import { setLocation } from '@/store/slices/locationSlice';
-import type { RootState } from '@/store/store';
 import type { CategorySuggestion } from '@/types/category';
 import { syncUserLocation } from '@/utils/locationSync';
 
@@ -56,8 +55,8 @@ const NAV_LINKS = [
 const SEARCH_ROUTES = ['/', '/services'];
 
 export default function Header() {
-  const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
-  const { city } = useAppSelector((s: RootState) => s.location);
+  const { user, isAuthenticated } = useAppSelector(state => state.auth);
+  const { city } = useAppSelector(state => state.location);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -156,13 +155,13 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
+      <header className="fixed left-0 right-0 top-0 z-50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             <Link
               to="/"
               onClick={() => handleNavClick('/')}
-              className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent flex-shrink-0"
+              className="text-xl lg:text-2xl font-bold bg-linear-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent shrink-0"
             >
               Workzy
             </Link>
@@ -189,8 +188,8 @@ export default function Header() {
                   onClick={() => setLocationModalOpen(true)}
                   className="flex items-center gap-2 px-3 py-2 bg-accent hover:bg-accent/80 border border-r-0 border-border rounded-l-lg transition-colors group"
                 >
-                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="text-sm font-medium text-foreground truncate max-w-[120px]">
+                  <MapPin className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm font-medium text-foreground truncate max-w-30">
                     {city}
                   </span>
                 </button>
@@ -346,7 +345,7 @@ export default function Header() {
                           }}
                           className="flex items-center gap-3 w-full px-3 py-2.5 bg-accent hover:bg-accent/80 rounded-lg transition-colors"
                         >
-                          <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
                           <span className="text-sm text-muted-foreground">
                             Search for services...
                           </span>
@@ -367,7 +366,7 @@ export default function Header() {
                                 : 'text-foreground hover:bg-accent'
                             }`}
                           >
-                            <Icon className="h-5 w-5 flex-shrink-0" />
+                            <Icon className="h-5 w-5 shrink-0" />
                             <span className="font-medium">{link.label}</span>
                           </Link>
                         );
@@ -381,7 +380,7 @@ export default function Header() {
                             onClick={() => setMobileMenuOpen(false)}
                             className="flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-accent transition-colors"
                           >
-                            <User className="h-5 w-5 flex-shrink-0" />
+                            <User className="h-5 w-5 shrink-0" />
                             <span className="font-medium">My Profile</span>
                           </Link>
                           {user?.role === ROLE.WORKER && (
@@ -389,7 +388,7 @@ export default function Header() {
                               onClick={handleSwitchMode}
                               className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-accent transition-colors"
                             >
-                              <Users className="h-5 w-5 flex-shrink-0" />
+                              <Users className="h-5 w-5 shrink-0" />
                               <span className="font-medium">Switch to Worker Mode</span>
                             </button>
                           )}

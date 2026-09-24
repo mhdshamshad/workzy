@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function ServiceCardSkeleton() {
   return (
-    <div className="bg-card rounded-[1rem] overflow-hidden border border-border/50 shadow-sm w-full h-full">
+    <div className="bg-card rounded-2xl overflow-hidden border border-border/50 shadow-sm w-full h-full">
       <div className="relative w-full h-32 sm:h-40 md:h-44 overflow-hidden">
         <Skeleton className="w-full h-full" />
       </div>
@@ -14,7 +14,7 @@ export function ServiceCardSkeleton() {
           <Skeleton className="h-3 w-full" />
           <Skeleton className="h-3 w-2/3" />
         </div>
-        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
+        <div className="h-px w-full bg-linear-to-r from-transparent via-border to-transparent" />
         <div className="flex items-center justify-between">
           <Skeleton className="h-5 w-24" />
           <Skeleton className="w-8 h-8 rounded-lg" />

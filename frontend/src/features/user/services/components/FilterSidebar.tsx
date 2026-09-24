@@ -40,7 +40,7 @@ export default function FilterSidebar({
     <aside
       className={`
         ${showFilters ? 'fixed inset-0 z-20 bg-black/50 lg:relative lg:bg-transparent' : 'hidden lg:block'}
-        lg:w-80 flex-shrink-0
+        lg:w-80 shrink-0
       `}
       onClick={e => {
         if (e.target === e.currentTarget) {

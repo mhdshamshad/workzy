@@ -28,7 +28,6 @@ import { useWorkerProfile } from '@/features/profile/hooks/useWorkerProfile';
 import { useWorkerReviews } from '@/features/review';
 import PageError from '@/pages/PageError';
 import { useAppSelector } from '@/store/hooks';
-import type { RootState } from '@/store/store';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate, formatTime12 } from '@/utils/time.format';
 
@@ -36,7 +35,7 @@ import WorkerDashboardSkeleton from '../components/WorkerDashboardSkeleton';
 import { useWorkerDashboard } from '../hooks/useWorkerDashboard';
 
 export default function WorkerDashboard() {
-  const { user } = useAppSelector((s: RootState) => s.auth);
+  const { user } = useAppSelector(state => state.auth);
 
   const { data: reviews, isLoading: reviewsLoading, error } = useWorkerReviews();
   const { data: bookings, isLoading: bookingLoading } = useBookings();

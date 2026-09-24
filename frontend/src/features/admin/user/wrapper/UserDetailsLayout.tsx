@@ -98,7 +98,7 @@ export default function UserDetailsLayout() {
                     shape="rounded"
                     size={100}
                     onClickImage={() => setOpenImage(true)}
-                    className="!w-20 !h-20 sm:!w-24 sm:!h-24"
+                    className="w-20! h-20! sm:w-24! sm:h-24!"
                   />
                   <div className="space-y-2 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -152,7 +152,7 @@ export default function UserDetailsLayout() {
                 Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-[110px] sm:h-[130px] w-full rounded-xl border bg-card p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
+                    className="h-27.5 sm:h-32.5 w-full rounded-xl border bg-card p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
                   >
                     <Skeleton className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl shrink-0" />
                     <div className="flex-1 space-y-2">

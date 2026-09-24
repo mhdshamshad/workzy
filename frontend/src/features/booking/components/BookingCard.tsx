@@ -55,7 +55,7 @@ export function StatusBadge({ status }: { status: BookingStatus }) {
         c.badge
       )}
     >
-      <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', c.dot)} />
+      <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', c.dot)} />
       {c.label}
     </span>
   );
@@ -144,7 +144,7 @@ export default function BookingCard({
     >
       {extraPending && b.extraCharge?.amount && (
         <div className="bg-amber-500/15 px-4 py-2.5 flex items-center gap-2">
-          <AlertTriangle size={13} className="text-amber-500 flex-shrink-0" />
+          <AlertTriangle size={13} className="text-amber-500 shrink-0" />
           <p className="text-xs text-amber-700 dark:text-amber-300 font-medium flex-1">
             {isWorker ? (
               <>
@@ -183,7 +183,7 @@ export default function BookingCard({
                 </div>
                 <ChevronRight
                   size={14}
-                  className="hidden sm:block text-muted-foreground/40 flex-shrink-0"
+                  className="hidden sm:block text-muted-foreground/40 shrink-0"
                 />
                 <div className="flex items-center gap-2.5 min-w-0">
                   <ProfileImage src={b.worker?.profileImage} size={32} name={b.worker?.name} />
@@ -210,7 +210,7 @@ export default function BookingCard({
                       <img
                         src={b.category.iconUrl}
                         alt=""
-                        className="w-3.5 h-3.5 rounded object-cover flex-shrink-0"
+                        className="w-3.5 h-3.5 rounded object-cover shrink-0"
                       />
                     )}
                     <p className="text-[13px] font-medium text-foreground truncate">
@@ -243,11 +243,11 @@ export default function BookingCard({
         <div
           className={cn(
             'mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground',
-            !showBothProfiles && 'sm:ml-[56px]'
+            !showBothProfiles && 'sm:ml-14'
           )}
         >
           <span className="flex items-center gap-1.5">
-            <Calendar size={11} className="flex-shrink-0" />
+            <Calendar size={11} className="shrink-0" />
             {formatDate(b.date, 'calendar')}
             {b.totalDays > 1 && (
               <span className="text-muted-foreground/60">
@@ -256,18 +256,18 @@ export default function BookingCard({
             )}
           </span>
           <span className="flex items-center gap-1.5">
-            <Clock size={11} className="flex-shrink-0" />
+            <Clock size={11} className="shrink-0" />
             {formatTime12(b.startTime)} – {formatTime12(b.endTime)}
           </span>
           <span className="flex items-center gap-1.5 min-w-0">
-            <MapPin size={11} className="flex-shrink-0" />
+            <MapPin size={11} className="shrink-0" />
             <span className="truncate">{b.addressLabel}</span>
           </span>
         </div>
 
         {extraApproved && b.extraCharge?.amount && (
           <div className="mt-3 text-xs font-medium bg-section-green rounded-xl px-3 py-2 flex items-center gap-2">
-            <CheckCheck size={12} className="text-[var(--section-green-text)] flex-shrink-0" />
+            <CheckCheck size={12} className="text-section-green-text shrink-0" />
             Extra charge of <strong>{formatCurrency(b.extraCharge.amount)}</strong> approved and
             added to total
           </div>

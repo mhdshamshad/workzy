@@ -47,7 +47,7 @@ export default function TrustSection({ section }: TrustSectionProps) {
                     alt={point.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-black/30" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/90 to-black/30" />
                   <div className="absolute top-4 left-4 w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30">
                     <IconComponent className="w-5 h-5 text-white" />
                   </div>

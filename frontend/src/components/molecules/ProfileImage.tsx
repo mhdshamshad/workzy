@@ -114,7 +114,7 @@ export default function ProfileImage({
         <div
           onClick={onClickImage}
           className={cn(
-            'flex items-center justify-center bg-gradient-to-br text-white font-semibold select-none',
+            'flex items-center justify-center bg-linear-to-br text-white font-semibold select-none',
             getGradient(name),
             shapeClass
           )}

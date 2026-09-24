@@ -60,7 +60,7 @@ export default function WorkerAcceptModal({
     >
       <div className="flex flex-col gap-4">
         <div className="flex gap-3 p-3 rounded-xl bg-blue-500/15 text-blue-400 border-blue-500/30">
-          <Info size={18} className="flex-shrink-0 mt-0.5" />
+          <Info size={18} className="shrink-0 mt-0.5" />
           <p className="text-sm leading-relaxed">
             By accepting, you commit to being available at the scheduled time. The client will be
             notified immediately.

@@ -47,7 +47,7 @@ export default function EvidenceModal({ open, onClose, bookingId }: EvidenceModa
       <EvidenceModalShell open={open} onClose={handleClose}>
         <div
           className="flex items-center justify-between px-6 pt-5 pb-4
-          border-b border-border flex-shrink-0"
+          border-b border-border shrink-0"
         >
           <h2 className="text-lg font-semibold tracking-tight text-foreground">
             Before & After Evidence
@@ -179,7 +179,7 @@ function EvidenceModalShell({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onClick={onClose}
-          className="fixed inset-0 z-[500] flex items-center justify-center
+          className="fixed inset-0 z-500 flex items-center justify-center
             bg-black/60 backdrop-blur-sm px-4"
         >
           <motion.div

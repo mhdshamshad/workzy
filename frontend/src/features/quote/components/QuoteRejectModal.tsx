@@ -29,7 +29,7 @@ export function QuoteRejectModal({ open, onClose, quote, onSubmit, isSubmitting 
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-2.5 rounded-xl bg-section-red border border-text-section-red-border  px-4 py-3">
-          <AlertTriangle className="h-4 w-4 text-section-red-text mt-0.5 flex-shrink-0" />
+          <AlertTriangle className="h-4 w-4 text-section-red-text mt-0.5 shrink-0" />
           <p className="text-sm text-section-red-text leading-snug">
             This action cannot be undone. The worker will be notified that you've declined their
             quote.

@@ -27,15 +27,15 @@ export function ServiceCard({ service, className }: ServiceCardProps) {
           />
         </div>
 
-        <div className="flex flex-col flex-grow p-4 md:p-5">
+        <div className="flex flex-col grow p-4 md:p-5">
           <h4 className="text-sm md:text-base font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
             {service.name}
           </h4>
 
-          <p className="text-[12px] md:text-sm text-muted-foreground line-clamp-2 mt-2 leading-relaxed min-h-[40px]">
+          <p className="text-[12px] md:text-sm text-muted-foreground line-clamp-2 mt-2 leading-relaxed min-h-10">
             {service.description || 'Professional service for your needs.'}
           </p>
-          <div className="mt-4 mb-3 h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="mt-4 mb-3 h-px w-full bg-linear-to-r from-transparent via-border to-transparent" />
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">

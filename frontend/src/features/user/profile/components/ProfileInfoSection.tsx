@@ -207,7 +207,7 @@ export default function ProfileInfoSection({ user, onSubmit }: Props) {
                     </div>
                   </div>
 
-                  <div className="mt-4 p-4 bg-gradient-to-r from-accent/20 to-primary/20 rounded-lg border">
+                  <div className="mt-4 p-4 bg-linear-to-r from-accent/20 to-primary/20 rounded-lg border">
                     <div className="flex items-start gap-3">
                       <MapPin className="w-5 h-5 text-indigo-600 mt-0.5" />
                       <div className="flex-1">

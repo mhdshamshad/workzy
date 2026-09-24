@@ -307,7 +307,7 @@ export default function ChatWindow({ chat, role = ROLE.ADMIN }: ChatWindowProps)
             >
               <ArrowDown className="h-5 w-5" />
               {incomingCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[9px] font-bold text-primary-foreground shadow animate-pulse-subtle">
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[9px] font-bold text-primary-foreground shadow animate-pulse-subtle">
                   {incomingCount}
                 </span>
               )}

@@ -108,7 +108,7 @@ export function BaseSidebar({
 
         {collapsed && !mobile && (
           <button
-            className="absolute left-[62px] p-1 rounded-md hover:bg-accent"
+            className="absolute left-15.5 p-1 rounded-md hover:bg-accent"
             onClick={toggleCollapse}
             aria-label="Expand sidebar"
           >

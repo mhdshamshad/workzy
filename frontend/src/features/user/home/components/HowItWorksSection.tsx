@@ -41,7 +41,7 @@ export default function HowItWorksSection({ section }: HowItWorksSectionProps) {
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
                   <div className="absolute top-4 left-4 w-10 h-10 bg-fine-blue rounded-full flex items-center justify-center font-bold text-lg text-white shadow-lg">
                     {item.step}
                   </div>

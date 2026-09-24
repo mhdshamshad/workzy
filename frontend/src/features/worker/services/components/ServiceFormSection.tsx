@@ -104,7 +104,7 @@ export default function ServiceFormSection({
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" {...register('allowSuddenBooking')} className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-primary after:absolute after:top-[2px] after:left-[2px] after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:after:translate-x-full" />
+              <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-primary after:absolute after:top-0.5 after:left-0.5 after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:after:translate-x-full" />
             </label>
           </div>
         )}
@@ -126,7 +126,7 @@ export default function ServiceFormSection({
 
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" {...register('_setTravelCost')} className="sr-only peer" />
-              <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-primary after:absolute after:top-[2px] after:left-[2px] after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:after:translate-x-full" />
+              <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-primary after:absolute after:top-0.5 after:left-0.5 after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all peer-checked:after:translate-x-full" />
             </label>
           </div>
         )}

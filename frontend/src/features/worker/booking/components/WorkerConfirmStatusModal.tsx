@@ -53,7 +53,7 @@ export default function WorkerConfirmStatusModal({
     >
       <div className="flex flex-col gap-4">
         <div className="flex gap-3 p-3 rounded-xl border bg-blue-500/15 text-blue-400 border-blue-500/30">
-          <Info size={18} className="flex-shrink-0 mt-0.5" />
+          <Info size={18} className="shrink-0 mt-0.5" />
           <p className="text-sm leading-relaxed">
             {isEnRoute
               ? 'This will notify the customer that you are on your way to their location.'

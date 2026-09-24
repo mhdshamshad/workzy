@@ -26,7 +26,7 @@ export default function AdminDashboardSkeleton() {
             <Skeleton className="h-4 w-60 mt-2" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-[300px] w-full" />
+            <Skeleton className="h-75 w-full" />
           </CardContent>
         </Card>
         <Card>
@@ -35,7 +35,7 @@ export default function AdminDashboardSkeleton() {
             <Skeleton className="h-4 w-48 mt-2" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-[260px] w-full" />
+            <Skeleton className="h-65 w-full" />
           </CardContent>
         </Card>
       </div>
@@ -46,7 +46,7 @@ export default function AdminDashboardSkeleton() {
             <Skeleton className="h-4 w-60 mt-2" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-[280px] w-full" />
+            <Skeleton className="h-70 w-full" />
           </CardContent>
         </Card>
         <Card>
@@ -82,7 +82,7 @@ export default function AdminDashboardSkeleton() {
             <Skeleton className="h-4 w-52 mt-2" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-[180px] w-full mb-4" />
+            <Skeleton className="h-45 w-full mb-4" />
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3">

@@ -35,7 +35,7 @@ export function ReviewSummary({
       className="rounded-xl border bg-card p-6"
     >
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-        <div className="flex flex-col items-center gap-1 sm:min-w-[140px]">
+        <div className="flex flex-col items-center gap-1 sm:min-w-35">
           <motion.span
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

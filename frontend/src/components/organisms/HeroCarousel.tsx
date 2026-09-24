@@ -49,7 +49,7 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
   const [current, setCurrent] = useState(0);
 
   return (
-    <section className="relative h-[500px] lg:h-[600px] overflow-hidden">
+    <section className="relative h-125 lg:h-150 overflow-hidden">
       <CoreCarousel
         autoplay={data.autoPlay}
         autoplayDelay={data.interval}
@@ -62,9 +62,9 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
       >
         <div className="flex h-full">
           {data.slides.map((slide, i) => (
-            <div key={i} className="flex-shrink-0 w-full h-full relative">
+            <div key={i} className="shrink-0 w-full h-full relative">
               <img src={slide.imageUrl} alt={slide.title} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/50 to-transparent" />
             </div>
           ))}
         </div>
@@ -100,8 +100,8 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
         ))}
       </div>
       <div className="absolute inset-0 z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[680px] xl:max-w-[720px] h-full flex flex-col justify-between py-12 lg:py-16">
-          <div className="min-h-[260px] lg:min-h-[340px]">
+        <div className="max-w-170 xl:max-w-180 h-full flex flex-col justify-between py-12 lg:py-16">
+          <div className="min-h-65 lg:min-h-85">
             {data.slides.map((slide, index) => (
               <div
                 key={index}
@@ -130,7 +130,7 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
                 >
                   {slide.title}
                   <br />
-                  <span className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-r from-yellow-300 via-orange-400 to-pink-500 bg-clip-text text-transparent">
                     {slide.subTitle}
                   </span>
                 </h1>

@@ -3,7 +3,6 @@ import { Bell, Sun, Moon, Menu } from 'lucide-react';
 import workzyLogo from '@/assets/icons/logo_image.svg';
 import { useTheme } from '@/context/theme/use-theme';
 import { useAppSelector } from '@/store/hooks';
-import type { RootState } from '@/store/store';
 
 import Button from '../atoms/Button';
 
@@ -15,7 +14,7 @@ interface TopbarProps {
 
 export function Topbar({ onMenuClick }: TopbarProps) {
   const { theme, setTheme } = useTheme();
-  const { isAuthenticated, user } = useAppSelector((s: RootState) => s.auth);
+  const { isAuthenticated, user } = useAppSelector(state => state.auth);
 
   return (
     <header className="sticky top-0 z-20 h-16 border-b bg-background/80 backdrop-blur flex items-center justify-between px-4 lg:px-6">

@@ -56,7 +56,7 @@ export default function ChatHeader({
           <ArrowLeft className="h-5 w-5" />
         </Link>
 
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           {!isAdmin && profilePart ? (
             <div className="relative">
               <ProfileImage src={profilePart.profileImage} name={profilePart.name} size={43} />
@@ -116,7 +116,7 @@ export default function ChatHeader({
             searchOpen ? 'bg-accent text-foreground' : 'text-muted-foreground'
           )}
         >
-          <Search className="h-[18px] w-[18px]" />
+          <Search className="h-4.5 w-4.5" />
         </button>
 
         <Button
