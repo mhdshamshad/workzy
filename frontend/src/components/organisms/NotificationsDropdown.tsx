@@ -100,6 +100,7 @@ export function NotificationsDropdown({ role = ROLE.USER }: { role?: Role }) {
                   size="icon"
                   onClick={() => void markAllAsRead()}
                   title="Mark all as read"
+                  aria-label="Mark all as read"
                   className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10 rounded-full"
                 >
                   <CheckCheck className="h-4 w-4" />
@@ -109,6 +110,7 @@ export function NotificationsDropdown({ role = ROLE.USER }: { role?: Role }) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setOpen(false)}
+                aria-label="Close notifications"
                 className="h-8 w-8 text-muted-foreground hover:bg-accent rounded-full"
               >
                 <X className="h-4 w-4" />

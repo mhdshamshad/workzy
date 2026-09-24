@@ -257,7 +257,12 @@ export default function WorkerDashboard() {
                   <p className="text-xs text-muted-foreground">{job.bookingId}</p>
                 </div>
                 <Link to={`/worker/bookings/${job.id}`}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    aria-label="View booking details"
+                  >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </Link>

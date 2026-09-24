@@ -86,18 +86,32 @@ export function BaseSidebar({
         className={cn('flex items-center p-4', collapsed ? 'justify-center' : 'justify-between')}
       >
         <div className="flex items-center gap-3">
-          <img src={workzyLogo} alt='workzy-logo' className="h-10" />
+          <img
+            src={workzyLogo}
+            alt="Workzy Logo"
+            width={40}
+            height={40}
+            className="h-10 w-10 object-contain"
+          />
           {!collapsed && <span className="text-lg font-semibold">WorkZy</span>}
         </div>
 
         {!collapsed && !mobile && (
-          <button onClick={toggleCollapse}>
+          <button
+            onClick={toggleCollapse}
+            aria-label="Collapse sidebar"
+            className="p-1 rounded-md hover:bg-accent"
+          >
             <ChevronLeft size={20} />
           </button>
         )}
 
         {collapsed && !mobile && (
-          <button className="absolute left-[62px]" onClick={toggleCollapse}>
+          <button
+            className="absolute left-[62px] p-1 rounded-md hover:bg-accent"
+            onClick={toggleCollapse}
+            aria-label="Expand sidebar"
+          >
             <ChevronRight size={20} />
           </button>
         )}
@@ -135,9 +149,10 @@ export function BaseSidebar({
         <Separator className="mb-3" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div
+            <button
+              type="button"
               className={cn(
-                'flex items-center p-3 rounded-xl cursor-pointer hover:bg-accent',
+                'w-full flex items-center p-3 rounded-xl cursor-pointer hover:bg-accent text-left',
                 collapsed && 'justify-center'
               )}
             >
@@ -159,7 +174,7 @@ export function BaseSidebar({
               )}
 
               {!collapsed && <ChevronDown size={14} />}
-            </div>
+            </button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-56 rounded-xl p-2" align="end">

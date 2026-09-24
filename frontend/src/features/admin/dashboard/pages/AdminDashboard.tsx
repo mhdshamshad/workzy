@@ -119,7 +119,7 @@ export default function AdminDashboard() {
               <CardTitle>Revenue & Commission</CardTitle>
               <CardDescription>Monthly platform earnings</CardDescription>
             </div>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="More revenue options">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </CardHeader>

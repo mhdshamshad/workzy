@@ -218,7 +218,10 @@ export default function Header() {
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="hidden lg:flex items-center gap-2 p-1 pr-3 hover:bg-accent rounded-full transition-colors">
+                    <button
+                      className="hidden lg:flex items-center gap-2 p-1 pr-3 hover:bg-accent rounded-full transition-colors"
+                      aria-label="User account menu"
+                    >
                       <ProfileImage src={user?.profileImage} size={35} name={user?.name} />
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </button>
@@ -284,7 +287,10 @@ export default function Header() {
               )}
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <button className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors">
+                  <button
+                    className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors"
+                    aria-label="Open mobile navigation menu"
+                  >
                     <Menu className="h-5 w-5" />
                   </button>
                 </SheetTrigger>
@@ -296,6 +302,7 @@ export default function Header() {
                       <button
                         onClick={() => setMobileMenuOpen(false)}
                         className="p-2 hover:bg-accent rounded-lg transition-colors"
+                        aria-label="Close menu"
                       >
                         <X className="h-5 w-5" />
                       </button>
@@ -325,11 +332,11 @@ export default function Header() {
                           }}
                           className="flex items-center gap-3 w-full px-3 py-2.5 bg-accent hover:bg-accent/80 rounded-lg transition-colors"
                         >
-                          <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                          <MapPin className="w-4 h-4 text-primary shrink-0" />
                           <span className="text-sm font-medium text-foreground truncate flex-1 text-left">
                             {city}
                           </span>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                         </button>
 
                         <button

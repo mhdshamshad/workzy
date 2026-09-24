@@ -171,6 +171,7 @@ export default function MessageBubble({
                 {isAdmin && isDeleted && (
                   <Button
                     size="icon"
+                    aria-label={revealDeleted ? 'Hide deleted message' : 'Reveal deleted message'}
                     onClick={() => setRevealDeleted(v => !v)}
                     variant={revealDeleted ? 'outline' : 'secondary'}
                     className="ml-1 h-4 w-4 p-0 rounded-full"
