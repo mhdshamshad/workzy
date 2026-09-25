@@ -39,7 +39,7 @@ export default function WorkerQuotesListPage() {
   const { data: stats, isLoading: statsLoading } = useWorkerQuoteStats();
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6">
+    <div className="py-6 p-4 lg:p-6">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">My Quotes</h1>
@@ -55,7 +55,7 @@ export default function WorkerQuotesListPage() {
         className="mb-4"
       />
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[220px] flex-1">
+        <div className="relative min-w-55 flex-1">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <SearchInput
             value={search}

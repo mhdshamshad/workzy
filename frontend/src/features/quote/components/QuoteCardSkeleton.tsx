@@ -35,7 +35,7 @@ function QuoteCardSkeletonItem({
       transition={{ delay, duration: 0.25, ease: 'easeOut' }}
       className="relative rounded-2xl border border-border bg-card overflow-hidden"
     >
-      <Skeleton className="absolute left-0 inset-y-0 w-[3px] rounded-l-2xl" />
+      <Skeleton className="absolute left-0 inset-y-0 w-0.75 rounded-l-2xl" />
 
       <div className="pl-5 pr-4 py-4 flex flex-col gap-3">
         <div className="flex flex-wrap items-start justify-between gap-3">

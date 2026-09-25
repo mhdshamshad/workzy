@@ -10,11 +10,11 @@ function SlotRow({ slot }: { slot: BookingSlot }) {
   return (
     <div className="flex items-center justify-between gap-4 py-1.5 border-b border-border/40 last:border-0">
       <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
-        <CalendarDays className="h-3 w-3 text-primary/70 flex-shrink-0" />
+        <CalendarDays className="h-3 w-3 text-primary/70 shrink-0" />
         {dayjs(slot.date).format('ddd, MMM D')}
       </span>
       <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground tabular-nums">
-        <Clock className="h-3 w-3 flex-shrink-0" />
+        <Clock className="h-3 w-3 shrink-0" />
         {slot.startTime} – {slot.endTime}
       </span>
     </div>
@@ -46,7 +46,7 @@ export function QuoteApproveModal({ open, onClose, quote, onSubmit, isSubmitting
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-2.5 rounded-xl bg-section-green border border-section-green-border px-4 py-3">
-          <CheckCircle2 className="h-4 w-4 text-section-green-text mt-0.5 flex-shrink-0" />
+          <CheckCircle2 className="h-4 w-4 text-section-green-text mt-0.5 shrink-0" />
           <p className="text-sm text-section-green-text leading-snug">
             By accepting this quote, you'll be redirected to complete the payment securely.
           </p>

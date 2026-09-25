@@ -98,13 +98,13 @@ export function getPaymentColumns<T extends Payment>(
             {isBooking ? (
               <Link
                 to={bookingPath}
-                className="font-mono text-xs font-semibold text-primary hover:underline underline-offset-2 truncate max-w-[160px]"
+                className="font-mono text-xs font-semibold text-primary hover:underline underline-offset-2 truncate max-w-40"
                 title={payment.refId}
               >
                 {payment.transactionId}
               </Link>
             ) : (
-              <span className="font-mono text-xs font-semibold text-muted-foreground truncate max-w-[160px]">
+              <span className="font-mono text-xs font-semibold text-muted-foreground truncate max-w-40">
                 {payment.transactionId}
               </span>
             )}
@@ -127,7 +127,7 @@ export function getPaymentColumns<T extends Payment>(
         const payment = row.original;
         return (
           <div className="flex flex-col gap-0.5">
-            <span className="font-medium text-foreground whitespace-normal break-words">
+            <span className="font-medium text-foreground whitespace-normal wrap-break-word">
               {payment.title}
             </span>
             {role === ROLE.USER && (

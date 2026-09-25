@@ -105,12 +105,7 @@ function SkeletonReviewRow() {
 
 export default function WorkerDashboardSkeleton() {
   return (
-    <motion.div
-      className="section-container py-8"
-      variants={pageVariants}
-      initial="hidden"
-      animate="show"
-    >
+    <motion.div className="p-4 lg:p-6 py-8" variants={pageVariants} initial="hidden" animate="show">
       <motion.div variants={sectionVariants} className="mb-8 space-y-2">
         <Skeleton className="h-8 w-72" />
         <Skeleton className="h-4 w-64" />
@@ -131,7 +126,7 @@ export default function WorkerDashboardSkeleton() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex h-[300px] gap-3">
+            <div className="flex h-75 gap-3">
               <div className="flex flex-col justify-between pb-6 pt-2">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Skeleton key={i} className="h-3 w-8" />
@@ -155,7 +150,7 @@ export default function WorkerDashboardSkeleton() {
             <Skeleton className="h-3.5 w-28" />
           </CardHeader>
           <CardContent>
-            <div className="flex h-[200px] items-center justify-center">
+            <div className="flex h-50 items-center justify-center">
               <div className="relative flex h-40 w-40 items-center justify-center">
                 <motion.div
                   className="absolute inset-0 rounded-full"
@@ -169,7 +164,7 @@ export default function WorkerDashboardSkeleton() {
                 />
                 <Skeleton className="h-40 w-40 rounded-full opacity-30" />
                 {/* hollow centre */}
-                <div className="absolute h-[88px] w-[88px] rounded-full bg-card" />
+                <div className="absolute h-22 w-22 rounded-full bg-card" />
               </div>
             </div>
 
@@ -252,7 +247,7 @@ export default function WorkerDashboardSkeleton() {
             <Skeleton className="h-3.5 w-64" />
           </CardHeader>
           <CardContent>
-            <div className="flex h-[260px] gap-3">
+            <div className="flex h-65 gap-3">
               <div className="flex flex-col justify-between pb-6 pt-2">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Skeleton key={i} className="h-3 w-6" />

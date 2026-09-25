@@ -51,7 +51,7 @@ export default function CountStep({
         >
           <Minus className="w-4 h-4" />
         </motion.button>
-        <div className="text-center min-w-[60px]">
+        <div className="text-center min-w-15">
           <span className="text-4xl font-black tabular-nums">{count}</span>
           <p className="text-[11px] text-muted-foreground mt-0.5">
             {count === 1 ? 'item' : 'items'}

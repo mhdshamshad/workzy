@@ -29,7 +29,7 @@ export default function LayoutPanel({
   dragHandlers,
 }: LayoutPanelProps) {
   return (
-    <div className="flex flex-col gap-2 min-h-[240px] max-h-[500px] overflow-y-auto">
+    <div className="flex flex-col gap-2 min-h-60 max-h-125 overflow-y-auto">
       {isLoading && Array.from({ length: 5 }).map((_, i) => <LayoutSkeleton key={i} />)}
 
       {error && !isLoading && (

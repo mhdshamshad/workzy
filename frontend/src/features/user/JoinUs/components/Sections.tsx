@@ -26,7 +26,7 @@ export const ProcessStep: React.FC<ProcessStepProps> = ({
   return (
     <div className="flex">
       <div className="flex flex-col items-center mr-6">
-        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-golden text-[var(--golden-dark)] font-bold text-xl">
+        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-golden text-(--golden-dark) font-bold text-xl">
           {number}
         </div>
         {!isLast && <div className="w-0.5 h-full bg-golden/30 my-2"></div>}
@@ -83,7 +83,7 @@ export const MetricCard: React.FC<{ value: string; label: string }> = ({ value, 
 export const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, description }) => {
   return (
     <div className="group relative overflow-hidden rounded-2xl bg-card p-8 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-border">
-      <div className="absolute top-0 right-0 h-24 w-24 -translate-y-1/2 translate-x-1/2 transform rounded-full bg-gradient-to-br from-golden/20 to-golden/5"></div>
+      <div className="absolute top-0 right-0 h-24 w-24 -translate-y-1/2 translate-x-1/2 transform rounded-full bg-linear-to-br from-golden/20 to-golden/5"></div>
       <div className="relative z-10">
         <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-section-dark text-golden transition-transform duration-300 group-hover:scale-110">
           <Icon className="h-7 w-7" />
@@ -156,7 +156,7 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   return (
     <span
       ref={countRef}
-      className="text-3xl sm:text-4xl lg:text-6xl font-bold text-golden text-golden block truncate"
+      className="text-3xl sm:text-4xl lg:text-6xl font-bold text-golden block truncate"
     >
       {prefix}
       {count.toLocaleString()}

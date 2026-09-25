@@ -403,7 +403,7 @@ export default function BecomeWorkerForm({
           </div>
 
           {/* Step content */}
-          <div className="min-h-[340px]">
+          <div className="min-h-85">
             {step === 0 && (
               <div className="space-y-6">
                 <FormSection icon={User} title="Professional Profile">

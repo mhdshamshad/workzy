@@ -4,7 +4,6 @@ import {
   Search,
   MapPin,
   Menu,
-  X,
   Home,
   Briefcase,
   UserPlus,
@@ -14,14 +13,12 @@ import {
   CreditCard,
   FileText,
   MessageSquare,
+  HelpCircle,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import {
-  LocationSearchModal,
-  type SelectedLocation,
-} from '@/components/molecules/LocationSearchModal';
+import type { SelectedLocation } from '@/components/molecules/LocationSearchModal';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import SearchInput from '@/components/molecules/SearchInput';
 import { NotificationsDropdown } from '@/components/organisms/NotificationsDropdown';
@@ -37,15 +34,18 @@ import {
 import ModeToggle from '@/components/ui/ModeToggle';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ROLE } from '@/constants';
-import ServiceSearchContainer from '@/features/user/services/components/ServiceSearchContainer';
 import { setAxiosToken } from '@/lib/api/axios';
 import { logoutService, switchRoleService } from '@/services/auth.service';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearUser, setCredentials } from '@/store/slices/authSlice';
 import { setLocation } from '@/store/slices/locationSlice';
-import type { RootState } from '@/store/store';
 import type { CategorySuggestion } from '@/types/category';
 import { syncUserLocation } from '@/utils/locationSync';
+
+const LocationSearchModal = lazy(() => import('@/components/molecules/LocationSearchModal'));
+const ServiceSearchContainer = lazy(
+  () => import('@/features/user/services/components/ServiceSearchContainer')
+);
 
 const NAV_LINKS = [
   { path: '/', label: 'Home', icon: Home },
@@ -53,11 +53,20 @@ const NAV_LINKS = [
   { path: '/join-us', label: 'Join Us', icon: UserPlus },
 ];
 
+const ACCOUNT_NAV_LINKS = [
+  { path: '/bookings', label: 'My Bookings', icon: Briefcase },
+  { path: '/quotes', label: 'My Quotes', icon: FileText },
+  { path: '/payments', label: 'My Payments', icon: CreditCard },
+  { path: '/messages', label: 'Messages', icon: MessageSquare },
+  { path: '/disputes', label: 'Support', icon: HelpCircle },
+  { path: '/profile', label: 'My Profile', icon: User },
+];
+
 const SEARCH_ROUTES = ['/', '/services'];
 
 export default function Header() {
-  const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
-  const { city } = useAppSelector((s: RootState) => s.location);
+  const { user, isAuthenticated } = useAppSelector(state => state.auth);
+  const { city } = useAppSelector(state => state.location);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -156,13 +165,13 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
+      <header className="fixed left-0 right-0 top-0 z-50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             <Link
               to="/"
               onClick={() => handleNavClick('/')}
-              className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent flex-shrink-0"
+              className="text-xl lg:text-2xl font-bold bg-linear-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent shrink-0"
             >
               Workzy
             </Link>
@@ -189,8 +198,8 @@ export default function Header() {
                   onClick={() => setLocationModalOpen(true)}
                   className="flex items-center gap-2 px-3 py-2 bg-accent hover:bg-accent/80 border border-r-0 border-border rounded-l-lg transition-colors group"
                 >
-                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="text-sm font-medium text-foreground truncate max-w-[120px]">
+                  <MapPin className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm font-medium text-foreground truncate max-w-30">
                     {city}
                   </span>
                 </button>
@@ -218,8 +227,16 @@ export default function Header() {
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="hidden lg:flex items-center gap-2 p-1 pr-3 hover:bg-accent rounded-full transition-colors">
-                      <ProfileImage src={user?.profileImage} size={35} name={user?.name} />
+                    <button
+                      className="hidden lg:flex items-center gap-2 p-1 pr-3 hover:bg-accent rounded-full transition-colors"
+                      aria-label="User account menu"
+                    >
+                      <ProfileImage
+                        src={user?.profileImage}
+                        size={35}
+                        name={user?.name}
+                        className="shrink-0"
+                      />
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </button>
                   </DropdownMenuTrigger>
@@ -239,7 +256,7 @@ export default function Header() {
 
                     <DropdownMenuItem onClick={() => navigate('/bookings')}>
                       <Briefcase className="h-4 w-4 mr-2" />
-                      My Booking
+                      My Bookings
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/quotes')}>
                       <FileText className="h-4 w-4 mr-2" />
@@ -250,7 +267,7 @@ export default function Header() {
                       My Payments
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/disputes')}>
-                      <CreditCard className="h-4 w-4 mr-2" />
+                      <HelpCircle className="h-4 w-4 mr-2" />
                       Support
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/messages')}>
@@ -284,22 +301,16 @@ export default function Header() {
               )}
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <button className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors">
+                  <button
+                    className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors"
+                    aria-label="Open mobile navigation menu"
+                  >
                     <Menu className="h-5 w-5" />
                   </button>
                 </SheetTrigger>
 
                 <SheetContent side="right" className="w-80 p-0">
                   <div className="flex flex-col h-full">
-                    <div className="flex items-center justify-between p-4 border-b border-border">
-                      <span className="text-lg font-semibold">Menu</span>
-                      <button
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="p-2 hover:bg-accent rounded-lg transition-colors"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
-                    </div>
                     {isAuthenticated && user && (
                       <div className="p-4 border-b border-border">
                         <div className="flex items-center gap-3">
@@ -325,11 +336,11 @@ export default function Header() {
                           }}
                           className="flex items-center gap-3 w-full px-3 py-2.5 bg-accent hover:bg-accent/80 rounded-lg transition-colors"
                         >
-                          <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                          <MapPin className="w-4 h-4 text-primary shrink-0" />
                           <span className="text-sm font-medium text-foreground truncate flex-1 text-left">
                             {city}
                           </span>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                         </button>
 
                         <button
@@ -339,7 +350,7 @@ export default function Header() {
                           }}
                           className="flex items-center gap-3 w-full px-3 py-2.5 bg-accent hover:bg-accent/80 rounded-lg transition-colors"
                         >
-                          <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
                           <span className="text-sm text-muted-foreground">
                             Search for services...
                           </span>
@@ -360,7 +371,7 @@ export default function Header() {
                                 : 'text-foreground hover:bg-accent'
                             }`}
                           >
-                            <Icon className="h-5 w-5 flex-shrink-0" />
+                            <Icon className="h-5 w-5 shrink-0" />
                             <span className="font-medium">{link.label}</span>
                           </Link>
                         );
@@ -368,22 +379,35 @@ export default function Header() {
 
                       {isAuthenticated && (
                         <>
-                          <div className="my-2 border-t border-border" />
-                          <Link
-                            to="/profile"
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-accent transition-colors"
-                          >
-                            <User className="h-5 w-5 flex-shrink-0" />
-                            <span className="font-medium">My Profile</span>
-                          </Link>
+                          <div className="my-3 border-t border-border" />
+                          <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            Account
+                          </p>
+                          {ACCOUNT_NAV_LINKS.map(link => {
+                            const Icon = link.icon;
+                            return (
+                              <Link
+                                key={link.path}
+                                to={link.path}
+                                onClick={() => handleNavClick(link.path, true)}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                                  isActiveRoute(link.path)
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'text-foreground hover:bg-accent'
+                                }`}
+                              >
+                                <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                <span className="font-medium text-sm">{link.label}</span>
+                              </Link>
+                            );
+                          })}
                           {user?.role === ROLE.WORKER && (
                             <button
                               onClick={handleSwitchMode}
-                              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-accent transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground hover:bg-accent transition-colors"
                             >
-                              <Users className="h-5 w-5 flex-shrink-0" />
-                              <span className="font-medium">Switch to Worker Mode</span>
+                              <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
+                              <span className="font-medium text-sm">Switch to Worker Mode</span>
                             </button>
                           )}
                         </>
@@ -418,20 +442,28 @@ export default function Header() {
         </div>
       </header>
 
-      <LocationSearchModal
-        open={locationModalOpen}
-        onClose={() => setLocationModalOpen(false)}
-        onSelectLocation={handleLocationSelect}
-        title="Select Your Location"
-        description="Choose your location to find services near you"
-      />
+      {locationModalOpen && (
+        <Suspense fallback={null}>
+          <LocationSearchModal
+            open={locationModalOpen}
+            onClose={() => setLocationModalOpen(false)}
+            onSelectLocation={handleLocationSelect}
+            title="Select Your Location"
+            description="Choose your location to find services near you"
+          />
+        </Suspense>
+      )}
 
-      <ServiceSearchContainer
-        open={serviceModalOpen}
-        onClose={() => setServiceModalOpen(false)}
-        externalSearchQuery={searchQuery}
-        onSelectService={handleServiceSelect}
-      />
+      {serviceModalOpen && (
+        <Suspense fallback={null}>
+          <ServiceSearchContainer
+            open={serviceModalOpen}
+            onClose={() => setServiceModalOpen(false)}
+            externalSearchQuery={searchQuery}
+            onSelectService={handleServiceSelect}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

@@ -2,8 +2,6 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import AdminWorkerDocumentsPage from '@/features/admin/worker/pages/AdminWorkerDocumentsPage';
-import AdminWorkerServicesPage from '@/features/admin/worker/pages/AdminWorkerServicesPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -64,6 +62,12 @@ const AdminBookingPage = lazy(() => import('@/features/admin/booking/pages/Admin
 const AdminPaymentsPage = lazy(() => import('@/features/payments/pages/AdminPaymentsPage'));
 const AdminBookingDetailsPage = lazy(
   () => import('@/features/admin/booking/pages/AdminBookingDetailsPage')
+);
+const AdminWorkerDocumentsPage = lazy(
+  () => import('@/features/admin/worker/pages/AdminWorkerDocumentsPage')
+);
+const AdminWorkerServicesPage = lazy(
+  () => import('@/features/admin/worker/pages/AdminWorkerServicesPage')
 );
 
 export default function AdminRoutes() {

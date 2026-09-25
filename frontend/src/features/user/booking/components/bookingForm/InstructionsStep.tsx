@@ -23,7 +23,7 @@ export default function InstructionsStep({
         </div>
         <button
           onClick={onSkip}
-          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 flex-shrink-0 mt-0.5 transition-colors"
+          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 shrink-0 mt-0.5 transition-colors"
         >
           Skip
         </button>
@@ -32,7 +32,7 @@ export default function InstructionsStep({
         placeholder="e.g. Ring the bell, 2nd floor, bring your own tools..."
         value={booking.note}
         onChange={e => setBooking(b => ({ ...b, note: e.target.value.trimStart() }))}
-        className="text-sm bg-muted/40 min-h-[110px]"
+        className="text-sm bg-muted/40 min-h-27.5"
       />
     </div>
   );

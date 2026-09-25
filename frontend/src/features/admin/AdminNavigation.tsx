@@ -5,7 +5,6 @@ import {
   Briefcase,
   MessageSquare,
   CreditCard,
-  Settings,
   PanelsTopLeft,
   Star,
   FileText,
@@ -27,5 +26,5 @@ export const adminMenuItems: MenuItem[] = [
 ];
 
 export const adminSupportItems: MenuItem[] = [
-  { icon: <Settings />, label: 'Settings', to: '/admin/settings' },
+  // { icon: <Settings />, label: 'Settings', to: '/admin/settings' },
 ];

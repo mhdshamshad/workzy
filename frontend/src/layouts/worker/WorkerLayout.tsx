@@ -26,13 +26,13 @@ export default function WorkerLayout() {
         </SheetContent>
       </Sheet>
 
-      <div className="flex flex-col flex-1 ">
+      <div className="flex flex-col flex-1 min-w-0">
         <Topbar
           onMenuClick={() => {
             setMobileSidebarOpen(true);
           }}
         />
-        <main className="flex-1 overflow-y-auto  no-scrollbar bg-background">
+        <main className="flex-1 overflow-y-auto no-scrollbar bg-background min-w-0 overflow-x-hidden">
           <Suspense fallback={<div className="opacity-50" />}>
             <Outlet />
           </Suspense>

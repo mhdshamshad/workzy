@@ -83,7 +83,7 @@ export default function WorkerDetailsLayout() {
 
   return (
     <main className="p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto w-full">
+      <div>
         <div className="flex items-start justify-between gap-3">
           <PageHeader
             title="Worker Details"
@@ -119,7 +119,7 @@ export default function WorkerDetailsLayout() {
                   backgroundPosition: 'center',
                 }}
               />
-              <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-black/10 via-transparent to-background sm:h-60" />
+              <div className="absolute inset-x-0 top-0 h-48 bg-linear-to-b from-black/10 via-transparent to-background sm:h-60" />
               <div className="relative mx-auto max-w-7xl px-4 sm:px-8">
                 <div className="-mt-14 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between pb-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -129,11 +129,11 @@ export default function WorkerDetailsLayout() {
                       shape="rounded"
                       size={120}
                       onClickImage={() => setOpenImage(true)}
-                      className="!w-24 !h-24 sm:!w-28 sm:!h-28"
+                      className="w-24! h-24! sm:w-28! sm:h-28!"
                     />
                     <div className="space-y-2 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h1 className="text-xl font-bold tracking-tight sm:text-3xl drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)] truncate max-w-[200px] sm:max-w-none">
+                        <h1 className="text-xl font-bold tracking-tight sm:text-3xl drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)] truncate max-w-50 sm:max-w-none">
                           {displayName}
                         </h1>
                         <Badge variant={config.badgeVariant}>
@@ -151,7 +151,7 @@ export default function WorkerDetailsLayout() {
                           <Award className="h-3.5 w-3.5" />
                           {experience} yrs experience
                         </span>
-                        <span className="inline-flex items-center gap-1.5 truncate max-w-[160px] sm:max-w-none">
+                        <span className="inline-flex items-center gap-1.5 truncate max-w-40 sm:max-w-none">
                           <Mail className="h-3.5 w-3.5 shrink-0" />
                           <span className="truncate">{email}</span>
                         </span>
@@ -208,7 +208,7 @@ export default function WorkerDetailsLayout() {
                   {...register('reason')}
                   error={formState.errors.reason?.message}
                   placeholder="Briefly explain why this account is being blocked."
-                  className="min-h-[100px] resize-none"
+                  className="min-h-25 resize-none"
                 />
               </div>
             </div>

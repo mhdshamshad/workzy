@@ -85,7 +85,7 @@ export default function ReschedulePendingView({ booking, role, onClose }: Props)
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-200 dark:border-amber-900/40">
-        <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+        <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
         <div>
           <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
             Reschedule Pending
@@ -111,7 +111,7 @@ export default function ReschedulePendingView({ booking, role, onClose }: Props)
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-blue-500/10 border-blue-200 dark:border-blue-900/40 p-4 flex flex-col gap-3">
+        <div className="rounded-xl border border-blue-200 bg-blue-500/10 dark:border-blue-900/40 p-4 flex flex-col gap-3">
           <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
             Proposed Schedule
           </p>
@@ -129,7 +129,7 @@ export default function ReschedulePendingView({ booking, role, onClose }: Props)
       {reason && (
         <div className="space-y-1">
           <Label className="text-muted-foreground uppercase tracking-wide text-xs">Reason</Label>
-          <div className="text-sm bg-muted p-2 rounded-md min-h-[96px] leading-6">{reason}</div>
+          <div className="text-sm bg-muted p-2 rounded-md min-h-24 leading-6">{reason}</div>
         </div>
       )}
 
@@ -172,7 +172,7 @@ export default function ReschedulePendingView({ booking, role, onClose }: Props)
           disabled={isLoading}
           variant="secondary"
           size="md"
-          className="flex-shrink-0 "
+          className="shrink-0 "
         >
           Close
         </Button>

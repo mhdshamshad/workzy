@@ -72,7 +72,7 @@ export default function ReviewStep({
       <div className="flex flex-col gap-3">
         {rows.map(row => (
           <div key={row.label} className="flex gap-3 text-sm">
-            <span className="text-muted-foreground mt-0.5 flex-shrink-0">{row.icon}</span>
+            <span className="text-muted-foreground mt-0.5 shrink-0">{row.icon}</span>
             <div>
               <p className="text-[11px] text-muted-foreground">{row.label}</p>
               <p className="font-medium text-foreground text-xs leading-relaxed">{row.value}</p>

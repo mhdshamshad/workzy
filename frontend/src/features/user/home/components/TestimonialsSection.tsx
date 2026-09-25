@@ -56,9 +56,7 @@ export default function TestimonialsSection({ items, title }: TestimonialsSectio
                     {testimonial.service}
                   </div>
                 </div>
-                <div className="text-xs text-muted-foreground flex-shrink-0">
-                  {testimonial.date}
-                </div>
+                <div className="text-xs text-muted-foreground shrink-0">{testimonial.date}</div>
               </div>
             </motion.div>
           ))}

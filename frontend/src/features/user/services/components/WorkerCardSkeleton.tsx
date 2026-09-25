@@ -1,7 +1,7 @@
 export default function WorkerCardSkeleton() {
   return (
     <div className="bg-card border border-border rounded-xl p-4 flex gap-4 animate-pulse">
-      <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-lg bg-muted flex-shrink-0" />
+      <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-lg bg-muted shrink-0" />
       <div className="flex-1 flex flex-col gap-2">
         <div className="flex justify-between">
           <div className="flex flex-col gap-1.5">

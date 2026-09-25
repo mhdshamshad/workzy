@@ -60,8 +60,8 @@ export default function UserDetailsLayout() {
   } = useToggleUserStatus();
 
   return (
-    <main className="p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto w-full">
+    <main className="p-4 lg:p-6 ">
+      <div className=" w-full">
         <div className="flex items-start justify-between gap-3">
           <PageHeader
             title="User Details"
@@ -98,7 +98,7 @@ export default function UserDetailsLayout() {
                     shape="rounded"
                     size={100}
                     onClickImage={() => setOpenImage(true)}
-                    className="!w-20 !h-20 sm:!w-24 sm:!h-24"
+                    className="w-20! h-20! sm:w-24! sm:h-24!"
                   />
                   <div className="space-y-2 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -147,12 +147,12 @@ export default function UserDetailsLayout() {
             </motion.section>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 w-full max-w-7xl mx-auto mt-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 w-full  mt-5">
               {isStatsLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-[110px] sm:h-[130px] w-full rounded-xl border bg-card p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
+                    className="h-27.5 sm:h-32.5 w-full rounded-xl border bg-card p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
                   >
                     <Skeleton className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl shrink-0" />
                     <div className="flex-1 space-y-2">
@@ -184,7 +184,7 @@ export default function UserDetailsLayout() {
                 </>
               )}
             </div>
-            <div className="max-w-7xl mx-auto pb-16 mt-4">
+            <div>
               <div className="overflow-x-auto no-scrollbar border-b border-border mb-6">
                 <div className="flex">
                   {TABS.map(tab => (

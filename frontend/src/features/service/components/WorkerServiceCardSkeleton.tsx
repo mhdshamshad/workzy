@@ -10,7 +10,7 @@ function ServiceCardSkeleton() {
       <Skeleton className="h-48 w-full rounded-none" />
 
       <div className="flex items-end gap-3 px-4">
-        <Skeleton className="-mt-[22px] h-11 w-11 shrink-0 rounded-[13px]" />
+        <Skeleton className="-mt-5.5 h-11 w-11 shrink-0 rounded-[13px]" />
         <div className="min-w-0 flex-1 space-y-1.5 pb-1 pt-3">
           <Skeleton className="h-3.5 w-3/4 rounded-md" />
           <Skeleton className="h-2.5 w-1/3 rounded-md" />
@@ -37,8 +37,8 @@ function ServiceCardSkeleton() {
 
         <div className="flex items-center gap-1.5">
           <Skeleton className="h-3 w-3 rounded-sm" />
-          <Skeleton className="h-5 w-[72px] rounded-full" />
-          <Skeleton className="h-5 w-[72px] rounded-full" />
+          <Skeleton className="h-5 w-18 rounded-full" />
+          <Skeleton className="h-5 w-18 rounded-full" />
         </div>
 
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-3">
@@ -47,8 +47,8 @@ function ServiceCardSkeleton() {
             <Skeleton className="h-2.5 w-14 rounded-md" />
           </div>
           <div className="flex gap-2">
-            <Skeleton className="h-8 w-[58px] rounded-lg" />
-            <Skeleton className="h-8 w-[70px] rounded-lg" />
+            <Skeleton className="h-8 w-14.5 rounded-lg" />
+            <Skeleton className="h-8 w-17.5 rounded-lg" />
           </div>
         </div>
       </div>

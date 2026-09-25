@@ -94,7 +94,7 @@ export function ImageUpload({
     <div className={cn('flex flex-col gap-2 w-full')}>
       <div
         className={cn(
-          'relative h-[250px] rounded-md border overflow-hidden bg-muted',
+          'relative h-62.5 rounded-md border overflow-hidden bg-muted',
           error && 'border-destructive',
           className
         )}

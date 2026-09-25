@@ -16,7 +16,7 @@ export default function StepIndicator<T extends string>({
   return (
     <div className="flex items-center gap-1.5 mb-5 overflow-x-auto pb-0.5 scrollbar-hide">
       {steps.map((s, i) => (
-        <div key={`${s}-${i}`} className="flex items-center gap-1.5 flex-shrink-0">
+        <div key={`${s}-${i}`} className="flex items-center gap-1.5 shrink-0">
           <div
             className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
               i < idx

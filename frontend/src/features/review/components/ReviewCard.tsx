@@ -176,7 +176,7 @@ export const ReviewCard = React.forwardRef<HTMLDivElement, ReviewCardProps>(
                 onClick={() => onOpenMedia(media, i)}
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.97 }}
-                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border/50 sm:h-[72px] sm:w-[72px]"
+                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border/50 sm:h-18 sm:w-18"
               >
                 {item.type === 'image' ? (
                   <img

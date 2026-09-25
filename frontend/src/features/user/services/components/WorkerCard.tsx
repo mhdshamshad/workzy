@@ -40,16 +40,9 @@ export function WorkerCard({ worker, index = 0, onBook }: WorkerCardProps) {
       className="relative bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
     >
       <div className="p-4 sm:p-5 flex gap-4">
-        <div className="flex-shrink-0 flex flex-col items-center gap-2">
+        <div className="shrink-0 flex flex-col items-center gap-2">
           <div className="relative">
             <ProfileImage src={profileImage} name={displayName} size={80} />
-            {/* <div className="w-[68px] h-[68px] sm:w-[76px] sm:h-[76px] rounded-xl overflow-hidden ring-1 ring-border/80">
-              <img
-                src={worker.profileImage}
-                alt={worker.displayName}
-                className="w-full h-full object-cover"
-              />
-            </div> */}
             {isAvailable && (
               <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
@@ -113,10 +106,10 @@ export function WorkerCard({ worker, index = 0, onBook }: WorkerCardProps) {
           </p>
         </div>
 
-        <div className="flex-shrink-0 flex flex-col items-end justify-between gap-4 min-w-[110px]">
+        <div className="shrink-0 flex flex-col items-end justify-between gap-4 min-w-27.5">
           <div className="text-right">
             <div className="flex items-start justify-end gap-0.5 leading-none">
-              <span className="text-sm font-bold text-foreground/70 mt-[3px]">₹</span>
+              <span className="text-sm font-bold text-foreground/70 mt-0.75">₹</span>
               <span className="text-[32px] font-black text-foreground leading-none tracking-tighter">
                 {serviceRate.toLocaleString('en-IN')}
               </span>
@@ -157,7 +150,7 @@ export function WorkerCard({ worker, index = 0, onBook }: WorkerCardProps) {
           <span className="text-[10px] text-muted-foreground/60">incl. travel & service</span>
         </div>
         <div className="flex items-start gap-0.5 leading-none">
-          <span className="text-sm font-bold text-foreground/70 mt-[3px]">₹</span>
+          <span className="text-sm font-bold text-foreground/70 mt-0.75">₹</span>
           <span className="text-2xl font-black text-foreground tracking-tighter">
             {totalAmount.toLocaleString('en-IN')}
           </span>

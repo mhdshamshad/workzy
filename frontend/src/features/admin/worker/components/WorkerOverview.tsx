@@ -46,12 +46,12 @@ export default function WorkerOverview({ worker }: WorkerOverviewProps) {
 
   return (
     <>
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 w-full max-w-7xl mx-auto mt-4">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 w-full  mt-4">
         {isStatsLoading ? (
           Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="h-[110px] sm:h-[130px] w-full rounded-xl border bg-card p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
+              className="h-27.5 sm:h-32.5 w-full rounded-xl border bg-card p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
             >
               <Skeleton className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl shrink-0" />
               <div className="flex-1 space-y-2">
@@ -115,7 +115,7 @@ export default function WorkerOverview({ worker }: WorkerOverviewProps) {
         )}
       </section>
 
-      <div className="max-w-7xl mx-auto pb-16 mt-4">
+      <div className=" pb-16 mt-4">
         <div className="overflow-x-auto no-scrollbar border-b border-border mb-6">
           <div className="flex">
             {TABS.map(tab => (

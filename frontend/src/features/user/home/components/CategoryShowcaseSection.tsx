@@ -31,26 +31,8 @@ export default function CategoryShowcaseSection({ section }: CategoryShowcaseBlo
   });
 
   return (
-    <section className="py-16">
+    <section className="py-8 sm:py-12 md:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div className="text-start">
-            <h2 className="text-3xl md:text-4xl font-black mb-3 text-foreground">{title}</h2>
-            <p className="text-lg text-muted-foreground font-medium">{subTitle}</p>
-          </div>
-
-          <Link
-            to={`/services?category=${categoryId}`}
-            className="group inline-flex items-center gap-2 text-primary font-semibold text-sm md:text-base transition-all hover:gap-3"
-          >
-            See All
-            <ArrowRight
-              size={16}
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            />
-          </Link>
-        </div>
-
         {isLoading ? (
           <CarouselRowSkeleton />
         ) : (
@@ -59,7 +41,21 @@ export default function CategoryShowcaseSection({ section }: CategoryShowcaseBlo
             renderItem={(service: ServiceItem) => (
               <ServiceCard key={service.id} service={service} />
             )}
-            className="min-[550px]:basis-1/2 md:basis-1/3 lg:basis-1/4"
+            className="basis-1/2 md:basis-1/3 lg:basis-1/4"
+            title={title}
+            subTitle={subTitle}
+            actions={
+              <Link
+                to={`/services?category=${categoryId}`}
+                className="group inline-flex items-center gap-1.5 text-primary font-semibold text-xs sm:text-sm hover:gap-2 transition-all whitespace-nowrap"
+              >
+                See All
+                <ArrowRight
+                  size={14}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </Link>
+            }
           />
         )}
       </div>

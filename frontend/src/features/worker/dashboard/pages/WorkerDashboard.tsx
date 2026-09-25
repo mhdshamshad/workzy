@@ -28,7 +28,6 @@ import { useWorkerProfile } from '@/features/profile/hooks/useWorkerProfile';
 import { useWorkerReviews } from '@/features/review';
 import PageError from '@/pages/PageError';
 import { useAppSelector } from '@/store/hooks';
-import type { RootState } from '@/store/store';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate, formatTime12 } from '@/utils/time.format';
 
@@ -36,7 +35,7 @@ import WorkerDashboardSkeleton from '../components/WorkerDashboardSkeleton';
 import { useWorkerDashboard } from '../hooks/useWorkerDashboard';
 
 export default function WorkerDashboard() {
-  const { user } = useAppSelector((s: RootState) => s.auth);
+  const { user } = useAppSelector(state => state.auth);
 
   const { data: reviews, isLoading: reviewsLoading, error } = useWorkerReviews();
   const { data: bookings, isLoading: bookingLoading } = useBookings();
@@ -74,7 +73,7 @@ export default function WorkerDashboard() {
   }
 
   return (
-    <div className="section-container py-8">
+    <div className="p-4 lg:p-6 py-8">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -257,7 +256,12 @@ export default function WorkerDashboard() {
                   <p className="text-xs text-muted-foreground">{job.bookingId}</p>
                 </div>
                 <Link to={`/worker/bookings/${job.id}`}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    aria-label="View booking details"
+                  >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </Link>

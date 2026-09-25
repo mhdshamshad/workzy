@@ -43,7 +43,7 @@ const EmojiPickerPopover = memo(({ onSelectEmoji, onClose }: EmojiPickerPopoverP
         width="100%"
         height={360}
         lazyLoadEmojis
-        className="!w-64 sm:!w-72 md:!w-80"
+        className="w-64! sm:w-72! md:w-80!"
       />
     </div>
   );
