@@ -1,86 +1,70 @@
 import Autoplay from 'embla-carousel-autoplay';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { HeroContent } from '@/types/home/home.sectionContent';
-
-import type { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel';
 
 interface HeroCarouselProps {
   data: HeroContent;
   stats: Record<string, string>;
 }
 
-function CoreCarousel({
-  children,
-  options,
-  autoplay,
-  autoplayDelay = 5000,
-  onInit,
-}: {
-  children: React.ReactNode;
-  options?: EmblaOptionsType;
-  autoplay?: boolean;
-  autoplayDelay?: number;
-  onInit?: (api: EmblaCarouselType) => void;
-}) {
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    options,
-    autoplay ? [Autoplay({ delay: autoplayDelay, stopOnInteraction: false })] : []
-  );
+export function HeroCarousel({ data, stats }: HeroCarouselProps) {
+  const [current, setCurrent] = useState(0);
+
+  const plugins = useMemo(() => {
+    return data.autoPlay
+      ? [Autoplay({ delay: data.interval || 5000, stopOnInteraction: false })]
+      : [];
+  }, [data.autoPlay, data.interval]);
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, plugins);
 
   useEffect(() => {
-    if (emblaApi && onInit) {
-      onInit(emblaApi);
-    }
-  }, [emblaApi, onInit]);
+    if (!emblaApi) {return;}
+    setCurrent(emblaApi.selectedScrollSnap());
 
-  return (
-    <div ref={emblaRef} className="overflow-hidden h-full">
-      {children}
-    </div>
-  );
-}
+    const onSelect = () => {
+      setCurrent(emblaApi.selectedScrollSnap());
+    };
 
-export function HeroCarousel({ data, stats }: HeroCarouselProps) {
-  const [api, setApi] = useState<EmblaCarouselType | null>(null);
-  const [current, setCurrent] = useState(0);
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi]);
 
   return (
     <section className="relative h-125 lg:h-150 overflow-hidden">
-      <CoreCarousel
-        autoplay={data.autoPlay}
-        autoplayDelay={data.interval}
-        options={{ loop: true }}
-        onInit={embla => {
-          setApi(embla);
-          setCurrent(embla.selectedScrollSnap());
-          embla.on('select', () => setCurrent(embla.selectedScrollSnap()));
-        }}
-      >
+      <div ref={emblaRef} className="overflow-hidden h-full">
         <div className="flex h-full">
           {data.slides.map((slide, i) => (
             <div key={i} className="shrink-0 w-full h-full relative">
-              <img src={slide.imageUrl} alt={slide.title} className="w-full h-full object-cover" />
+              <img
+                src={slide.imageUrl}
+                alt={slide.title}
+                className="w-full h-full object-cover"
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
               <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/50 to-transparent" />
             </div>
           ))}
         </div>
-      </CoreCarousel>
+      </div>
 
       {data.slides.length > 1 && (
         <>
           <button
-            onClick={() => api?.scrollPrev()}
+            onClick={() => emblaApi?.scrollPrev()}
             className="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 z-20 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white p-2 lg:p-3 rounded-full transition-all"
           >
             <ChevronLeft className="w-5 h-5 lg:w-6 lg:h-6" />
           </button>
 
           <button
-            onClick={() => api?.scrollNext()}
+            onClick={() => emblaApi?.scrollNext()}
             className="absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 z-20 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white p-2 lg:p-3 rounded-full transition-all"
           >
             <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6" />
@@ -92,7 +76,7 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
         {data.slides.map((_, i) => (
           <button
             key={i}
-            onClick={() => api?.scrollTo(i)}
+            onClick={() => emblaApi?.scrollTo(i)}
             className={`h-2 rounded-full transition-all ${
               i === current ? 'bg-white w-8' : 'bg-white/50 w-2'
             }`}

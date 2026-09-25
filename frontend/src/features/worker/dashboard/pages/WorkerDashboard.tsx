@@ -73,7 +73,7 @@ export default function WorkerDashboard() {
   }
 
   return (
-    <div className="section-container py-8">
+    <div className="p-4 lg:p-6 py-8">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">

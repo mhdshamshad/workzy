@@ -68,7 +68,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
+    <div className="p-4 lg:p-6 space-y-6">
       <PageHeader
         title="Admin Dashboard"
         description="Overview of users, workers, jobs and revenue across the platform."
@@ -396,7 +396,7 @@ export default function AdminDashboard() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{w.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      ★ {w.rating} · {w.jobs} jobs
+                      ★ {w.rating.toFixed(1)} · {w.jobs} jobs
                     </p>
                   </div>
                   <span className="text-sm font-semibold">{formatCurrency(w.earnings)}</span>

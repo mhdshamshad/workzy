@@ -105,12 +105,7 @@ function SkeletonReviewRow() {
 
 export default function WorkerDashboardSkeleton() {
   return (
-    <motion.div
-      className="section-container py-8"
-      variants={pageVariants}
-      initial="hidden"
-      animate="show"
-    >
+    <motion.div className="p-4 lg:p-6 py-8" variants={pageVariants} initial="hidden" animate="show">
       <motion.div variants={sectionVariants} className="mb-8 space-y-2">
         <Skeleton className="h-8 w-72" />
         <Skeleton className="h-4 w-64" />

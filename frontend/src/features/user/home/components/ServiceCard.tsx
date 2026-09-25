@@ -19,7 +19,7 @@ export function ServiceCard({ service, className }: ServiceCardProps) {
           className
         )}
       >
-        <div className="relative w-full h-32 sm:h-40 md:h-44 bg-muted overflow-hidden">
+        <div className="relative w-full h-28 sm:h-36 md:h-44 bg-muted overflow-hidden">
           <img
             src={service.imageUrl || '/assets/service-placeholder.png'}
             alt={service.name}
@@ -27,27 +27,27 @@ export function ServiceCard({ service, className }: ServiceCardProps) {
           />
         </div>
 
-        <div className="flex flex-col grow p-4 md:p-5">
-          <h4 className="text-sm md:text-base font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+        <div className="flex flex-col grow p-3 sm:p-4 md:p-5">
+          <h4 className="text-xs sm:text-sm md:text-base font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
             {service.name}
           </h4>
 
-          <p className="text-[12px] md:text-sm text-muted-foreground line-clamp-2 mt-2 leading-relaxed min-h-10">
+          <p className="text-[11px] sm:text-xs md:text-sm text-muted-foreground line-clamp-2 mt-1 sm:mt-2 leading-relaxed min-h-8 sm:min-h-10">
             {service.description || 'Professional service for your needs.'}
           </p>
-          <div className="mt-4 mb-3 h-px w-full bg-linear-to-r from-transparent via-border to-transparent" />
+          <div className="mt-3 mb-2 sm:mt-4 sm:mb-3 h-px w-full bg-linear-to-r from-transparent via-border to-transparent" />
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
                 Starts at
               </span>
-              <span className="text-base md:text-lg font-black text-primary">
+              <span className="text-sm sm:text-base md:text-lg font-black text-primary">
                 ₹{service.baseRate}
               </span>
             </div>
 
-            <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-              <ArrowRight size={16} />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shrink-0">
+              <ArrowRight size={14} />
             </div>
           </div>
         </div>

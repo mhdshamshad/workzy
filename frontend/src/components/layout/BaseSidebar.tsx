@@ -145,35 +145,45 @@ export function BaseSidebar({
           </>
         )}
       </div>
-      <div className="p-4">
+      <div className={cn('p-4', collapsed && 'p-2')}>
         <Separator className="mb-3" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
               className={cn(
-                'w-full flex items-center p-3 rounded-xl cursor-pointer hover:bg-accent text-left',
-                collapsed && 'justify-center'
+                'w-full flex items-center p-3 rounded-xl cursor-pointer hover:bg-accent text-left transition-colors',
+                collapsed && 'justify-center p-2'
               )}
             >
               {user.role === ROLE.WORKER ? (
-                <ProfileImage src={worker?.profileImage} name={worker?.displayName} size={40} />
+                <ProfileImage
+                  src={worker?.profileImage}
+                  name={worker?.displayName}
+                  size={40}
+                  className="shrink-0"
+                />
               ) : (
-                <ProfileImage src={user?.profileImage} name={user?.name} size={40} />
+                <ProfileImage
+                  src={user?.profileImage}
+                  name={user?.name}
+                  size={40}
+                  className="shrink-0"
+                />
               )}
 
               {!collapsed && (
-                <div className="ml-3 flex-1">
+                <div className="ml-3 flex-1 min-w-0">
                   {user.role === ROLE.WORKER ? (
-                    <p className="text-sm font-medium">{worker?.displayName}</p>
+                    <p className="text-sm font-medium truncate">{worker?.displayName}</p>
                   ) : (
-                    <p className="text-sm font-medium">{user.name}</p>
+                    <p className="text-sm font-medium truncate">{user.name}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
               )}
 
-              {!collapsed && <ChevronDown size={14} />}
+              {!collapsed && <ChevronDown size={14} className="shrink-0 text-muted-foreground" />}
             </button>
           </DropdownMenuTrigger>
 

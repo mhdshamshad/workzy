@@ -60,8 +60,8 @@ export default function UserDetailsLayout() {
   } = useToggleUserStatus();
 
   return (
-    <main className="p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto w-full">
+    <main className="p-4 lg:p-6 ">
+      <div className=" w-full">
         <div className="flex items-start justify-between gap-3">
           <PageHeader
             title="User Details"
@@ -147,7 +147,7 @@ export default function UserDetailsLayout() {
             </motion.section>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 w-full max-w-7xl mx-auto mt-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 w-full  mt-5">
               {isStatsLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <div
@@ -184,7 +184,7 @@ export default function UserDetailsLayout() {
                 </>
               )}
             </div>
-            <div className="max-w-7xl mx-auto pb-16 mt-4">
+            <div>
               <div className="overflow-x-auto no-scrollbar border-b border-border mb-6">
                 <div className="flex">
                   {TABS.map(tab => (

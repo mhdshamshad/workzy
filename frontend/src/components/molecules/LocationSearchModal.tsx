@@ -33,7 +33,7 @@ interface LocationSearchModalProps {
   description?: string;
 }
 
-export function LocationSearchModal({
+export default function LocationSearchModal({
   open,
   onClose,
   onSelectLocation,

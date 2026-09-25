@@ -83,7 +83,7 @@ export default function WorkerDetailsLayout() {
 
   return (
     <main className="p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto w-full">
+      <div>
         <div className="flex items-start justify-between gap-3">
           <PageHeader
             title="Worker Details"

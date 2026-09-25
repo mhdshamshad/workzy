@@ -4,7 +4,6 @@ import {
   Search,
   MapPin,
   Menu,
-  X,
   Home,
   Briefcase,
   UserPlus,
@@ -14,14 +13,12 @@ import {
   CreditCard,
   FileText,
   MessageSquare,
+  HelpCircle,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import {
-  LocationSearchModal,
-  type SelectedLocation,
-} from '@/components/molecules/LocationSearchModal';
+import type { SelectedLocation } from '@/components/molecules/LocationSearchModal';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import SearchInput from '@/components/molecules/SearchInput';
 import { NotificationsDropdown } from '@/components/organisms/NotificationsDropdown';
@@ -37,7 +34,6 @@ import {
 import ModeToggle from '@/components/ui/ModeToggle';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ROLE } from '@/constants';
-import ServiceSearchContainer from '@/features/user/services/components/ServiceSearchContainer';
 import { setAxiosToken } from '@/lib/api/axios';
 import { logoutService, switchRoleService } from '@/services/auth.service';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
@@ -46,10 +42,24 @@ import { setLocation } from '@/store/slices/locationSlice';
 import type { CategorySuggestion } from '@/types/category';
 import { syncUserLocation } from '@/utils/locationSync';
 
+const LocationSearchModal = lazy(() => import('@/components/molecules/LocationSearchModal'));
+const ServiceSearchContainer = lazy(
+  () => import('@/features/user/services/components/ServiceSearchContainer')
+);
+
 const NAV_LINKS = [
   { path: '/', label: 'Home', icon: Home },
   { path: '/services', label: 'Services', icon: Briefcase },
   { path: '/join-us', label: 'Join Us', icon: UserPlus },
+];
+
+const ACCOUNT_NAV_LINKS = [
+  { path: '/bookings', label: 'My Bookings', icon: Briefcase },
+  { path: '/quotes', label: 'My Quotes', icon: FileText },
+  { path: '/payments', label: 'My Payments', icon: CreditCard },
+  { path: '/messages', label: 'Messages', icon: MessageSquare },
+  { path: '/disputes', label: 'Support', icon: HelpCircle },
+  { path: '/profile', label: 'My Profile', icon: User },
 ];
 
 const SEARCH_ROUTES = ['/', '/services'];
@@ -221,7 +231,12 @@ export default function Header() {
                       className="hidden lg:flex items-center gap-2 p-1 pr-3 hover:bg-accent rounded-full transition-colors"
                       aria-label="User account menu"
                     >
-                      <ProfileImage src={user?.profileImage} size={35} name={user?.name} />
+                      <ProfileImage
+                        src={user?.profileImage}
+                        size={35}
+                        name={user?.name}
+                        className="shrink-0"
+                      />
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </button>
                   </DropdownMenuTrigger>
@@ -241,7 +256,7 @@ export default function Header() {
 
                     <DropdownMenuItem onClick={() => navigate('/bookings')}>
                       <Briefcase className="h-4 w-4 mr-2" />
-                      My Booking
+                      My Bookings
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/quotes')}>
                       <FileText className="h-4 w-4 mr-2" />
@@ -252,7 +267,7 @@ export default function Header() {
                       My Payments
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/disputes')}>
-                      <CreditCard className="h-4 w-4 mr-2" />
+                      <HelpCircle className="h-4 w-4 mr-2" />
                       Support
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/messages')}>
@@ -296,16 +311,6 @@ export default function Header() {
 
                 <SheetContent side="right" className="w-80 p-0">
                   <div className="flex flex-col h-full">
-                    <div className="flex items-center justify-between p-4 border-b border-border">
-                      <span className="text-lg font-semibold">Menu</span>
-                      <button
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="p-2 hover:bg-accent rounded-lg transition-colors"
-                        aria-label="Close menu"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
-                    </div>
                     {isAuthenticated && user && (
                       <div className="p-4 border-b border-border">
                         <div className="flex items-center gap-3">
@@ -374,22 +379,35 @@ export default function Header() {
 
                       {isAuthenticated && (
                         <>
-                          <div className="my-2 border-t border-border" />
-                          <Link
-                            to="/profile"
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-accent transition-colors"
-                          >
-                            <User className="h-5 w-5 shrink-0" />
-                            <span className="font-medium">My Profile</span>
-                          </Link>
+                          <div className="my-3 border-t border-border" />
+                          <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            Account
+                          </p>
+                          {ACCOUNT_NAV_LINKS.map(link => {
+                            const Icon = link.icon;
+                            return (
+                              <Link
+                                key={link.path}
+                                to={link.path}
+                                onClick={() => handleNavClick(link.path, true)}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                                  isActiveRoute(link.path)
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'text-foreground hover:bg-accent'
+                                }`}
+                              >
+                                <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                <span className="font-medium text-sm">{link.label}</span>
+                              </Link>
+                            );
+                          })}
                           {user?.role === ROLE.WORKER && (
                             <button
                               onClick={handleSwitchMode}
-                              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-accent transition-colors"
+                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-foreground hover:bg-accent transition-colors"
                             >
-                              <Users className="h-5 w-5 shrink-0" />
-                              <span className="font-medium">Switch to Worker Mode</span>
+                              <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
+                              <span className="font-medium text-sm">Switch to Worker Mode</span>
                             </button>
                           )}
                         </>
@@ -424,20 +442,28 @@ export default function Header() {
         </div>
       </header>
 
-      <LocationSearchModal
-        open={locationModalOpen}
-        onClose={() => setLocationModalOpen(false)}
-        onSelectLocation={handleLocationSelect}
-        title="Select Your Location"
-        description="Choose your location to find services near you"
-      />
+      {locationModalOpen && (
+        <Suspense fallback={null}>
+          <LocationSearchModal
+            open={locationModalOpen}
+            onClose={() => setLocationModalOpen(false)}
+            onSelectLocation={handleLocationSelect}
+            title="Select Your Location"
+            description="Choose your location to find services near you"
+          />
+        </Suspense>
+      )}
 
-      <ServiceSearchContainer
-        open={serviceModalOpen}
-        onClose={() => setServiceModalOpen(false)}
-        externalSearchQuery={searchQuery}
-        onSelectService={handleServiceSelect}
-      />
+      {serviceModalOpen && (
+        <Suspense fallback={null}>
+          <ServiceSearchContainer
+            open={serviceModalOpen}
+            onClose={() => setServiceModalOpen(false)}
+            externalSearchQuery={searchQuery}
+            onSelectService={handleServiceSelect}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

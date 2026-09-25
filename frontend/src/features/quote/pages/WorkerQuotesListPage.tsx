@@ -39,7 +39,7 @@ export default function WorkerQuotesListPage() {
   const { data: stats, isLoading: statsLoading } = useWorkerQuoteStats();
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6">
+    <div className="py-6 p-4 lg:p-6">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">My Quotes</h1>

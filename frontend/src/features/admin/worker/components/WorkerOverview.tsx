@@ -46,7 +46,7 @@ export default function WorkerOverview({ worker }: WorkerOverviewProps) {
 
   return (
     <>
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 w-full max-w-7xl mx-auto mt-4">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 w-full  mt-4">
         {isStatsLoading ? (
           Array.from({ length: 8 }).map((_, i) => (
             <div
@@ -115,7 +115,7 @@ export default function WorkerOverview({ worker }: WorkerOverviewProps) {
         )}
       </section>
 
-      <div className="max-w-7xl mx-auto pb-16 mt-4">
+      <div className=" pb-16 mt-4">
         <div className="overflow-x-auto no-scrollbar border-b border-border mb-6">
           <div className="flex">
             {TABS.map(tab => (
