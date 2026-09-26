@@ -54,7 +54,7 @@ export default function WorkerServiceCard({
   );
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl hover:shadow-black/[0.08] dark:hover:shadow-black/30">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-xl hover:shadow-black/8 dark:hover:shadow-black/30">
       <div className="relative h-48 shrink-0 overflow-hidden bg-muted">
         {service.imageUrl ? (
           <img
@@ -63,13 +63,13 @@ export default function WorkerServiceCard({
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/60">
+          <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-muted to-muted/60">
             <span className="select-none text-7xl font-black text-muted-foreground/10">
               {service.serviceName.charAt(0).toUpperCase()}
             </span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/10 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/82 via-black/10 to-transparent" />
         {!isPublic && full && (
           <div className="absolute left-3 top-3">
             <Badge
@@ -102,7 +102,7 @@ export default function WorkerServiceCard({
       <div className="relative z-10 flex items-end gap-3 px-4">
         <div
           className={cn(
-            '-mt-[22px] flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border-[2.5px] border-card shadow-[0_3px_12px_rgba(0,0,0,0.20)'
+            '-mt-5.5 flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[13px] border-[2.5px] border-card shadow-[0_3px_12px_rgba(0,0,0,0.20)'
           )}
         >
           {service.iconUrl ? (
@@ -168,7 +168,7 @@ export default function WorkerServiceCard({
             {service.bulkDiscounts.map(d => (
               <span
                 key={d.count}
-                className="rounded-full border border-rose-500/[0.22] bg-rose-500/[0.08] px-2 py-0.5 text-[10px] font-semibold text-rose-600 dark:bg-rose-500/[0.12] dark:text-rose-400"
+                className="rounded-full border border-rose-500/22 bg-rose-500/8 px-2 py-0.5 text-[10px] font-semibold text-rose-600 dark:bg-rose-500/12 dark:text-rose-400"
               >
                 {d.count}+ → {d.percent}% off
               </span>

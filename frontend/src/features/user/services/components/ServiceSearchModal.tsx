@@ -36,7 +36,7 @@ function ServiceItem({
       onClick={() => onSelect(service)}
       className="w-full flex items-center gap-3 p-3.5 transition-colors text-left"
     >
-      <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+      <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted shrink-0">
         <img
           src={service.iconUrl}
           alt={service.name}
@@ -65,7 +65,7 @@ function TrendingItem({
       onClick={() => onSelect(service)}
       className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors text-left"
     >
-      <TrendingUp className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+      <TrendingUp className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
       <span className="text-sm text-foreground">{service.name}</span>
     </motion.button>
   );
@@ -219,7 +219,7 @@ export default function ServiceSearchModal({
           className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
           onClick={onClose}
         />
-        <div className="fixed top-[72px] left-0 right-0 z-50 flex justify-center px-4">
+        <div className="fixed top-18 left-0 right-0 z-50 flex justify-center px-4">
           <motion.div
             variants={dropdownVariants}
             initial="hidden"
@@ -231,7 +231,7 @@ export default function ServiceSearchModal({
             <div className="flex items-center gap-2 p-3 border-b border-border">
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-accent rounded-lg transition-colors flex-shrink-0"
+                className="p-2 hover:bg-accent rounded-lg transition-colors shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -264,7 +264,7 @@ export default function ServiceSearchModal({
         className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="fixed top-[72px] left-0 right-0 z-50 flex justify-center px-4">
+      <div className="fixed top-18 left-0 right-0 z-50 flex justify-center px-4">
         <motion.div
           ref={dropdownRef}
           variants={dropdownVariants}

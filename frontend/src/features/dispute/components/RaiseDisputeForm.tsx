@@ -58,7 +58,7 @@ export function RaiseDisputeForm({ dispute, onSubmit, mediaUploading, onPreview 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex gap-3 p-4 rounded-xl border bg-section-amber text-section-amber-text border-section-amber-border">
-        <ShieldAlert size={20} className="flex-shrink-0 mt-0.5 text-section-amber-text" />
+        <ShieldAlert size={20} className="shrink-0 mt-0.5 text-section-amber-text" />
         <div className="flex flex-col gap-1">
           <p className="text-sm font-bold">Safe Escrow Resolution</p>
           <p className="text-xs leading-relaxed opacity-90">

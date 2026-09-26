@@ -89,7 +89,7 @@ export function DisputeContent({ role = ROLE.USER, workerId, userId }: DisputeCo
               size="md"
               iconLeft={<X className="h-3 w-3" />}
               variant="red"
-              className="w-full md:w-auto mt-[1px]"
+              className="w-full md:w-auto mt-px"
             >
               Clear
             </Button>

@@ -24,7 +24,7 @@ export function DisputeDetailsView({ dispute, role, onPreview }: Props) {
     <div className="space-y-4 pt-1">
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-muted/40 rounded-xl border border-border">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-background border border-border flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-background border border-border flex items-center justify-center shrink-0">
             <FileText size={16} className="text-muted-foreground" />
           </div>
           <div>

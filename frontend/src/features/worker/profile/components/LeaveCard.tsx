@@ -72,7 +72,7 @@ export function LeaveCard({ leave, onCancel }: { leave: Leave; onCancel: (id: st
             {leave.reason && (
               <>
                 <span className="text-border">·</span>
-                <span className="text-xs text-muted-foreground truncate max-w-[140px]">
+                <span className="text-xs text-muted-foreground truncate max-w-35">
                   {leave.reason}
                 </span>
               </>

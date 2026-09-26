@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="600" height="600">
+<path d="M0,0 L600,0 L600,600 L0,600 Z " fill="#F3F3F1" transform="translate(0,0)"/>
+<path d="M0,0 L4,2 L22,20 L30,27 L96,93 L104,100 L111,107 L189,108 L189,178 L185,187 L178,193 L171,196 L121,196 L121,275 L114,269 L82,237 L74,230 L41,197 L-71,196 L-79,192 L-86,184 L-88,179 L-88,87 L-45,44 L-37,37 Z " fill="#5C6F79" transform="translate(249,203)"/>
+<path d="M0,0 L139,0 L153,14 L161,21 L227,87 L235,94 L277,136 L277,137 L139,137 L122,120 L114,113 L48,47 L40,40 L21,21 L17,23 L-28,68 L-36,75 L-98,137 L-138,137 L-132,130 L-90,88 L-82,81 L-17,16 L-9,9 Z " fill="#F6901E" transform="translate(230,151)"/>
+<path d="M0,0 Z M-2,1 L0,1 L-2,5 L-23,26 L-27,29 L-29,28 Z " fill="#F2E7DA" transform="translate(202,218)"/>
+</svg>

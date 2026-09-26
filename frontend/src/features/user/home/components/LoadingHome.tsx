@@ -17,12 +17,12 @@ export default function LoadingHome() {
 
 function HeroSkeleton() {
   return (
-    <section className="relative h-[500px] lg:h-[600px] overflow-hidden">
+    <section className="relative h-125 lg:h-150 overflow-hidden">
       <Skeleton className="absolute inset-0 rounded-none" />
 
       <div className="absolute inset-0 z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[680px] xl:max-w-[720px] h-full flex flex-col justify-between py-12 lg:py-16">
-          <div className="min-h-[260px] lg:min-h-[340px]">
+        <div className="max-w-170 xl:max-w-180 h-full flex flex-col justify-between py-12 lg:py-16">
+          <div className="min-h-65 lg:min-h-85">
             <Skeleton className="h-7 w-44 rounded-full mb-4 bg-white/20" />
             <Skeleton className="h-12 sm:h-14 lg:h-16 w-[90%] mb-3 bg-white/20" />
             <Skeleton className="h-12 sm:h-14 lg:h-16 w-[70%] mb-5 bg-white/20" />
@@ -58,7 +58,7 @@ function SectionHeadingSkeleton() {
   return (
     <div className="mb-10">
       <Skeleton className="h-9 w-72 mb-3" />
-      <Skeleton className="h-5 w-[420px] max-w-full" />
+      <Skeleton className="h-5 w-105 max-w-full" />
     </div>
   );
 }
@@ -69,7 +69,7 @@ export function CarouselRowSkeleton({ cards = 5 }: { cards?: number }) {
       {Array.from({ length: cards }).map((_, i) => (
         <div
           key={i}
-          className="basis-full min-[550px]:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 flex-shrink-0"
+          className="basis-full min-[550px]:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 shrink-0"
         >
           <Skeleton className="h-56 rounded-2xl" />
           <Skeleton className="h-4 w-3/4 mt-4" />

@@ -99,7 +99,7 @@ function ExtraChargeStatusBadge({ status }: { status: ExtraChargeStatus }) {
         c.badge
       )}
     >
-      <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', c.dot)} />
+      <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', c.dot)} />
       {c.label}
     </span>
   );
@@ -250,7 +250,7 @@ export default function BookingDetailsPage({
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-2 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
@@ -283,7 +283,7 @@ export default function BookingDetailsPage({
                     key={i}
                     className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-3.5"
                   >
-                    <div className="flex h-11 w-11 flex-shrink-0 flex-col items-center justify-center rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20">
+                    <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20">
                       <span className="text-[9px] font-bold uppercase text-amber-500">
                         {dayjs(slot.date).format('MMM')}
                       </span>
@@ -694,7 +694,7 @@ function StatusTimeline({
   return (
     <div className="relative space-y-1 pl-2">
       {/* Connector line */}
-      <div className="pointer-events-none absolute left-[19px] top-4 bottom-4 w-px bg-gradient-to-b from-border via-border/40 to-transparent" />
+      <div className="pointer-events-none absolute left-4.75 top-4 bottom-4 w-px bg-linear-to-b from-border via-border/40 to-transparent" />
 
       {history.map((h, i) => {
         const cfg = BOOKING_STATUS_META[h.status] ?? BOOKING_STATUS_META.pending;
@@ -709,7 +709,7 @@ function StatusTimeline({
             {/* Dot */}
             <div
               className={cn(
-                'relative z-10 mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ring-2 ring-background',
+                'relative z-10 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ring-2 ring-background',
                 cfg.dot
               )}
             >
@@ -726,7 +726,7 @@ function StatusTimeline({
                 >
                   {cfg.label}
                 </span>
-                <time className="flex-shrink-0 font-mono text-[11px] text-muted-foreground">
+                <time className="shrink-0 font-mono text-[11px] text-muted-foreground">
                   {formatSmartDateTime(h.changedAt)}
                 </time>
               </div>
@@ -802,7 +802,7 @@ function InfoChip({
 }) {
   return (
     <div className="flex items-center gap-2 rounded-xl border border-border bg-muted/40 p-3">
-      <Icon className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+      <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
       <div className="min-w-0">
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
         <p className="truncate text-xs font-semibold text-foreground">{value}</p>
@@ -831,7 +831,7 @@ function PartyCard({
     violet: 'from-violet-500/10 to-violet-500/[0.03] border-violet-500/20',
   };
   return (
-    <div className={cn('rounded-xl border bg-gradient-to-br p-4', accentCls[accent])}>
+    <div className={cn('rounded-xl border bg-linear-to-br p-4', accentCls[accent])}>
       <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         {label}
       </p>

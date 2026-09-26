@@ -36,7 +36,7 @@ export default function DateSelector({
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="flex-shrink-0 flex flex-col items-center px-3 py-2.5 rounded-xl border border-border min-w-[52px] gap-1"
+              className="shrink-0 flex flex-col items-center px-3 py-2.5 rounded-xl border border-border min-w-13 gap-1"
             >
               <Skeleton className="h-2 w-6 rounded" />
               <Skeleton className="h-4 w-4 rounded" />
@@ -59,7 +59,7 @@ export default function DateSelector({
                 whileTap={available ? { scale: 0.93 } : {}}
                 onClick={() => available && onDateSelect(dateStr)}
                 disabled={!available}
-                className={`flex-shrink-0 flex flex-col items-center px-3 py-2.5 rounded-xl border text-center min-w-[52px] transition-all ${
+                className={`shrink-0 flex flex-col items-center px-3 py-2.5 rounded-xl border text-center min-w-13 transition-all ${
                   !available
                     ? 'border-border bg-muted/20 opacity-40 cursor-not-allowed'
                     : selected

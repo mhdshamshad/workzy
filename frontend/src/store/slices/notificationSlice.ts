@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-interface NotificationState {
+export interface NotificationState {
   unreadCount: number;
 }
 

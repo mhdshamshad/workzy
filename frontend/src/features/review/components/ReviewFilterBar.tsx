@@ -38,7 +38,7 @@ export function ReviewFilterBar({
         <span>Filters</span>
       </div>
       <Select value={sortBy} onValueChange={v => onSortByChange(v as 'createdAt' | 'rating')}>
-        <SelectTrigger className="w-[150px]">
+        <SelectTrigger className="w-37.5">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
@@ -47,7 +47,7 @@ export function ReviewFilterBar({
         </SelectContent>
       </Select>
       <Select value={sortOrder} onValueChange={v => onSortOrderChange(v as 'asc' | 'desc')}>
-        <SelectTrigger className="w-[140px]">
+        <SelectTrigger className="w-35">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

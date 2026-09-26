@@ -117,7 +117,7 @@ export default function BookingModal({ open, onClose, worker }: BookingModalProp
           onClick={() => goTo(stepIndex - 1)}
           disabled={isReleasing || isReserving || isBooking}
           iconLeft={<ChevronLeft className="w-4 h-4" />}
-          className="flex-shrink-0"
+          className="shrink-0"
         >
           Back
         </Button>

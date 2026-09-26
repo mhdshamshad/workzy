@@ -72,7 +72,7 @@ export default function WorkerProfileRouteWrapper() {
                   size={120}
                   onChange={handleImageUpload}
                   loading={imageUploading}
-                  className="!w-24 !h-24 sm:!w-28 sm:!h-28"
+                  className="w-24! h-24! sm:w-28! sm:h-28!"
                   editable
                   progress={progress}
                 />

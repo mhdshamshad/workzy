@@ -65,10 +65,7 @@ export function ReviewCardSkeleton({
             {mediaCount > 0 && (
               <div className="mt-2.5 flex flex-wrap gap-2">
                 {Array.from({ length: mediaCount }).map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    className="h-16 w-16 shrink-0 rounded-lg sm:h-[72px] sm:w-[72px]"
-                  />
+                  <Skeleton key={i} className="h-16 w-16 shrink-0 rounded-lg sm:h-18 sm:w-18" />
                 ))}
               </div>
             )}

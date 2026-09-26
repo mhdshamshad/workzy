@@ -48,10 +48,7 @@ export default function NearbyWorkerCard({ worker }: { worker: NearbyWorkerItem 
           </div>
           {averageRating > 0 && (
             <div className="flex shrink-0 items-center gap-1 rounded-full border bg-background/60 px-2.5 py-1 text-xs font-semibold backdrop-blur">
-              <Star
-                className="h-3.5 w-3.5 fill-[var(--golden)] text-[var(--golden)]"
-                strokeWidth={1.5}
-              />
+              <Star className="h-3.5 w-3.5 fill-golden text-golden" strokeWidth={1.5} />
               <span>{averageRating?.toFixed(1)}</span>
             </div>
           )}

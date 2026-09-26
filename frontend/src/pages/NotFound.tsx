@@ -25,7 +25,7 @@ export default function NotFound() {
             404
           </span>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-primary via-violet-500 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-5xl sm:text-6xl font-black bg-linear-to-r from-primary via-violet-500 to-pink-500 bg-clip-text text-transparent">
               404
             </span>
           </div>

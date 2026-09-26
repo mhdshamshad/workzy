@@ -10,7 +10,7 @@ export function ReviewSummarySkeleton() {
         className="rounded-xl border bg-card p-6"
       >
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-          <div className="flex flex-col items-center gap-2 sm:min-w-[140px]">
+          <div className="flex flex-col items-center gap-2 sm:min-w-35">
             <Skeleton className="h-12 w-16" />
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-3 w-16" />
@@ -24,8 +24,8 @@ export function ReviewSummarySkeleton() {
       </motion.div>
       <div className="flex gap-3">
         <Skeleton className="h-9 w-20" />
-        <Skeleton className="h-9 w-[150px]" />
-        <Skeleton className="h-9 w-[140px]" />
+        <Skeleton className="h-9 w-37.5" />
+        <Skeleton className="h-9 w-35" />
       </div>
     </div>
   );

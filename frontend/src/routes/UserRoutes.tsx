@@ -3,11 +3,12 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
-import UserChatPage from '@/features/user/chat/UserChatPage';
 import NotFound from '@/pages/NotFound';
 
 import GuestRoute from './GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
+
+const UserChatPage = lazy(() => import('@/features/user/chat/UserChatPage'));
 
 // guest pages
 const Login = lazy(() => import('@/features/auth/pages/Login'));

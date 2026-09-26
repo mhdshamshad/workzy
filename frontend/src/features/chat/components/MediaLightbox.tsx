@@ -27,7 +27,7 @@ export default function MediaLightbox({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 p-4 backdrop-blur-md cursor-zoom-out"
+          className="fixed inset-0 z-100 flex flex-col items-center justify-center bg-black/95 p-4 backdrop-blur-md cursor-zoom-out"
         >
           <button
             onClick={onClose}

@@ -88,7 +88,7 @@ export default function CancelModal({
     >
       <div className="flex flex-col gap-4">
         <div className="flex gap-3 p-3 rounded-xl border bg-amber-500/15 text-amber-500 border-amber-500/30 ">
-          <AlertTriangle size={15} className="flex-shrink-0 mt-0.5" />
+          <AlertTriangle size={15} className="shrink-0 mt-0.5" />
           <p className="text-sm leading-relaxed">
             Cancelling may incur a fee depending on timing. Payment will be refunded as per our
             policy.

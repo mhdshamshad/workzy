@@ -1,0 +1,8 @@
+# Workzy Platform
+
+> Workzy is a digital on-demand platform connecting customers with verified skilled service workers for home and commercial maintenance, electrical, plumbing, carpentry, and cleaning tasks.
+
+## Platform Capabilities
+- [Service Catalog](https://workzynow.in/services): Browse available professional services and service categories.
+- [Worker Registration](https://workzynow.in/join): Onboarding portal for skilled trade professionals.
+- [Customer Support](https://workzynow.in/support): Support, dispute assistance, and platform policies.

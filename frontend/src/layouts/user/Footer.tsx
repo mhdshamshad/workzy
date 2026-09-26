@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           <div>
-            <div className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-4">
+            <div className="text-3xl font-bold bg-linear-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-4">
               Workzy
             </div>
             <p className="text-sm leading-relaxed">
@@ -12,7 +12,7 @@ export default function Footer() {
             </p>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Services</h4>
+            <h3 className="text-white font-semibold mb-4">Services</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
@@ -37,7 +37,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
+            <h3 className="text-white font-semibold mb-4">Company</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
@@ -62,7 +62,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">For Professionals</h4>
+            <h3 className="text-white font-semibold mb-4">For Professionals</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">

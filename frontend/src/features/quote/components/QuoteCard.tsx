@@ -53,7 +53,7 @@ export function QuoteCard({
     >
       <div
         className={[
-          'absolute left-0 inset-y-0 w-[3px] rounded-l-2xl',
+          'absolute left-0 inset-y-0 w-0.75 rounded-l-2xl',
           status === QUOTE_STATUS.ACCEPTED
             ? 'bg-emerald-500'
             : status === QUOTE_STATUS.PENDING
@@ -68,7 +68,7 @@ export function QuoteCard({
             {isAdmin ? (
               <>
                 <PersonChip person={user} label="Client" icon={<User className="h-2.5 w-2.5" />} />
-                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 flex-shrink-0" />
+                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                 <PersonChip
                   person={worker}
                   label="Worker"
@@ -85,7 +85,7 @@ export function QuoteCard({
               />
             )}
           </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <Badge variant={statusVariantMap[status] ?? 'blue'}>{status}</Badge>
             <div className="text-right">
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Quote</p>
@@ -101,7 +101,7 @@ export function QuoteCard({
               <img
                 src={category.iconUrl}
                 alt=""
-                className="h-3.5 w-3.5 rounded-sm object-cover flex-shrink-0"
+                className="h-3.5 w-3.5 rounded-sm object-cover shrink-0"
               />
             )}
             {category.name}
@@ -180,11 +180,11 @@ function SlotRow({ slot }: { slot: BookingSlot }) {
   return (
     <div className="flex items-center justify-between gap-4 py-1.5 border-b border-border/40 last:border-0">
       <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
-        <CalendarDays className="h-3 w-3 text-primary/70 flex-shrink-0" />
+        <CalendarDays className="h-3 w-3 text-primary/70 shrink-0" />
         {dayjs(slot.date).format('ddd, MMM D')}
       </span>
       <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground tabular-nums">
-        <Clock className="h-3 w-3 flex-shrink-0" />
+        <Clock className="h-3 w-3 shrink-0" />
         {slot.startTime} – {slot.endTime}
       </span>
     </div>

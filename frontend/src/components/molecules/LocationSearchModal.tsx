@@ -33,7 +33,7 @@ interface LocationSearchModalProps {
   description?: string;
 }
 
-export function LocationSearchModal({
+export default function LocationSearchModal({
   open,
   onClose,
   onSelectLocation,
@@ -182,7 +182,7 @@ export function LocationSearchModal({
           disabled={useCurrentLocation}
           className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
         >
-          <MapPin className="w-4 h-4 flex-shrink-0" />
+          <MapPin className="w-4 h-4 shrink-0" />
           {useCurrentLocation && (
             <div className="w-4 h-4 relative">
               <div className="absolute inset-0 flex items-center justify-center">
@@ -237,7 +237,7 @@ export function LocationSearchModal({
                   onClick={() => handleSelectLocation(location)}
                   className="w-full flex items-start gap-3 p-3 hover:bg-accent transition-colors border-b border-border last:border-b-0 text-left"
                 >
-                  <MapPin className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
+                  <MapPin className="w-4 h-4 text-muted-foreground mt-1 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm text-foreground">{location.text}</div>
                     <div className="text-xs text-muted-foreground truncate">

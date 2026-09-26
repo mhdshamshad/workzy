@@ -78,7 +78,7 @@ export default function WorkerStartJobModal({
     >
       <div className="flex flex-col gap-4">
         <div className="flex gap-3 p-3 rounded-xl border bg-blue-500/15 text-blue-400 border-blue-500/30">
-          <Info size={18} className="flex-shrink-0 mt-0.5" />
+          <Info size={18} className="shrink-0 mt-0.5" />
           <p className="text-sm leading-relaxed">
             Starting the job will notify the client that you have arrived and work is commencing.
             The status will change to "In Progress".
@@ -100,7 +100,7 @@ export default function WorkerStartJobModal({
           </div>
           <div className="pt-2 border-t border-border flex justify-between items-center text-sm">
             <span className="text-muted-foreground font-medium">Location</span>
-            <span className="font-medium text-foreground text-right max-w-[200px] truncate">
+            <span className="font-medium text-foreground text-right max-w-50 truncate">
               {booking.addressLabel}
             </span>
           </div>

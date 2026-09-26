@@ -547,7 +547,7 @@ export default function MessageInput({
               rows={1}
               disabled={isBusy}
               placeholder={isEditing ? 'Edit message…' : 'Type your message…'}
-              className="flex-grow bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground py-3 resize-none max-h-32 disabled:opacity-50"
+              className="grow bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground py-3 resize-none max-h-32 disabled:opacity-50"
               {...rhfRest}
               ref={el => {
                 rhfRef(el);

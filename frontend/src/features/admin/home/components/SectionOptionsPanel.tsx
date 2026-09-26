@@ -67,7 +67,7 @@ export default function SectionOptionsPanel({ layoutIds, onAdd }: Props) {
         />
       </div>
 
-      <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto my-3">
+      <div className="flex flex-col gap-2 max-h-105 overflow-y-auto my-3">
         {sectionsIsLoading ? (
           <LayoutSkeleton />
         ) : sectionsError ? (

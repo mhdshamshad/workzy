@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, PawPrint, Phone, Settings, Smartphone } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -8,7 +8,6 @@ import Button from '@/components/atoms/Button';
 import { WORKER_STATUS } from '@/constants';
 import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS, STATS_CARDS } from '@/constants/landingItems';
 import CTASection from '@/features/user/home/components/CTASection';
-import BecomeWorkerForm from '@/features/user/JoinUs/components/BecomeWorkerForm';
 import {
   AnimatedCounter,
   FAQItem,
@@ -23,6 +22,9 @@ import type { RootState } from '@/store/store';
 
 import become_wokrer_img from '../assets/images/become_wokrer.webp';
 import workerImg from '../assets/images/worker_image.webp';
+
+const BecomeWorkerForm = lazy(() => import('@/features/user/JoinUs/components/BecomeWorkerForm'));
+
 export default function JoinUsPage() {
   const navigate = useNavigate();
   const applyNowRef = useRef<HTMLElement | null>(null);
@@ -60,7 +62,7 @@ export default function JoinUsPage() {
 
   return (
     <main>
-      <section className="relative bg-gradient-to-br from-[oklch(89.1% 0.01315 266.734)] to-[oklch(89.1% 0.01315 266.734)] bg-[oklch(21.48%_0.03444_254.607)] text-white overflow-hidden">
+      <section className="relative bg-linear-to-br from-[oklch(89.1% 0.01315 266.734)] to-[oklch(89.1% 0.01315 266.734)] bg-[oklch(21.48%_0.03444_254.607)] text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-golden animate-pulse"></div>
           <div
@@ -83,7 +85,7 @@ export default function JoinUsPage() {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
                 Grow Your Service Business with <span className="text-golden">Workzy</span>
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+              <p className="text-lg md:text-xl text-slate-200 leading-relaxed">
                 Join thousands of service providers expanding their reach and transforming their
                 business with our all-in-one platform.
               </p>
@@ -92,7 +94,7 @@ export default function JoinUsPage() {
                   <Button
                     size="lg"
                     onClick={openFormAndScroll}
-                    className="bg-golden hover:bg-golden/90 text-section-dark px-8 py-6 text-lg rounded-full shadow-lg transform transition-transform duration-300 hover:translate-y-[-2px]"
+                    className="bg-golden hover:bg-golden/90 text-section-dark px-8 py-6 text-lg rounded-full shadow-lg transform transition-transform duration-300 hover:-translate-y-0.5"
                   >
                     Get Started
                     <ArrowRight className="ml-2 h-5 w-5" />
@@ -107,14 +109,16 @@ export default function JoinUsPage() {
                 <img
                   src={workerImg}
                   alt="Service professional using Workzy"
-                  className="w-full h-auto"
+                  width="600"
+                  height="400"
+                  className="w-full h-auto object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-section-dark to-transparent opacity-20"></div>
+                <div className="absolute inset-0 bg-linear-to-t from-section-dark to-transparent opacity-20"></div>
               </div>
               <div className="absolute -bottom-8 -right-8">
                 <MetricCard value="+65%" label="Average Revenue Growth" />
               </div>
-              <div className="absolute top-[-30px] right-[30px]">
+              <div className="absolute -top-7.5 right-7.5">
                 <MetricCard value="2.3x" label="Client Base Expansion" />
               </div>
             </div>
@@ -187,12 +191,20 @@ export default function JoinUsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
               >
-                <BecomeWorkerForm
-                  worker={data}
-                  isLoading={isLoading || isPending}
-                  onSubmit={onSubmit}
-                  userPhone={user?.phone}
-                />
+                <Suspense
+                  fallback={
+                    <div className="flex h-64 items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                    </div>
+                  }
+                >
+                  <BecomeWorkerForm
+                    worker={data}
+                    isLoading={isLoading || isPending}
+                    onSubmit={onSubmit}
+                    userPhone={user?.phone}
+                  />
+                </Suspense>
               </motion.div>
             )}
           </div>
@@ -203,7 +215,7 @@ export default function JoinUsPage() {
       <section className="py-20 px-4 bg-background">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-golden/10 text-[var(--golden-dark)] rounded-full text-sm font-medium mb-4">
+            <span className="inline-block px-4 py-1.5 bg-golden/10 text-(--golden-dark) rounded-full text-sm font-medium mb-4">
               WHY CHOOSE US
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -234,7 +246,7 @@ export default function JoinUsPage() {
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <span className="inline-block px-4 py-1.5 bg-golden/10 text-[var(--golden-dark)] rounded-full text-sm font-medium mb-4">
+              <span className="inline-block px-4 py-1.5 bg-golden/10 text-(--golden-dark) rounded-full text-sm font-medium mb-4">
                 HOW IT WORKS
               </span>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
@@ -264,11 +276,14 @@ export default function JoinUsPage() {
                 <img
                   src={become_wokrer_img}
                   alt="Workzy app demonstration"
-                  className="w-full max-w-[620px] object-contain"
+                  width="620"
+                  height="450"
+                  loading="lazy"
+                  className="w-full max-w-155 object-contain"
                 />
               </div>
               <div className="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-golden rounded-full p-6 shadow-xl">
-                <Smartphone className="h-8 w-8 text-[var(--golden-dark)]" />
+                <Smartphone className="h-8 w-8 text-(--golden-dark)" />
               </div>
               <div className="absolute bottom-1/4 right-0 transform translate-x-1/3 bg-card rounded-full p-5 shadow-xl border">
                 <Settings className="h-7 w-7 text-golden" />
@@ -282,7 +297,7 @@ export default function JoinUsPage() {
       <section className="py-20 px-4 bg-background">
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-golden/10 text-[var(--golden-dark)] rounded-full text-sm font-medium mb-4">
+            <span className="inline-block px-4 py-1.5 bg-golden/10 text-(--golden-dark) rounded-full text-sm font-medium mb-4">
               FAQ
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">

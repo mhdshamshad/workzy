@@ -27,7 +27,7 @@ export function StarRating({ rating, showValue = true, size = 'md', className }:
         {[0, 1, 2, 3, 4].map(i => {
           const fill = Math.max(0, Math.min(1, rating - i));
           return (
-            <div key={i} className={cn('relative flex-shrink-0', star)}>
+            <div key={i} className={cn('relative shrink-0', star)}>
               <Star className={cn(star, 'text-muted-foreground/20 absolute inset-0')} />
               <div className="absolute inset-0 overflow-hidden" style={{ width: `${fill * 100}%` }}>
                 <Star className={cn(star, 'fill-amber-400 text-amber-400')} />

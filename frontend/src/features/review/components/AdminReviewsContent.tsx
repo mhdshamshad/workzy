@@ -116,12 +116,12 @@ export function AdminReviewsContent({ workerId, userId }: AdminReviewsContentPro
           <div className="col-span-4 md:col-span-1 flex items-start md:order-last">
             <Popover>
               <PopoverTrigger asChild>
-                <Btn variant="outline" className="w-full md:w-auto mt-[1px] h-10">
+                <Btn variant="outline" className="w-full md:w-auto mt-px h-10">
                   <SlidersHorizontal size={14} />
                   Filters ({filters.activeFilterCount})
                 </Btn>
               </PopoverTrigger>
-              <PopoverContent className="w-full md:w-auto mt-[1px] space-y-3">
+              <PopoverContent className="w-full md:w-auto mt-px space-y-3">
                 <AdminReviewFilters {...filters} />
               </PopoverContent>
             </Popover>

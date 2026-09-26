@@ -44,7 +44,7 @@ export default function HomePage() {
     return <LoadingHome />;
   }
   if (error || !homeData) {
-    return <PageError />;
+    return <PageError title={error?.message} fullScreen />;
   }
 
   const sections = [...homeData.sections].sort((a, b) => a.order - b.order);

@@ -86,6 +86,7 @@ export default function WorkerQuoteCreatePage() {
               variant="ghost"
               size="icon"
               type="button"
+              aria-label="Go back"
               onClick={() => navigate(-1)}
               iconLeft={<ArrowLeft className="h-4 w-4" />}
             />

@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function WorkerProfileLayoutSkeleton() {
   return (
     <div className="pb-12 bg-background">
-      <div className="relative w-full h-[260px] md:h-[320px] overflow-hidden rounded-t-2xl">
+      <div className="relative w-full h-65 md:h-80 overflow-hidden rounded-t-2xl">
         <Skeleton className="w-full h-full" />
       </div>
       <div className="px-6 -mt-16 relative z-10">

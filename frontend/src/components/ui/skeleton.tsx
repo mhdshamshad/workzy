@@ -9,7 +9,7 @@ function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
       className={cn('relative overflow-hidden bg-muted rounded-md', className)}
       {...props}
     >
-      <div className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-black/20 to-transparent dark:via-white/20" />
+      <div className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-linear-to-r from-transparent via-black/20 to-transparent dark:via-white/20" />
     </div>
   );
 }

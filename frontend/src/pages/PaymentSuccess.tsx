@@ -85,7 +85,7 @@ export default function PaymentSuccess() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-10">
       <div className="rounded-2xl border border-border bg-card w-full max-w-md overflow-hidden">
-        <div className="h-[3px] w-full bg-gradient-to-r from-violet-600 to-violet-400" />
+        <div className="h-0.75 w-full bg-linear-to-r from-violet-600 to-violet-400" />
 
         <div className="p-8 flex flex-col items-center gap-6">
           <div className="flex flex-col items-center gap-3 text-center">

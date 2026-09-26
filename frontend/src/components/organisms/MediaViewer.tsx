@@ -143,7 +143,7 @@ function MediaContent({ item }: { item: MediaItem }) {
       <div
         onClick={e => e.stopPropagation()}
         className="absolute bottom-0 inset-x-0 px-3 pb-3 pt-8
-          bg-gradient-to-t from-black/80 to-transparent flex flex-col gap-1.5"
+          bg-linear-to-t from-black/80 to-transparent flex flex-col gap-1.5"
       >
         <div
           className="relative w-full h-1 rounded-full bg-white/20 cursor-pointer group/bar"
@@ -216,13 +216,13 @@ export function MediaViewer({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
       onClick={onClose}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center
+      className="fixed inset-0 z-9999 flex flex-col items-center justify-center
         bg-black/95 backdrop-blur-md"
     >
       <div
         onClick={e => e.stopPropagation()}
         className="absolute top-0 inset-x-0 z-10 flex items-center justify-between
-          px-4 py-3 sm:px-6 bg-gradient-to-b from-black/70 to-transparent"
+          px-4 py-3 sm:px-6 bg-linear-to-b from-black/70 to-transparent"
       >
         <span
           className="flex items-center gap-1.5 text-white/70 text-xs font-medium
@@ -299,7 +299,7 @@ export function MediaViewer({
         <div
           onClick={e => e.stopPropagation()}
           className="absolute bottom-0 inset-x-0 z-10 flex justify-center
-            px-4 pb-5 pt-10 bg-gradient-to-t from-black/70 to-transparent"
+            px-4 pb-5 pt-10 bg-linear-to-t from-black/70 to-transparent"
         >
           <p className="text-white/80 text-sm text-center max-w-lg">{item.caption}</p>
         </div>

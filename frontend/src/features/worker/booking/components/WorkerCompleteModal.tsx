@@ -132,7 +132,7 @@ export default function WorkerCompleteModal({
             onChange={e => setNote(e.target.value)}
             placeholder="Describe the final outcome or any details for the client..."
             disabled={isSubmitting}
-            className="min-h-[100px]"
+            className="min-h-25"
           />
         </div>
       </div>

@@ -96,7 +96,7 @@ export default function ChatListItem({ chat, role, active, onClick }: ChatListIt
             )}
           </div>
           {!active && !isAdmin && unread > 0 && (
-            <span className="ml-1 inline-flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+            <span className="ml-1 inline-flex h-4.5 min-w-4.5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
               {unread > 99 ? '99+' : unread}
             </span>
           )}

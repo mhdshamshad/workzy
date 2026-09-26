@@ -4,7 +4,7 @@ import { AUTH_API, HOST, SESSION_MESSAGES } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
 import type { UpdateUserPayload, User } from '@/types/user';
 
-interface AuthState {
+export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   accessToken: string | null;

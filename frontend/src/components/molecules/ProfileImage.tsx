@@ -104,6 +104,8 @@ export default function ProfileImage({
           onClick={onClickImage}
           onLoad={() => setImgLoaded(true)}
           onError={() => setImgError(true)}
+          loading="lazy"
+          decoding="async"
           style={{ width: size, height: size, display: showImage ? 'block' : 'none' }}
           className={cn('object-cover border-2 border-white/10', shapeClass)}
         />
@@ -114,7 +116,7 @@ export default function ProfileImage({
         <div
           onClick={onClickImage}
           className={cn(
-            'flex items-center justify-center bg-gradient-to-br text-white font-semibold select-none',
+            'flex items-center justify-center bg-linear-to-br text-white font-semibold select-none',
             getGradient(name),
             shapeClass
           )}
@@ -155,6 +157,8 @@ export default function ProfileImage({
         <>
           <button
             type="button"
+            aria-label="Change profile picture"
+            title="Change profile picture"
             onClick={() => fileRef.current?.click()}
             className={cn(
               'absolute bottom-0.5 right-0.5 z-30 rounded-full border border-border bg-background p-1.5 shadow-sm',

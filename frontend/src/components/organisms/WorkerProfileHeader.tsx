@@ -63,7 +63,7 @@ export default function WorkerProfileHeader({
             backgroundPosition: 'center',
           }}
         />
-        <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-black/10 via-transparent to-background sm:h-60" />
+        <div className="absolute inset-x-0 top-0 h-48 bg-linear-to-b from-black/10 via-transparent to-background sm:h-60" />
 
         <div
           className={cn(
@@ -81,7 +81,7 @@ export default function WorkerProfileHeader({
                   name={displayName}
                   shape="rounded"
                   size={120}
-                  className="!w-24 !h-24 sm:!w-28 sm:!h-28"
+                  className="w-24! h-24! sm:w-28! sm:h-28!"
                 />
               )}
 

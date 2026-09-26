@@ -142,7 +142,7 @@ export class WorkerService implements IWorkerService {
       throw new CustomError(WORKER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
     }
     if (worker.profileImage?.includes("public/worker/profiles")) {
-      await this._s3Service.deleteFile(worker.profileImage);
+      void this._s3Service.deleteFile(worker.profileImage);
     }
     return updateWorker.profileImage;
   }

@@ -129,7 +129,7 @@ export function PaymentFilterBar({
       >
         <div
           className={cn(
-            'col-span-12 md:col-span-1 md:order-none',
+            'col-span-12 md:col-span-1 md:order-0',
             hasActiveFilters ? 'col-span-8 order-1' : 'order-1'
           )}
         >
@@ -140,18 +140,18 @@ export function PaymentFilterBar({
             {renderClearButton('w-full md:w-auto mt-[1px]')}
           </div>
         )}
-        <div className="col-span-6 sm:col-span-4 md:col-span-1 md:order-none order-3">
+        <div className="col-span-6 sm:col-span-4 md:col-span-1 md:order-0 order-3">
           {statusSelect}
         </div>
-        <div className="col-span-6 sm:col-span-4 md:col-span-1 md:order-none order-4">
+        <div className="col-span-6 sm:col-span-4 md:col-span-1 md:order-0 order-4">
           {billTypeSelect}
         </div>
         {showDates && (
           <>
-            <div className="col-span-6 sm:col-span-4 md:col-span-1 md:order-none order-5">
+            <div className="col-span-6 sm:col-span-4 md:col-span-1 md:order-0 order-5">
               {fromDatePicker}
             </div>
-            <div className="col-span-6 sm:col-span-4 md:col-span-1 md:order-none order-6">
+            <div className="col-span-6 sm:col-span-4 md:col-span-1 md:order-0 order-6">
               {toDatePicker}
             </div>
           </>
@@ -169,37 +169,37 @@ export function PaymentFilterBar({
           : 'lg:grid-cols-[1fr_180px_160px_160px]'
       )}
     >
-      <div className="col-span-12 lg:col-span-1 order-1 lg:order-none">
+      <div className="col-span-12 lg:col-span-1 order-1 lg:order-0">
         <div className="flex items-center gap-3">
           <div className="flex-1">{searchField}</div>
           {hasActiveFilters && (
-            <div className="hidden sm:block lg:hidden flex-shrink-0">
+            <div className="hidden sm:block lg:hidden shrink-0">
               {renderClearButton('mt-[1px]')}
             </div>
           )}
         </div>
       </div>
 
-      <div className="col-span-6 sm:col-span-4 lg:col-span-1 order-2 lg:order-none">
+      <div className="col-span-6 sm:col-span-4 lg:col-span-1 order-2 lg:order-0">
         {statusSelect}
       </div>
       {showDates && (
-        <div className="col-span-6 sm:col-span-4 lg:col-span-1 order-3 lg:order-none">
+        <div className="col-span-6 sm:col-span-4 lg:col-span-1 order-3 lg:order-0">
           {fromDatePicker}
         </div>
       )}
       {showDates && (
-        <div className="col-span-6 sm:col-span-4 lg:col-span-1 order-4 lg:order-none">
+        <div className="col-span-6 sm:col-span-4 lg:col-span-1 order-4 lg:order-0">
           {toDatePicker}
         </div>
       )}
       {hasActiveFilters && (
         <>
           <div className="col-span-6 sm:hidden order-5 flex items-start">
-            {renderClearButton('w-full mt-[1px]')}
+            {renderClearButton('w-full mt-px')}
           </div>
-          <div className="hidden lg:block lg:col-span-1 lg:order-last flex items-start">
-            {renderClearButton('mt-[1px]')}
+          <div className="hidden lg:flex lg:col-span-1 lg:order-last items-start">
+            {renderClearButton('mt-px')}
           </div>
         </>
       )}

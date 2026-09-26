@@ -93,7 +93,7 @@ export function AvailabilityGrid({
             >
               <div className="flex items-center gap-3 mb-4">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                     isAvailable ? 'bg-primary/10' : 'bg-muted'
                   }`}
                   aria-hidden
@@ -118,7 +118,7 @@ export function AvailabilityGrid({
                     <div key={idx} className="flex items-center gap-2 p-2 rounded-lg bg-muted">
                       {isEditing ? (
                         <>
-                          <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          <Clock className="w-3 h-3 text-muted-foreground shrink-0" />
                           <input
                             aria-label={`${day}-start-${idx}`}
                             type="time"
@@ -140,7 +140,7 @@ export function AvailabilityGrid({
                           />
                           <button
                             onClick={() => handleRemoveSlot(day as DayKey, idx)}
-                            className="p-1 text-destructive hover:bg-destructive/10 rounded transition-colors flex-shrink-0"
+                            className="p-1 text-destructive hover:bg-destructive/10 rounded transition-colors shrink-0"
                             title="Remove slot"
                             type="button"
                           >
@@ -149,7 +149,7 @@ export function AvailabilityGrid({
                         </>
                       ) : (
                         <>
-                          <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          <Clock className="w-3 h-3 text-muted-foreground shrink-0" />
                           <span className="text-xs text-card-foreground font-medium">
                             {slot.startTime} - {slot.endTime}
                           </span>

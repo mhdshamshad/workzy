@@ -58,7 +58,7 @@ export function ResolveDisputeForm({ dispute, onSubmit, isSubmitting }: Props) {
   return (
     <div className="space-y-6">
       <div className="p-4 rounded-xl bg-section-blue border border-border flex gap-3 items-center">
-        <AlertCircle className="text-section-blue-text flex-shrink-0" size={20} />
+        <AlertCircle className="text-section-blue-text shrink-0" size={20} />
         <div className="text-xs text-section-blue-text leading-relaxed">
           You are resolving Dispute <strong>#{dispute?.disputeId}</strong>. Confirming resolution
           modifies Stripe payments, transfers payouts, updates customer refunds, and notifies both

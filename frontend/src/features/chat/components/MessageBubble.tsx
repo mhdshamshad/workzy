@@ -171,6 +171,7 @@ export default function MessageBubble({
                 {isAdmin && isDeleted && (
                   <Button
                     size="icon"
+                    aria-label={revealDeleted ? 'Hide deleted message' : 'Reveal deleted message'}
                     onClick={() => setRevealDeleted(v => !v)}
                     variant={revealDeleted ? 'outline' : 'secondary'}
                     className="ml-1 h-4 w-4 p-0 rounded-full"
@@ -200,7 +201,7 @@ export default function MessageBubble({
                   >
                     {message.replyTo.role === currentRole ? 'You' : message.replyTo.role}
                   </p>
-                  <p className="line-clamp-2 break-words opacity-80">
+                  <p className="line-clamp-2 wrap-break-word opacity-80">
                     {message.replyTo.type === MESSAGE_TYPE.IMAGE
                       ? '📷 Photo'
                       : message.replyTo.type === MESSAGE_TYPE.VIDEO
@@ -223,12 +224,12 @@ export default function MessageBubble({
               ) : (
                 <>
                   {type === MESSAGE_TYPE.TEXT && (
-                    <p className="whitespace-pre-wrap leading-relaxed break-words">{content}</p>
+                    <p className="whitespace-pre-wrap leading-relaxed wrap-break-word">{content}</p>
                   )}
 
                   {type === MESSAGE_TYPE.IMAGE && (
                     <div className="space-y-1">
-                      <div className="relative min-w-[200px] max-w-[260px] overflow-hidden rounded-xl">
+                      <div className="relative min-w-50 max-w-65 overflow-hidden rounded-xl">
                         {imgLoading && <Skeleton className="h-48 w-full rounded-xl" />}
                         {!imgError ? (
                           <img
@@ -281,7 +282,7 @@ export default function MessageBubble({
 
                   {type === MESSAGE_TYPE.AUDIO && (
                     <div className="space-y-1">
-                      <audio controls className="w-56 min-w-[200px] mt-1">
+                      <audio controls className="w-56 min-w-50 mt-1">
                         <source src={mediaUrl} />
                       </audio>
                       {content && <p className="text-sm mt-1">{content}</p>}
@@ -329,7 +330,7 @@ export default function MessageBubble({
       {menuOpen && (
         <div
           ref={menuRef}
-          className="fixed z-50 min-w-[140px] bg-popover text-popover-foreground border border-border rounded-xl shadow-2xl py-1.5"
+          className="fixed z-50 min-w-35 bg-popover text-popover-foreground border border-border rounded-xl shadow-2xl py-1.5"
           style={{ top: menuPos.top, left: menuPos.left }}
           onClick={e => e.stopPropagation()}
         >

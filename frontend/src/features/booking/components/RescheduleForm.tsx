@@ -146,7 +146,7 @@ export default function RescheduleForm({ booking, ctx, onSubmit, isRescheduling 
                     {...register('reason')}
                     error={errors.reason?.message}
                     placeholder="e.g. Need to shift by a day due to travel..."
-                    className="text-sm bg-muted/40 min-h-[110px]"
+                    className="text-sm bg-muted/40 min-h-27.5"
                   />
                 </div>
               </div>
@@ -161,7 +161,7 @@ export default function RescheduleForm({ booking, ctx, onSubmit, isRescheduling 
           disabled={stepIndex === 0 || isLoading}
           variant="secondary"
           iconLeft={<ChevronLeft className="w-4 h-4" />}
-          className="flex-shrink-0"
+          className="shrink-0"
         >
           Back
         </Button>

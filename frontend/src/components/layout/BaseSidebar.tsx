@@ -11,8 +11,7 @@ import type { MenuItem } from '@/types/navigation';
 import type { User } from '@/types/user';
 import { syncUserLocation } from '@/utils/locationSync';
 
-import workzyLogo from '../../assets/icons/logo-icon.jpg';
-import workzyIcon from '../../assets/icons/logo-icon.jpg';
+import workzyLogo from '../../assets/icons/logo_image.svg';
 import ProfileImage from '../molecules/ProfileImage';
 import { SidebarItem } from '../molecules/SidebarItem';
 import {
@@ -87,18 +86,32 @@ export function BaseSidebar({
         className={cn('flex items-center p-4', collapsed ? 'justify-center' : 'justify-between')}
       >
         <div className="flex items-center gap-3">
-          <img src={collapsed ? workzyIcon : workzyLogo} className="h-10" />
+          <img
+            src={workzyLogo}
+            alt="Workzy Logo"
+            width={40}
+            height={40}
+            className="h-10 w-10 object-contain"
+          />
           {!collapsed && <span className="text-lg font-semibold">WorkZy</span>}
         </div>
 
         {!collapsed && !mobile && (
-          <button onClick={toggleCollapse}>
+          <button
+            onClick={toggleCollapse}
+            aria-label="Collapse sidebar"
+            className="p-1 rounded-md hover:bg-accent"
+          >
             <ChevronLeft size={20} />
           </button>
         )}
 
         {collapsed && !mobile && (
-          <button className="absolute left-[62px]" onClick={toggleCollapse}>
+          <button
+            className="absolute left-15.5 p-1 rounded-md hover:bg-accent"
+            onClick={toggleCollapse}
+            aria-label="Expand sidebar"
+          >
             <ChevronRight size={20} />
           </button>
         )}
@@ -132,35 +145,46 @@ export function BaseSidebar({
           </>
         )}
       </div>
-      <div className="p-4">
+      <div className={cn('p-4', collapsed && 'p-2')}>
         <Separator className="mb-3" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div
+            <button
+              type="button"
               className={cn(
-                'flex items-center p-3 rounded-xl cursor-pointer hover:bg-accent',
-                collapsed && 'justify-center'
+                'w-full flex items-center p-3 rounded-xl cursor-pointer hover:bg-accent text-left transition-colors',
+                collapsed && 'justify-center p-2'
               )}
             >
               {user.role === ROLE.WORKER ? (
-                <ProfileImage src={worker?.profileImage} name={worker?.displayName} size={40} />
+                <ProfileImage
+                  src={worker?.profileImage}
+                  name={worker?.displayName}
+                  size={40}
+                  className="shrink-0"
+                />
               ) : (
-                <ProfileImage src={user?.profileImage} name={user?.name} size={40} />
+                <ProfileImage
+                  src={user?.profileImage}
+                  name={user?.name}
+                  size={40}
+                  className="shrink-0"
+                />
               )}
 
               {!collapsed && (
-                <div className="ml-3 flex-1">
+                <div className="ml-3 flex-1 min-w-0">
                   {user.role === ROLE.WORKER ? (
-                    <p className="text-sm font-medium">{worker?.displayName}</p>
+                    <p className="text-sm font-medium truncate">{worker?.displayName}</p>
                   ) : (
-                    <p className="text-sm font-medium">{user.name}</p>
+                    <p className="text-sm font-medium truncate">{user.name}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
               )}
 
-              {!collapsed && <ChevronDown size={14} />}
-            </div>
+              {!collapsed && <ChevronDown size={14} className="shrink-0 text-muted-foreground" />}
+            </button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-56 rounded-xl p-2" align="end">
