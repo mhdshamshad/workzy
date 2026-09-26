@@ -14,7 +14,7 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -27,7 +27,7 @@ import MultiSelectInput from '@/components/molecules/MultiSelectInput';
 import { Badge } from '@/components/ui/badge';
 import { INDIAN_LANGUAGES, WORKER_STATUS, WORKER_STATUS_CONFIG } from '@/constants';
 import { UploadPurposes } from '@/constants/upload';
-import MapSelector from '@/features/profile/components/MapSelector';
+const MapSelector = lazy(() => import('@/features/profile/components/MapSelector'));
 import type { WorkerProfileDetails } from '@/types/worker';
 
 import { AvailabilitySection } from '../../components/AvailabilitySection';
@@ -174,7 +174,7 @@ export default function WorkerProfileSection({
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <User2 size={16} className="text-primary" />
               </div>
-              <h3 className="text-lg font-bold text-foreground">Worker Profile</h3>
+              <h2 className="text-lg font-bold text-foreground">Worker Profile</h2>
               <Badge variant={config.badgeVariant}>
                 <StatusIcon className="size-3" />
                 {config.label}
@@ -446,21 +446,34 @@ export default function WorkerProfileSection({
                               )}
                             </div>
                             {locationMapOpen && (
-                              <MapSelector
-                                onLocationSelect={(coords, address) => {
-                                  const addressLabel = address
-                                    ? [address.place, address.city, address.state, address.pincode]
-                                        .filter(Boolean)
-                                        .join(', ')
-                                    : '';
-                                  field.onChange({
-                                    type: 'Point',
-                                    coordinates: coords,
-                                    addressLabel,
-                                  });
-                                }}
-                                onClose={() => setLocationMapOpen(false)}
-                              />
+                              <Suspense
+                                fallback={
+                                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                                  </div>
+                                }
+                              >
+                                <MapSelector
+                                  onLocationSelect={(coords, address) => {
+                                    const addressLabel = address
+                                      ? [
+                                          address.place,
+                                          address.city,
+                                          address.state,
+                                          address.pincode,
+                                        ]
+                                          .filter(Boolean)
+                                          .join(', ')
+                                      : '';
+                                    field.onChange({
+                                      type: 'Point',
+                                      coordinates: coords,
+                                      addressLabel,
+                                    });
+                                  }}
+                                  onClose={() => setLocationMapOpen(false)}
+                                />
+                              </Suspense>
                             )}
                           </>
                         )}
@@ -498,6 +511,7 @@ export default function WorkerProfileSection({
                       <button
                         type="button"
                         onClick={onChangePhone}
+                        aria-label="Change phone number"
                         title="Change phone number"
                         className="ml-auto p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shrink-0"
                       >

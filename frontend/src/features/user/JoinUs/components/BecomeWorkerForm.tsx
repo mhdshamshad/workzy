@@ -15,7 +15,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import Button from '@/components/atoms/Button';
@@ -27,7 +27,7 @@ import MultiSelectInput from '@/components/molecules/MultiSelectInput';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { DOCUMENT_TYPE, INDIAN_LANGUAGES, WORKER_STATUS, type DocumentType } from '@/constants';
 import { UploadPurposes } from '@/constants/upload';
-import MapSelector from '@/features/profile/components/MapSelector';
+const MapSelector = lazy(() => import('@/features/profile/components/MapSelector'));
 import { useImageUpload } from '@/features/profile/hooks/useImageUpload';
 import { cn } from '@/lib/utils';
 import type { WorkerProfileDetails } from '@/types/worker';
@@ -557,22 +557,30 @@ export default function BecomeWorkerForm({
                             )}
                           </div>
                           {locationMapOpen && (
-                            <MapSelector
-                              onLocationSelect={(coords, address) => {
-                                const addressLabel = address
-                                  ? [address.place, address.city, address.state, address.pincode]
-                                      .filter(Boolean)
-                                      .join(', ')
-                                  : '';
-                                field.onChange({
-                                  type: 'Point',
-                                  coordinates: coords,
-                                  addressLabel,
-                                });
-                                setLocationMapOpen(false);
-                              }}
-                              onClose={() => setLocationMapOpen(false)}
-                            />
+                            <Suspense
+                              fallback={
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                                </div>
+                              }
+                            >
+                              <MapSelector
+                                onLocationSelect={(coords, address) => {
+                                  const addressLabel = address
+                                    ? [address.place, address.city, address.state, address.pincode]
+                                        .filter(Boolean)
+                                        .join(', ')
+                                    : '';
+                                  field.onChange({
+                                    type: 'Point',
+                                    coordinates: coords,
+                                    addressLabel,
+                                  });
+                                  setLocationMapOpen(false);
+                                }}
+                                onClose={() => setLocationMapOpen(false)}
+                              />
+                            </Suspense>
                           )}
                         </>
                       )}

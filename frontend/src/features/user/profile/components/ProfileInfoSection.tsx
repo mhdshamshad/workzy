@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, MapPin, Pencil, Phone, Save, User2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { INDIAN_STATES } from '@/constants';
 import type { User } from '@/types/user';
 
-import MapSelector from '../../../profile/components/MapSelector';
+const MapSelector = lazy(() => import('../../../profile/components/MapSelector'));
 import {
   ProfileSchema,
   type ProfileFormType,
@@ -245,20 +245,28 @@ export default function ProfileInfoSection({ user, onSubmit }: Props) {
                   </div>
                 </div>
                 {locationMapOpen && (
-                  <MapSelector
-                    onLocationSelect={(coords, address) => {
-                      setValue('profile.address.house', address?.house || '');
-                      setValue('profile.address.place', address?.place || '');
-                      setValue('profile.address.city', address?.city || '');
-                      setValue('profile.address.state', address?.state || '');
-                      setValue('profile.address.pincode', address?.pincode || '');
-                      setValue('profile.location', {
-                        type: 'Point',
-                        coordinates: coords,
-                      });
-                    }}
-                    onClose={() => setLocationMapOpen(false)}
-                  />
+                  <Suspense
+                    fallback={
+                      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                      </div>
+                    }
+                  >
+                    <MapSelector
+                      onLocationSelect={(coords, address) => {
+                        setValue('profile.address.house', address?.house || '');
+                        setValue('profile.address.place', address?.place || '');
+                        setValue('profile.address.city', address?.city || '');
+                        setValue('profile.address.state', address?.state || '');
+                        setValue('profile.address.pincode', address?.pincode || '');
+                        setValue('profile.location', {
+                          type: 'Point',
+                          coordinates: coords,
+                        });
+                      }}
+                      onClose={() => setLocationMapOpen(false)}
+                    />
+                  </Suspense>
                 )}
               </>
             )}

@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
-import HomePage from '@/pages/Home';
+import LoadingHome from '@/features/user/home/components/LoadingHome';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import { syncUserLocation } from '@/utils/locationSync';
+
+const HomePage = lazy(() => import('@/pages/Home'));
 
 export default function RoleBasedRoot() {
   const { user, isAuthenticated, status } = useAppSelector((s: RootState) => s.auth);
@@ -26,7 +28,11 @@ export default function RoleBasedRoot() {
   }
 
   if (!isAuthenticated || !user) {
-    return <HomePage />;
+    return (
+      <Suspense fallback={<LoadingHome />}>
+        <HomePage />
+      </Suspense>
+    );
   }
 
   if (user.role === ROLE.ADMIN) {
@@ -37,5 +43,9 @@ export default function RoleBasedRoot() {
     return <Navigate to="/worker/dashboard" replace />;
   }
 
-  return <HomePage />;
+  return (
+    <Suspense fallback={<LoadingHome />}>
+      <HomePage />
+    </Suspense>
+  );
 }

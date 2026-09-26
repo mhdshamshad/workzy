@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, PawPrint, Phone, Settings, Smartphone } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { lazy, Suspense, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -8,7 +8,6 @@ import Button from '@/components/atoms/Button';
 import { WORKER_STATUS } from '@/constants';
 import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS, STATS_CARDS } from '@/constants/landingItems';
 import CTASection from '@/features/user/home/components/CTASection';
-import BecomeWorkerForm from '@/features/user/JoinUs/components/BecomeWorkerForm';
 import {
   AnimatedCounter,
   FAQItem,
@@ -23,6 +22,9 @@ import type { RootState } from '@/store/store';
 
 import become_wokrer_img from '../assets/images/become_wokrer.webp';
 import workerImg from '../assets/images/worker_image.webp';
+
+const BecomeWorkerForm = lazy(() => import('@/features/user/JoinUs/components/BecomeWorkerForm'));
+
 export default function JoinUsPage() {
   const navigate = useNavigate();
   const applyNowRef = useRef<HTMLElement | null>(null);
@@ -83,7 +85,7 @@ export default function JoinUsPage() {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
                 Grow Your Service Business with <span className="text-golden">Workzy</span>
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+              <p className="text-lg md:text-xl text-slate-200 leading-relaxed">
                 Join thousands of service providers expanding their reach and transforming their
                 business with our all-in-one platform.
               </p>
@@ -107,7 +109,9 @@ export default function JoinUsPage() {
                 <img
                   src={workerImg}
                   alt="Service professional using Workzy"
-                  className="w-full h-auto"
+                  width="600"
+                  height="400"
+                  className="w-full h-auto object-cover"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-section-dark to-transparent opacity-20"></div>
               </div>
@@ -187,12 +191,20 @@ export default function JoinUsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
               >
-                <BecomeWorkerForm
-                  worker={data}
-                  isLoading={isLoading || isPending}
-                  onSubmit={onSubmit}
-                  userPhone={user?.phone}
-                />
+                <Suspense
+                  fallback={
+                    <div className="flex h-64 items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                    </div>
+                  }
+                >
+                  <BecomeWorkerForm
+                    worker={data}
+                    isLoading={isLoading || isPending}
+                    onSubmit={onSubmit}
+                    userPhone={user?.phone}
+                  />
+                </Suspense>
               </motion.div>
             )}
           </div>
@@ -264,6 +276,9 @@ export default function JoinUsPage() {
                 <img
                   src={become_wokrer_img}
                   alt="Workzy app demonstration"
+                  width="620"
+                  height="450"
+                  loading="lazy"
                   className="w-full max-w-155 object-contain"
                 />
               </div>
