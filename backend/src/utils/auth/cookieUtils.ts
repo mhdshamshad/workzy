@@ -12,7 +12,8 @@ export const setRefreshTokenCookie = (res: Response, payload: { id: string; role
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : "lax",
+    sameSite: isProd ? "lax" : "none",
+    partitioned: isProd,
     path: "/",
     maxAge: REFRESH_TOKEN_TTL_SECONDS * 1000,
   });
@@ -22,7 +23,8 @@ export const clearRefreshTokenCookie = (res: Response) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : "lax",
+    sameSite: isProd ? "lax" : "none",
+    partitioned: isProd,
     path: "/",
   });
 };

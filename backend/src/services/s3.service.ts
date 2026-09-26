@@ -58,10 +58,12 @@ export class S3Service implements IS3Service {
     const uniqueName = generateUniqueFileName(prefix, extension);
     const fileKey = `${policy.folder}/${uniqueName}`;
 
+    const isPublic = !policy.folder.startsWith("private");
     const command = new PutObjectCommand({
       Bucket: this.config.bucket,
       Key: fileKey,
       ContentType: normalizedFileType,
+      CacheControl: isPublic ? "public, max-age=31536000, immutable" : undefined,
     });
 
     const uploadUrl = await getSignedUrl(this.s3, command, { expiresIn: 300 });
