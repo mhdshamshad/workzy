@@ -21,9 +21,12 @@ export default function CTASection({ isVerified, onBecomeProvider }: CTASectionP
     <section className="relative overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1200&q=80"
-          alt="CTA"
+          src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1200&q=75&auto=format&fit=crop"
+          alt="Workzy Service Platform"
           width="1200"
+          height="450"
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-[oklch(0.18_0.02_250/0.9)] "></div>

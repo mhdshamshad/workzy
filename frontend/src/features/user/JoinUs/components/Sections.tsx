@@ -156,7 +156,7 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   return (
     <span
       ref={countRef}
-      className="text-3xl sm:text-4xl lg:text-6xl font-bold text-golden block truncate"
+      className="text-3xl sm:text-4xl lg:text-6xl font-bold text-amber-600 dark:text-amber-400 block truncate"
     >
       {prefix}
       {count.toLocaleString()}

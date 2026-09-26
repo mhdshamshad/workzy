@@ -43,6 +43,7 @@ export function DataTablePagination({ table, onPageChange, onPageSizeChange }: P
           <span className="text-sm">Rows:</span>
           <select
             className="input"
+            aria-label="Rows per page"
             value={pageSizeLocal}
             onChange={e => handlePageSizeChange?.(Number(e.target.value))}
           >
@@ -58,6 +59,7 @@ export function DataTablePagination({ table, onPageChange, onPageSizeChange }: P
           <Button
             variant="outline"
             className="hidden @lg:inline-flex"
+            aria-label="First page"
             onClick={() => {
               onPageChange?.(0);
             }}
@@ -67,6 +69,7 @@ export function DataTablePagination({ table, onPageChange, onPageSizeChange }: P
           </Button>
           <Button
             variant="outline"
+            aria-label="Previous page"
             onClick={() => {
               onPageChange?.(pageIndex - 1);
             }}
@@ -79,6 +82,7 @@ export function DataTablePagination({ table, onPageChange, onPageSizeChange }: P
           </div>
           <Button
             variant="outline"
+            aria-label="Next page"
             onClick={() => {
               onPageChange?.(pageIndex + 1);
             }}
@@ -89,6 +93,7 @@ export function DataTablePagination({ table, onPageChange, onPageSizeChange }: P
           <Button
             variant="outline"
             className="hidden @lg:inline-flex"
+            aria-label="Last page"
             onClick={() => {
               onPageChange?.(table.getPageCount() - 1);
             }}

@@ -28,9 +28,9 @@ export function ServiceCard({ service, className }: ServiceCardProps) {
         </div>
 
         <div className="flex flex-col grow p-3 sm:p-4 md:p-5">
-          <h4 className="text-xs sm:text-sm md:text-base font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+          <h3 className="text-xs sm:text-sm md:text-base font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
             {service.name}
-          </h4>
+          </h3>
 
           <p className="text-[11px] sm:text-xs md:text-sm text-muted-foreground line-clamp-2 mt-1 sm:mt-2 leading-relaxed min-h-8 sm:min-h-10">
             {service.description || 'Professional service for your needs.'}

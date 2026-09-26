@@ -67,11 +67,18 @@ export function NotificationsDropdown({ role = ROLE.USER }: { role?: Role }) {
       <PopoverTrigger asChild>
         <button
           className="relative p-2.5 hover:bg-accent rounded-full transition-all duration-300 hover:scale-105"
-          aria-label="Notifications"
+          aria-label={
+            unreadCount > 0
+              ? `Notifications, ${unreadCount > 9 ? '9+' : unreadCount} unread`
+              : 'Notifications'
+          }
         >
           <Bell className="h-5.5 w-5.5 text-muted-foreground" />
           {unreadCount > 0 && (
-            <Badge className="absolute top-1 right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] bg-red-500 hover:bg-red-600 shadow-md border-2 border-background animate-in zoom-in">
+            <Badge
+              aria-hidden="true"
+              className="absolute top-1 right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] bg-red-500 hover:bg-red-600 shadow-md border-2 border-background animate-in zoom-in"
+            >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}

@@ -24,6 +24,7 @@ interface Props<T extends string> {
   leftIcon?: React.ReactNode;
   disabled?: boolean;
   customClass?: string;
+  ariaLabel?: string;
 }
 
 export default function Select<T extends string>({
@@ -35,6 +36,7 @@ export default function Select<T extends string>({
   leftIcon,
   disabled = false,
   customClass,
+  ariaLabel,
 }: Props<T>) {
   return (
     <div>
@@ -47,6 +49,12 @@ export default function Select<T extends string>({
 
         <ShadSelect value={value} onValueChange={onChange}>
           <SelectTrigger
+            aria-label={
+              ariaLabel ||
+              placeholder ||
+              options.find(o => o.value === value)?.label ||
+              'Select option'
+            }
             className={cn(
               'w-full py-5 px-3 rounded-lg bg-background border border-input text-foreground',
               'transition-all outline-none focus:ring-2 focus:ring-ring focus:ring-offset-0',

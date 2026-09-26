@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { cn } from '@/lib/utils';
+import PageError from '@/pages/PageError';
 import CategoryService from '@/services/category.service';
 
 import { ServiceCard } from '../../home/components/ServiceCard';
@@ -31,6 +32,8 @@ export default function ServiceDiscoveryPage() {
     isLoading: isInitialLoading,
     fetchNextPage,
     hasNextPage,
+    isError,
+    error,
     isFetchingNextPage,
   } = usePublicServices({
     categoryId: activeCategoryId || undefined,
@@ -75,6 +78,9 @@ export default function ServiceDiscoveryPage() {
   const services = data?.pages.flatMap(page => page.categories) ?? [];
   const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
 
+  if (isError) {
+    return <PageError title={error?.message} fullScreen />;
+  }
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-10 overflow-x-hidden">
@@ -86,6 +92,7 @@ export default function ServiceDiscoveryPage() {
                 <select
                   value={sortBy}
                   onChange={e => updateParam('sortBy', e.target.value)}
+                  aria-label="Sort services"
                   className="w-full appearance-none bg-card h-10 pl-4 pr-10 rounded-xl border border-border shadow-sm text-sm font-medium text-foreground cursor-pointer outline-none transition-all hover:border-border/80 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 >
                   <option value="popular">Recommended</option>

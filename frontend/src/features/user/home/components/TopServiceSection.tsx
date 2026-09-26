@@ -84,9 +84,9 @@ export function TopService({ service }: { service: TopServiceItem }) {
           )}
 
           <div className="absolute bottom-4 left-4 right-4">
-            <h4 className="font-black text-white text-lg leading-tight group-hover:translate-x-1 transition-transform duration-300">
+            <h3 className="font-black text-white text-lg leading-tight group-hover:translate-x-1 transition-transform duration-300">
               {service.name}
-            </h4>
+            </h3>
           </div>
         </div>
 

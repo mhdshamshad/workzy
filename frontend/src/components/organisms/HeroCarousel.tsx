@@ -23,7 +23,9 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, plugins);
 
   useEffect(() => {
-    if (!emblaApi) {return;}
+    if (!emblaApi) {
+      return;
+    }
     setCurrent(emblaApi.selectedScrollSnap());
 
     const onSelect = () => {
@@ -47,6 +49,10 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
                 alt={slide.title}
                 className="w-full h-full object-cover"
                 loading={i === 0 ? 'eager' : 'lazy'}
+                decoding={i === 0 ? 'sync' : 'async'}
+                {...({
+                  fetchpriority: i === 0 ? 'high' : 'auto',
+                } as React.ImgHTMLAttributes<HTMLImageElement>)}
               />
               <div className="absolute inset-0 bg-linear-to-r from-black/70 via-black/50 to-transparent" />
             </div>
@@ -58,6 +64,7 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
         <>
           <button
             onClick={() => emblaApi?.scrollPrev()}
+            aria-label="Previous slide"
             className="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 z-20 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white p-2 lg:p-3 rounded-full transition-all"
           >
             <ChevronLeft className="w-5 h-5 lg:w-6 lg:h-6" />
@@ -65,6 +72,7 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
 
           <button
             onClick={() => emblaApi?.scrollNext()}
+            aria-label="Next slide"
             className="absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 z-20 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white p-2 lg:p-3 rounded-full transition-all"
           >
             <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6" />
@@ -72,15 +80,20 @@ export function HeroCarousel({ data, stats }: HeroCarouselProps) {
         </>
       )}
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-1">
         {data.slides.map((_, i) => (
           <button
             key={i}
             onClick={() => emblaApi?.scrollTo(i)}
-            className={`h-2 rounded-full transition-all ${
-              i === current ? 'bg-white w-8' : 'bg-white/50 w-2'
-            }`}
-          />
+            aria-label={`Go to slide ${i + 1}`}
+            className="p-2 flex items-center justify-center cursor-pointer min-w-6 min-h-6"
+          >
+            <span
+              className={`h-2 rounded-full transition-all block ${
+                i === current ? 'bg-white w-8' : 'bg-white/50 w-2'
+              }`}
+            />
+          </button>
         ))}
       </div>
       <div className="absolute inset-0 z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

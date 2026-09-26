@@ -12,7 +12,7 @@ export default function Footer() {
             </p>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Services</h4>
+            <h3 className="text-white font-semibold mb-4">Services</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
@@ -37,7 +37,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
+            <h3 className="text-white font-semibold mb-4">Company</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
@@ -62,7 +62,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-semibold mb-4">For Professionals</h4>
+            <h3 className="text-white font-semibold mb-4">For Professionals</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="#" className="hover:text-white transition-colors">
