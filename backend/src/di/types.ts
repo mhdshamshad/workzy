@@ -104,6 +104,16 @@ const TYPES = {
   ChatService: Symbol.for("ChatService"),
   ChatRepository: Symbol.for("ChatRepository"),
 
+  WalletRepository: Symbol.for("WalletRepository"),
+  WalletTransactionRepository: Symbol.for("WalletTransactionRepository"),
+  WalletService: Symbol.for("WalletService"),
+  WalletController: Symbol.for("WalletController"),
+
+  PayoutRepository: Symbol.for("PayoutRepository"),
+  PayoutService: Symbol.for("PayoutService"),
+  PayoutController: Symbol.for("PayoutController"),
+  AdminPayoutController: Symbol.for("AdminPayoutController"),
+
   UnitOfWork: Symbol.for("UnitOfWork"),
 };
 
