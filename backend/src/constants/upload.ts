@@ -100,6 +100,12 @@ export const PURPOSE_POLICY = {
     maxSizeMB: 10,
     allowedTypes: FILE_TYPES.AUDIOS,
   },
+
+  PAYOUT_RECEIPT: {
+    folder: "private/payouts/receipts",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
 } as const;
 
 export type UploadPurpose = keyof typeof PURPOSE_POLICY;

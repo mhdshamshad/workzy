@@ -12,6 +12,5 @@ export interface IWalletTransaction extends Document<string> {
   type: WalletTransactionType;
   category: WalletTransactionCategory;
   description: string;
-  withdrawableBalanceAfter: number;
   createdAt: Date;
 }

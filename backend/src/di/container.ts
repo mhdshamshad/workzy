@@ -2,6 +2,7 @@ import { Container } from "inversify";
 
 import { AdminBookingController } from "@/controllers/admin/admin-booking.controller";
 import { AdminCategoryController } from "@/controllers/admin/admin-category.controller";
+import { AdminPayoutController } from "@/controllers/admin/admin-payout.controller";
 import { AdminUserController } from "@/controllers/admin/admin-user.controller";
 import { AdminWorkerController } from "@/controllers/admin/admin-worker.controller";
 import { AdminController } from "@/controllers/admin/admin.controller";
@@ -17,6 +18,7 @@ import { LeaveController } from "@/controllers/leave.controller";
 import { MessageController } from "@/controllers/message.controller";
 import { NotificationController } from "@/controllers/notification.controller";
 import { PaymentController } from "@/controllers/payment.controller";
+import { PayoutController } from "@/controllers/payout.controller";
 import { QuoteController } from "@/controllers/quote.controller";
 import { ReviewController } from "@/controllers/review.controller";
 import { ServiceController } from "@/controllers/service.controller";
@@ -24,10 +26,12 @@ import { SlotController } from "@/controllers/slot.controller";
 import { SocketController } from "@/controllers/socket.controller";
 import { UploadController } from "@/controllers/upload.controller";
 import { UserController } from "@/controllers/user.controller";
+import { WalletController } from "@/controllers/wallet.controller";
 import { WorkerController } from "@/controllers/worker.controller";
 import { IAdminBookingController } from "@/core/interfaces/controllers/admin/IAdminBookingController";
 import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IAdminCategoryController";
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
+import { IAdminPayoutController } from "@/core/interfaces/controllers/admin/IAdminPayoutController";
 import { IAdminUserController } from "@/core/interfaces/controllers/admin/IAdminUserController";
 import { IAdminWorkerController } from "@/core/interfaces/controllers/admin/IAdminWorkerController";
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
@@ -42,12 +46,14 @@ import { ILeaveController } from "@/core/interfaces/controllers/ILeaveController
 import { IMessageController } from "@/core/interfaces/controllers/IMessageController";
 import { INotificationController } from "@/core/interfaces/controllers/INotificationController";
 import { IPaymentController } from "@/core/interfaces/controllers/IPaymentController";
+import { IPayoutController } from "@/core/interfaces/controllers/IPayoutController";
 import { IQuoteController } from "@/core/interfaces/controllers/IQuoteController";
 import { IReviewController } from "@/core/interfaces/controllers/IReviewController";
 import { IServiceController } from "@/core/interfaces/controllers/IServiceController";
 import { ISlotController } from "@/core/interfaces/controllers/ISlotController";
 import { IUploadController } from "@/core/interfaces/controllers/IUploadController";
 import { IUserController } from "@/core/interfaces/controllers/IUserController";
+import { IWalletController } from "@/core/interfaces/controllers/IWalletController";
 import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
@@ -59,11 +65,14 @@ import { ILeaveRepository } from "@/core/interfaces/repositories/ILeaveRepositor
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
 import { INotificationRepository } from "@/core/interfaces/repositories/INotificationRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
+import { IPayoutRepository } from "@/core/interfaces/repositories/IPayoutRepository";
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
 import { IReviewRepository } from "@/core/interfaces/repositories/IReviewRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
+import { IWalletRepository } from "@/core/interfaces/repositories/IWalletRepository";
+import { IWalletTransactionRepository } from "@/core/interfaces/repositories/IWalletTransactionRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IAdminBookingService } from "@/core/interfaces/services/admin/IAdminBookingService";
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
@@ -89,6 +98,7 @@ import { INotificationService } from "@/core/interfaces/services/INotificationSe
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentGateway } from "@/core/interfaces/services/IPaymentGateway";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
+import { IPayoutService } from "@/core/interfaces/services/IPayoutService";
 import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
@@ -99,6 +109,7 @@ import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { IUserService } from "@/core/interfaces/services/IUserService";
+import { IWalletService } from "@/core/interfaces/services/IWalletService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { BookingRepository } from "@/repositories/booking.repository";
 import { CategoryRepository } from "@/repositories/category.repository";
@@ -110,11 +121,14 @@ import { LeaveRepository } from "@/repositories/leave.repository";
 import { MessageRepository } from "@/repositories/message.repository";
 import { NotificationRepository } from "@/repositories/notification.repository";
 import { PaymentRepository } from "@/repositories/payment.repository";
+import { PayoutRepository } from "@/repositories/payout.repository";
 import { QuoteRepository } from "@/repositories/quote.repository";
 import { ReviewRepository } from "@/repositories/review.repository";
 import { ServiceRepository } from "@/repositories/service.repository";
 import { SlotRepository } from "@/repositories/slot.repository";
 import { UserRepository } from "@/repositories/user.repository";
+import { WalletTransactionRepository } from "@/repositories/wallet-transaction.repository";
+import { WalletRepository } from "@/repositories/wallet.repository";
 import { WorkerRepository } from "@/repositories/worker.repository";
 import { AdminService } from "@/services/admin/admin.service";
 import { AdminBookingService } from "@/services/admin/booking.service";
@@ -141,6 +155,7 @@ import { MessageService } from "@/services/message.service";
 import { NotificationService } from "@/services/notification.service";
 import { StripePaymentGateway } from "@/services/payment/stripe-payment-gateway.service";
 import { PaymentService } from "@/services/payment.service";
+import { PayoutService } from "@/services/payout.service";
 import { PresenceService } from "@/services/presence.service";
 import { QuoteService } from "@/services/quote.service";
 import { RedisService } from "@/services/redis.service";
@@ -150,6 +165,7 @@ import { ServiceManagement } from "@/services/service-management.service";
 import { SlotService } from "@/services/slot.service";
 import { UnitOfWork } from "@/services/unit-of-work.service";
 import { UserService } from "@/services/user.service";
+import { WalletService } from "@/services/wallet.service";
 import { WorkerService } from "@/services/worker.service";
 
 import { TYPES } from "./types";
@@ -263,6 +279,18 @@ container.bind<IMessageController>(TYPES.MessageController).to(MessageController
 container.bind<IChatRepository>(TYPES.ChatRepository).to(ChatRepository);
 container.bind<IChatService>(TYPES.ChatService).to(ChatService);
 container.bind<IChatController>(TYPES.ChatController).to(ChatController);
+
+container.bind<IWalletController>(TYPES.WalletController).to(WalletController);
+container.bind<IWalletService>(TYPES.WalletService).to(WalletService);
+container.bind<IWalletRepository>(TYPES.WalletRepository).to(WalletRepository);
+container
+  .bind<IWalletTransactionRepository>(TYPES.WalletTransactionRepository)
+  .to(WalletTransactionRepository);
+
+container.bind<IPayoutController>(TYPES.PayoutController).to(PayoutController);
+container.bind<IPayoutService>(TYPES.PayoutService).to(PayoutService);
+container.bind<IPayoutRepository>(TYPES.PayoutRepository).to(PayoutRepository);
+container.bind<IAdminPayoutController>(TYPES.AdminPayoutController).to(AdminPayoutController);
 
 container.bind<IUnitOfWork>(TYPES.UnitOfWork).to(UnitOfWork).inSingletonScope();
 
