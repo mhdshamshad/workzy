@@ -13,4 +13,6 @@ router.get("/", controller.listPayouts);
 router.post("/:payoutId/approve", validateDto(ApprovePayoutDto), controller.approvePayout);
 router.post("/:payoutId/reject", validateDto(RejectPayoutDto), controller.rejectPayout);
 
+router.patch("/:workerId/payout-settings/:method/verify", controller.verifyPayoutMethod);
+router.patch("/:workerId/payout-settings/:method/reject", controller.rejectPayoutMethod);
 export default router;

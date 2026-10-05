@@ -1,3 +1,4 @@
+import { PayoutMethod, PayoutMethodStatus } from "@/constants";
 import {
   ApprovePayoutDto,
   BankDetailsDto,
@@ -24,4 +25,10 @@ export interface IPayoutService {
 
   approvePayout(payoutId: string, adminUserId: string, data: ApprovePayoutDto): Promise<void>;
   rejectPayout(payoutId: string, adminUserId: string, data: RejectPayoutDto): Promise<void>;
+  updatePayoutMethodStatus(
+    workerId: string,
+    method: PayoutMethod,
+    status: PayoutMethodStatus,
+    rejectReason?: string
+  ): Promise<WalletResponseDto>;
 }

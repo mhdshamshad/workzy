@@ -23,36 +23,36 @@ export class PayoutController implements IPayoutController {
   updateBankDetails = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const data = req.body as BankDetailsDto;
-    await this._payoutService.updateBankDetails(workerId, data);
-    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, "Payout details updated successfully"));
+    const wallet = await this._payoutService.updateBankDetails(workerId, data);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(wallet, "Payout details updated successfully"));
   });
 
   updateUpiDetails = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const data = req.body as UpiDetailsDto;
-    await this._payoutService.updateUpiDetails(workerId, data);
-    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, "Payout details updated successfully"));
+    const wallet = await this._payoutService.updateUpiDetails(workerId, data);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(wallet, "Payout details updated successfully"));
   });
 
   setPrimaryMethod = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const data = req.body as setPrimaryMethodDto;
-    await this._payoutService.setPrimaryMethod(workerId, data);
+    const wallet = await this._payoutService.setPrimaryMethod(workerId, data);
     res
       .status(HTTPSTATUS.OK)
-      .json(new ApiResponse(null, "Payout method set as primary successfully"));
+      .json(new ApiResponse(wallet, "Payout method set as primary successfully"));
   });
 
   removeBankDetails = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
-    await this._payoutService.removeBankDetails(workerId);
-    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, "Payout details removed successfully"));
+    const wallet = await this._payoutService.removeBankDetails(workerId);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(wallet, "Payout details removed successfully"));
   });
 
   removeUpiDetails = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
-    await this._payoutService.removeUpiDetails(workerId);
-    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, "Payout details removed successfully"));
+    const wallet = await this._payoutService.removeUpiDetails(workerId);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(wallet, "Payout details removed successfully"));
   });
 
   requestPayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -84,7 +84,7 @@ export class PayoutController implements IPayoutController {
     }
     const status = (req.query.status as PayoutRequestStatus) || "all";
 
-    const result = await this._payoutService.getPayoutRequests({
+    const { data, nextCursor } = await this._payoutService.getPayoutRequests({
       workerId,
       limit,
       search,
@@ -93,9 +93,7 @@ export class PayoutController implements IPayoutController {
       fromDate: fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined,
       toDate: toDate ? dayjs(toDate).endOf("day").toDate() : undefined,
     });
-    res
-      .status(HTTPSTATUS.OK)
-      .json(new ApiResponse(result, "Payout history retrieved successfully"));
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ payouts: data, nextCursor }));
   });
 
   private requireWorkerId(req: Request): string {

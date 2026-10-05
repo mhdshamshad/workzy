@@ -19,4 +19,5 @@ export const PAYOUT_MESSAGES = {
   ALREADY_PROCESSED: "This payout request has already been processed.",
   UTR_REQUIRED: "A UTR / reference number is required to approve a payout.",
   WALLET_NOT_FOUND: "Wallet not found for this worker.",
+  PAYOUT_NOT_FOUND: "Payout not found.",
 };

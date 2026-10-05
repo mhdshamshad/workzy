@@ -38,7 +38,7 @@ export class UpiDetailsDto {
 
 export class setPrimaryMethodDto {
   @IsIn(Object.values(PAYOUT_METHOD))
-  primaryMethod!: PayoutMethod;
+  method!: PayoutMethod;
 }
 
 export class RequestPayoutDto {

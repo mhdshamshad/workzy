@@ -10,6 +10,8 @@ import {
   WALLET_TRANSACTION_TYPE,
   PAYOUT_METHOD,
   WALLET_PAYOUT_STATUS,
+  PayoutMethod,
+  PayoutMethodStatus,
 } from "@/constants/payout";
 import { IPayoutRepository } from "@/core/interfaces/repositories/IPayoutRepository";
 import { IWalletRepository } from "@/core/interfaces/repositories/IWalletRepository";
@@ -123,7 +125,7 @@ export class PayoutService implements IPayoutService {
   }
 
   async setPrimaryMethod(workerId: string, data: setPrimaryMethodDto): Promise<WalletResponseDto> {
-    const wallet = await this._walletRepository.setPrimaryMethod(workerId, data.primaryMethod);
+    const wallet = await this._walletRepository.setPrimaryMethod(workerId, data.method);
     if (!wallet) {
       throw new CustomError(PAYOUT_MESSAGES.WALLET_NOT_FOUND);
     }
@@ -266,7 +268,7 @@ export class PayoutService implements IPayoutService {
         options
       );
       if (!payout) {
-        throw new CustomError(PAYOUT_MESSAGES.PAYOUT_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+        throw new CustomError(PAYOUT_MESSAGES.REQUEST_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
       }
       const wallet = await this._walletRepository.resolvePendingPayout(
         payout.workerId.toString(),
@@ -308,7 +310,7 @@ export class PayoutService implements IPayoutService {
         options
       );
       if (!payout) {
-        throw new CustomError(PAYOUT_MESSAGES.PAYOUT_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+        throw new CustomError(PAYOUT_MESSAGES.REQUEST_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
       }
       const wallet = await this._walletRepository.resolvePendingPayout(
         payout.workerId.toString(),
@@ -320,5 +322,37 @@ export class PayoutService implements IPayoutService {
         throw new CustomError(PAYOUT_MESSAGES.WALLET_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
       }
     });
+  }
+
+  async updatePayoutMethodStatus(
+    workerId: string,
+    method: PayoutMethod,
+    status: PayoutMethodStatus,
+    rejectReason?: string
+  ): Promise<WalletResponseDto> {
+    const wallet = await this._unitOfWork.execute(async (options) => {
+      const [worker, wallet] = await Promise.all([
+        getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND),
+        this._walletRepository.updatePayoutMethodStatus(
+          workerId,
+          method,
+          status,
+          rejectReason,
+          options
+        ),
+      ]);
+      if (!wallet) {
+        throw new CustomError(PAYOUT_MESSAGES.WALLET_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+      }
+      if (worker.payoutStatus !== wallet.payoutStatus) {
+        await this._workerRepository.findByIdAndUpdate(
+          workerId,
+          { payoutStatus: wallet.payoutStatus },
+          options
+        );
+      }
+      return wallet;
+    });
+    return WalletResponseDto.fromEntity(wallet);
   }
 }

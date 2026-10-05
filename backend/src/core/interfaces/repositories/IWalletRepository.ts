@@ -1,6 +1,6 @@
 import { ClientSession } from "mongoose";
 
-import { PayoutMethod } from "@/constants/payout";
+import { PayoutMethod, PayoutMethodStatus } from "@/constants/payout";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { RepositoryOptions } from "@/core/types/repository";
 import { IBankDetails, IUpiDetails } from "@/types/payout/payout.entity";
@@ -46,5 +46,13 @@ export interface IWalletRepository extends BaseRepository<IWallet> {
     amount: number,
     outcome: "approved" | "rejected",
     options?: { session?: ClientSession }
+  ): Promise<IWallet | null>;
+
+  updatePayoutMethodStatus(
+    workerId: string,
+    method: PayoutMethod,
+    status: PayoutMethodStatus,
+    rejectReason?: string,
+    options?: RepositoryOptions
   ): Promise<IWallet | null>;
 }

@@ -3,7 +3,13 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
 
-import { AUTH, HTTPSTATUS, PayoutRequestStatus } from "@/constants";
+import {
+  AUTH,
+  HTTPSTATUS,
+  PAYOUT_METHOD_STATUS,
+  PayoutMethod,
+  PayoutRequestStatus,
+} from "@/constants";
 import { IAdminPayoutController } from "@/core/interfaces/controllers/admin/IAdminPayoutController";
 import { IPayoutService } from "@/core/interfaces/services/IPayoutService";
 import { TYPES } from "@/di/types";
@@ -34,7 +40,7 @@ export class AdminPayoutController implements IAdminPayoutController {
     }
     const status = (req.query.status as PayoutRequestStatus) || "all";
 
-    const result = await this._payoutService.getPayoutRequests({
+    const { data, nextCursor } = await this._payoutService.getPayoutRequests({
       limit,
       cursor: parsedCursor,
       status,
@@ -45,7 +51,9 @@ export class AdminPayoutController implements IAdminPayoutController {
     });
     res
       .status(HTTPSTATUS.OK)
-      .json(new ApiResponse(result, "Payout requests retrieved successfully"));
+      .json(
+        new ApiResponse({ payouts: data, nextCursor })
+      );
   });
 
   approvePayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -68,5 +76,29 @@ export class AdminPayoutController implements IAdminPayoutController {
     const data = req.body as RejectPayoutDto;
     await this._payoutService.rejectPayout(payoutId, adminId, data);
     res.status(HTTPSTATUS.OK).json(new ApiResponse(null, "Payout rejected and balance refunded"));
+  });
+
+  verifyPayoutMethod = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { workerId, method } = req.params;
+    const wallet = await this._payoutService.updatePayoutMethodStatus(
+      workerId,
+      method as PayoutMethod,
+      PAYOUT_METHOD_STATUS.VERIFIED
+    );
+
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(wallet, "Payout method verified successfully"));
+  });
+  rejectPayoutMethod = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { workerId, method } = req.params;
+    const { reason } = req.body;
+
+    const wallet = await this._payoutService.updatePayoutMethodStatus(
+      workerId,
+      method as PayoutMethod,
+      PAYOUT_METHOD_STATUS.REJECTED,
+      reason
+    );
+
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(wallet, "Payout method rejected successfully"));
   });
 }

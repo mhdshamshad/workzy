@@ -40,7 +40,7 @@ export class WalletController implements IWalletController {
       }
     }
 
-    const result = await this._walletService.getTransactions(workerId, {
+    const { data, nextCursor } = await this._walletService.getTransactions(workerId, {
       limit,
       cursor: parsedCursor,
       category,
@@ -49,7 +49,7 @@ export class WalletController implements IWalletController {
       fromDate: fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined,
       toDate: toDate ? dayjs(toDate).endOf("day").toDate() : undefined,
     });
-    res.status(HTTPSTATUS.OK).json(new ApiResponse(result));
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ transactions: data, nextCursor }));
   });
 
   private requireWorkerId(req: Request): string {

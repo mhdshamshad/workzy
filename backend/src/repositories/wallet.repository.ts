@@ -5,6 +5,7 @@ import {
   PAYOUT_METHOD,
   PAYOUT_METHOD_STATUS,
   PayoutMethod,
+  PayoutMethodStatus,
   WALLET_PAYOUT_STATUS,
 } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
@@ -214,6 +215,94 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
         pendingBalance: { $gte: amount },
       },
       update,
+      {
+        new: true,
+        session: options?.session,
+      }
+    );
+  }
+
+  async updatePayoutMethodStatus(
+    workerId: string,
+    method: PayoutMethod,
+    status: PayoutMethodStatus,
+    rejectReason?: string,
+    options?: RepositoryOptions
+  ): Promise<IWallet | null> {
+    const methodField = method === PAYOUT_METHOD.BANK ? "bankDetails" : "upiDetails";
+
+    const statusField = `payout.${methodField}.status`;
+    const verifiedAtField = `payout.${methodField}.verifiedAt`;
+    const rejectReasonField = `payout.${methodField}.rejectReason`;
+
+    return this.model.findOneAndUpdate(
+      {
+        workerId: new Types.ObjectId(workerId),
+        [`payout.${methodField}`]: { $exists: true },
+      },
+      [
+        {
+          $set: {
+            [statusField]: { $literal: status },
+            [verifiedAtField]: {
+              $literal: status === PAYOUT_METHOD_STATUS.VERIFIED ? new Date() : null,
+            },
+            [rejectReasonField]: {
+              $literal: status === PAYOUT_METHOD_STATUS.REJECTED ? (rejectReason ?? null) : null,
+            },
+          },
+        },
+        {
+          $set: {
+            payoutStatus: {
+              $cond: [
+                {
+                  $or: [
+                    {
+                      $eq: ["$payout.bankDetails.status", PAYOUT_METHOD_STATUS.REJECTED],
+                    },
+                    {
+                      $eq: ["$payout.upiDetails.status", PAYOUT_METHOD_STATUS.REJECTED],
+                    },
+                  ],
+                },
+                WALLET_PAYOUT_STATUS.REJECTED,
+                {
+                  $cond: [
+                    {
+                      $or: [
+                        {
+                          $eq: ["$payout.bankDetails.status", PAYOUT_METHOD_STATUS.PENDING],
+                        },
+                        {
+                          $eq: ["$payout.upiDetails.status", PAYOUT_METHOD_STATUS.PENDING],
+                        },
+                      ],
+                    },
+                    WALLET_PAYOUT_STATUS.PENDING,
+                    {
+                      $cond: [
+                        {
+                          $or: [
+                            {
+                              $eq: ["$payout.bankDetails.status", PAYOUT_METHOD_STATUS.VERIFIED],
+                            },
+                            {
+                              $eq: ["$payout.upiDetails.status", PAYOUT_METHOD_STATUS.VERIFIED],
+                            },
+                          ],
+                        },
+                        WALLET_PAYOUT_STATUS.VERIFIED,
+                        WALLET_PAYOUT_STATUS.REJECTED,
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      ],
       {
         new: true,
         session: options?.session,
