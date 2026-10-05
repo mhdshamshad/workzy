@@ -10,6 +10,7 @@ const router = Router();
 const controller = container.get<IAdminPayoutController>(TYPES.AdminPayoutController);
 
 router.get("/", controller.listPayouts);
+router.get("/stats", controller.getPayoutStats);
 router.post("/:payoutId/approve", validateDto(ApprovePayoutDto), controller.approvePayout);
 router.post("/:payoutId/reject", validateDto(RejectPayoutDto), controller.rejectPayout);
 

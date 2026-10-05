@@ -15,6 +15,7 @@ const TYPES = {
 
   AdminController: Symbol.for("AdminController"),
   AdminWorkerController: Symbol.for("AdminWorkerController"),
+  AdminWalletController: Symbol.for("AdminWalletController"),
   AdminUserController: Symbol.for("AdminUserController"),
   AdminBookingController: Symbol.for("AdminBookingController"),
   AdminBookingService: Symbol.for("AdminBookingService"),

@@ -11,6 +11,7 @@ import { PayoutResponseDto } from "@/dtos/responses/payout.dto";
 import { WalletResponseDto } from "@/dtos/responses/wallet.dto";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { IPayout } from "@/types/payout/payout.entity";
+import { PayoutStatsData } from "@/types/payout/payout.projection";
 import { PayoutListQuery } from "@/types/payout/payout.query";
 
 export interface IPayoutService {
@@ -31,4 +32,5 @@ export interface IPayoutService {
     status: PayoutMethodStatus,
     rejectReason?: string
   ): Promise<WalletResponseDto>;
+  getPayoutStats(): Promise<PayoutStatsData>;
 }

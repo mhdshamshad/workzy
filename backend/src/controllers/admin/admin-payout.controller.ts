@@ -49,11 +49,12 @@ export class AdminPayoutController implements IAdminPayoutController {
       fromDate: fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined,
       toDate: toDate ? dayjs(toDate).endOf("day").toDate() : undefined,
     });
-    res
-      .status(HTTPSTATUS.OK)
-      .json(
-        new ApiResponse({ payouts: data, nextCursor })
-      );
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ payouts: data, nextCursor }));
+  });
+
+  getPayoutStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const stats = await this._payoutService.getPayoutStats();
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(stats));
   });
 
   approvePayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {

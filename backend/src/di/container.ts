@@ -4,6 +4,7 @@ import { AdminBookingController } from "@/controllers/admin/admin-booking.contro
 import { AdminCategoryController } from "@/controllers/admin/admin-category.controller";
 import { AdminPayoutController } from "@/controllers/admin/admin-payout.controller";
 import { AdminUserController } from "@/controllers/admin/admin-user.controller";
+import { AdminWalletController } from "@/controllers/admin/admin-wallet.controller";
 import { AdminWorkerController } from "@/controllers/admin/admin-worker.controller";
 import { AdminController } from "@/controllers/admin/admin.controller";
 import { AuthController } from "@/controllers/auth.controller";
@@ -33,6 +34,7 @@ import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IA
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
 import { IAdminPayoutController } from "@/core/interfaces/controllers/admin/IAdminPayoutController";
 import { IAdminUserController } from "@/core/interfaces/controllers/admin/IAdminUserController";
+import { IAdminWalletController } from "@/core/interfaces/controllers/admin/IAdminWalletController";
 import { IAdminWorkerController } from "@/core/interfaces/controllers/admin/IAdminWorkerController";
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
@@ -192,6 +194,7 @@ container.bind<IAdminService>(TYPES.AdminService).to(AdminService);
 
 container.bind<IAdminUserController>(TYPES.AdminUserController).to(AdminUserController);
 container.bind<IAdminWorkerController>(TYPES.AdminWorkerController).to(AdminWorkerController);
+container.bind<IAdminWalletController>(TYPES.AdminWalletController).to(AdminWalletController);
 container.bind<IAdminCategoryController>(TYPES.AdminCategoryController).to(AdminCategoryController);
 container.bind<IAdminBookingController>(TYPES.AdminBookingController).to(AdminBookingController);
 container.bind<IAdminBookingService>(TYPES.AdminBookingService).to(AdminBookingService);

@@ -33,6 +33,7 @@ import { PayoutResponseDto } from "@/dtos/responses/payout.dto";
 import { WalletResponseDto } from "@/dtos/responses/wallet.dto";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { IBankDetails, IPayout, IPayoutSnapshot, IUpiDetails } from "@/types/payout/payout.entity";
+import { PayoutStatsData } from "@/types/payout/payout.projection";
 import { PayoutListQuery } from "@/types/payout/payout.query";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
@@ -354,5 +355,8 @@ export class PayoutService implements IPayoutService {
       return wallet;
     });
     return WalletResponseDto.fromEntity(wallet);
+  }
+  async getPayoutStats(): Promise<PayoutStatsData> {
+    return this._payoutRepository.getPayoutStats();
   }
 }
