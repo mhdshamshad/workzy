@@ -68,7 +68,7 @@ export class StripePaymentGateway implements IPaymentGateway {
   async createExtraChargeCheckoutSession(
     params: ExtraChargeCheckoutSessionParams
   ): Promise<{ id: string; url: string }> {
-    const { userId, bookingId, workerStripeAccountId, amount } = params;
+    const { userId, bookingId, amount } = params;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -84,9 +84,7 @@ export class StripePaymentGateway implements IPaymentGateway {
       ],
       mode: "payment",
       payment_intent_data: {
-        transfer_data: {
-          destination: workerStripeAccountId,
-        },
+        transfer_group: bookingId,
         metadata: {
           type: "EXTRA_CHARGE",
           bookingId,

@@ -37,6 +37,7 @@ import { PayoutStatsData } from "@/types/payout/payout.projection";
 import { PayoutListQuery } from "@/types/payout/payout.query";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
+import { extractKeyFromUrl } from "@/utils/upload";
 
 @injectable()
 export class PayoutService implements IPayoutService {
@@ -264,7 +265,7 @@ export class PayoutService implements IPayoutService {
           processedAt: new Date(),
           processedBy: new Types.ObjectId(adminUserId),
           referenceId,
-          receiptUrl,
+          receiptUrl: extractKeyFromUrl(receiptUrl),
         },
         options
       );

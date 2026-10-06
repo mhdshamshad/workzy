@@ -1,6 +1,12 @@
 import { Types } from "mongoose";
 
-import { PricingMode, ServiceType, StripeAccountStatus, WorkerStatus } from "@/constants";
+import {
+  PricingMode,
+  ServiceType,
+  StripeAccountStatus,
+  WalletPayoutStatus,
+  WorkerStatus,
+} from "@/constants";
 
 import { BulkDiscountType } from "../service/service.entity";
 
@@ -16,6 +22,7 @@ export type WorkerListItem = {
   phone?: string;
   profileImage?: string;
   stripeAccountStatus: StripeAccountStatus;
+  payoutStatus: WalletPayoutStatus;
   status: WorkerStatus;
   createdAt: Date;
 };

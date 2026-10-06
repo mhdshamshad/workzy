@@ -1,4 +1,4 @@
-import { StripeAccountStatus, WorkerStatus } from "@/constants";
+import { StripeAccountStatus, WalletPayoutStatus, WorkerStatus } from "@/constants";
 import { WorkerListItem } from "@/types/worker/worker.projection";
 
 export class WorkerListResponseDto {
@@ -9,7 +9,7 @@ export class WorkerListResponseDto {
   userId!: string;
   email!: string;
   phone?: string;
-  stripeAccountStatus!: StripeAccountStatus;
+  payoutStatus!: WalletPayoutStatus;
   createdAt!: Date;
 
   static fromEntity(entity: WorkerListItem): WorkerListResponseDto {
@@ -20,7 +20,7 @@ export class WorkerListResponseDto {
     dto.userId = entity.userId._id.toString();
     dto.email = entity.userId.email;
     dto.profileImage = entity.profileImage;
-    dto.stripeAccountStatus = entity.stripeAccountStatus;
+    dto.payoutStatus = entity.payoutStatus;
     dto.status = entity.status;
     dto.phone = entity.phone;
     dto.createdAt = entity.createdAt;
