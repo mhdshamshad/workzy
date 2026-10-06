@@ -29,4 +29,18 @@ export const ADMIN_API = {
     BY_ID: (id: string) => admin(`/bookings/${id}`),
   },
   DASHBOARD: admin('dashboard'),
+  PAYOUT: {
+    ROOT: admin('/payouts'),
+    STATS: admin('/payouts/stats'),
+    APPROVE: (id: string) => admin(`/payouts/${id}/approve`),
+    REJECT: (id: string) => admin(`/payouts/${id}/reject`),
+    METHOD_VERIFY: (id: string, method: string) =>
+      admin(`/payouts/${id}/payout-settings/${method}/verify`),
+    METHOD_REJECT: (id: string, method: string) =>
+      admin(`/payouts/${id}/payout-settings/${method}/reject`),
+  },
+  WORKER_WALLET: {
+    ROOT: (workerId: string) => admin(`/workers/${workerId}/wallet`),
+    TRANSACTIONS: (workerId: string) => admin(`/workers/${workerId}/wallet/transactions`),
+  },
 } as const;

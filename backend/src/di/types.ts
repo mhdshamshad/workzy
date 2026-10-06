@@ -15,6 +15,7 @@ const TYPES = {
 
   AdminController: Symbol.for("AdminController"),
   AdminWorkerController: Symbol.for("AdminWorkerController"),
+  AdminWalletController: Symbol.for("AdminWalletController"),
   AdminUserController: Symbol.for("AdminUserController"),
   AdminBookingController: Symbol.for("AdminBookingController"),
   AdminBookingService: Symbol.for("AdminBookingService"),
@@ -103,6 +104,16 @@ const TYPES = {
   ChatController: Symbol.for("ChatController"),
   ChatService: Symbol.for("ChatService"),
   ChatRepository: Symbol.for("ChatRepository"),
+
+  WalletRepository: Symbol.for("WalletRepository"),
+  WalletTransactionRepository: Symbol.for("WalletTransactionRepository"),
+  WalletService: Symbol.for("WalletService"),
+  WalletController: Symbol.for("WalletController"),
+
+  PayoutRepository: Symbol.for("PayoutRepository"),
+  PayoutService: Symbol.for("PayoutService"),
+  PayoutController: Symbol.for("PayoutController"),
+  AdminPayoutController: Symbol.for("AdminPayoutController"),
 
   UnitOfWork: Symbol.for("UnitOfWork"),
 };

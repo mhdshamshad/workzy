@@ -153,5 +153,4 @@ export interface BookingContext {
   travelRatePerKM: number;
   distanceKm: number;
   travelCost: number;
-  workerStripeId: string;
 }

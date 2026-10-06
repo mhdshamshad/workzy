@@ -86,7 +86,7 @@ export class BookingService implements IBookingService {
     if (reservedBy?.toString() !== userId) {
       throw new CustomError(SLOT.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
-    const { category, worker, workerStripeId, service, platformFeePercent, rate, travelCost } =
+    const { category, worker, service, platformFeePercent, rate, travelCost } =
       await this._pricingService.getBookingContext(
         workerId,
         serviceId,
@@ -149,7 +149,6 @@ export class BookingService implements IBookingService {
       amount: booking.total,
       userId,
       platformFee,
-      workerStripeId,
       userName: user.name,
       workerName: booking.snapshot.worker.name,
     });

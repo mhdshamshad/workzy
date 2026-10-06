@@ -11,7 +11,6 @@ import {
   PAYMENT_PROVIDER,
   PAYMENT_STATUS,
   STRIPE_ACCOUNT_STATUS,
-  WORKER,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
@@ -22,6 +21,7 @@ import { IPaymentGateway } from "@/core/interfaces/services/IPaymentGateway";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
+import { IWalletService } from "@/core/interfaces/services/IWalletService";
 import { TYPES } from "@/di/types";
 import { PaymentAdminDto, PaymentUserDto, PaymentWorkerDto } from "@/dtos/responses/payment.dto";
 import { IBooking } from "@/types/booking/booking.entity";
@@ -31,7 +31,6 @@ import { PaymentListQuery } from "@/types/payment/payment.query";
 import { IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
-import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
 export class PaymentService implements IPaymentService {
@@ -43,7 +42,8 @@ export class PaymentService implements IPaymentService {
     @inject(TYPES.BookingPaymentHandler) private _bookingPaymentHandler: IBookingPaymentHandler,
     @inject(TYPES.SlotService) private _slotService: ISlotService,
     @inject(TYPES.PaymentGateway) private _gateway: IPaymentGateway,
-    @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
+    @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork,
+    @inject(TYPES.WalletService) private _walletService: IWalletService
   ) {}
 
   async createBookingPaymentCheckout(data: BookingCheckoutParams): Promise<string> {
@@ -97,20 +97,9 @@ export class PaymentService implements IPaymentService {
   }): Promise<string> {
     const { userId, booking, amount } = data;
 
-    const worker = await getEntityOrThrow(
-      this._workerRepository,
-      booking.workerId.toString(),
-      WORKER.NOT_FOUND
-    );
-    const workerStripeId = worker?.stripeAccountId;
-    if (!workerStripeId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
-      throw new CustomError(WORKER.STRIPE_NOT_ACTIVE, HTTPSTATUS.BAD_REQUEST);
-    }
-
     const session = await this._gateway.createExtraChargeCheckoutSession({
       userId,
       bookingId: booking._id.toString(),
-      workerStripeAccountId: workerStripeId,
       amount,
     });
 
@@ -134,50 +123,42 @@ export class PaymentService implements IPaymentService {
   }
 
   async releaseBookingPayment(booking: IBooking, customAmount?: number): Promise<void> {
-    const payment = await this._paymentRepo.findOne({
+    const payments = await this._paymentRepo.find({
       bookingId: new Types.ObjectId(booking._id.toString()),
-      billType: BILL_TYPE.BOOKING,
+      billType: { $in: [BILL_TYPE.BOOKING, BILL_TYPE.EXTRA_CHARGE] },
       status: PAYMENT_STATUS.SUCCEEDED,
     });
-    if (!payment) {
-      throw new CustomError(PAYMENT.PAYMENT_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
-    }
-    if (!payment.paymentIntentId) {
-      throw new CustomError(PAYMENT.PAYMENT_INTENT_MISSING, HTTPSTATUS.BAD_REQUEST);
-    }
-    const worker = await getEntityOrThrow(
-      this._workerRepository,
-      booking.workerId.toString(),
-      WORKER.NOT_FOUND
-    );
-    const workerStripeId = worker.stripeAccountId;
-    if (!workerStripeId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
-      throw new CustomError(WORKER.STRIPE_NOT_ACTIVE, HTTPSTATUS.BAD_REQUEST);
-    }
-    if (payment.workerAmount === undefined || payment?.workerAmount === null) {
-      throw new CustomError(PAYMENT.WORKER_AMOUNT_MISSING, HTTPSTATUS.BAD_REQUEST);
-    }
 
-    const transferCurrency = await this._gateway.getAccountDefaultCurrency(workerStripeId);
-    let transferAmount = customAmount !== undefined ? customAmount : payment.workerAmount;
-    if (payment.currency === "inr" && transferCurrency === "aed") {
-      transferAmount = transferAmount * 0.044;
-    }
+    await this._unitOfWork.execute(async (options) => {
+      for (const payment of payments) {
+        const baseWorkerAmount = payment.workerAmount ?? payment.amount;
+        let amountToRelease = baseWorkerAmount;
+        if (payment.billType === BILL_TYPE.BOOKING && customAmount !== undefined) {
+          amountToRelease = customAmount;
+        }
 
-    await this._gateway.createTransfer({
-      bookingId: booking._id.toString(),
-      workerStripeAccountId: workerStripeId,
-      amount: transferAmount,
-      currency: transferCurrency,
-    });
+        if (amountToRelease > 0) {
+          await this._walletService.creditBookingEarnings(
+            {
+              workerId: booking.workerId.toString(),
+              bookingId: booking._id.toString(),
+              amount: amountToRelease,
+              description: `${payment.billType === BILL_TYPE.EXTRA_CHARGE ? "Extra Charge" : "Booking"} payment - ${booking.bookingId}`,
+            },
+            options
+          );
+        }
 
-    await this._paymentRepo.findOneAndUpdate(
-      { _id: payment._id },
-      {
-        status: PAYMENT_STATUS.RELEASED,
-        workerAmount: transferAmount,
+        await this._paymentRepo.findOneAndUpdate(
+          { _id: payment._id },
+          {
+            status: PAYMENT_STATUS.RELEASED,
+            workerAmount: amountToRelease,
+          },
+          options
+        );
       }
-    );
+    });
   }
 
   async handleWebhookEvent(rawBody: Buffer, signature: string): Promise<void> {
