@@ -60,6 +60,7 @@ const HomeLayoutPage = lazy(() => import('@/features/admin/home/pages/HomeLayout
 const AdminReviewsPage = lazy(() => import('@/features/review/pages/AdminReviewsPage'));
 const AdminBookingPage = lazy(() => import('@/features/admin/booking/pages/AdminBookingPage'));
 const AdminPaymentsPage = lazy(() => import('@/features/payments/pages/AdminPaymentsPage'));
+const AdminPayoutPage = lazy(() => import('@/features/wallet/pages/admin/AdminPayoutPage'));
 const AdminBookingDetailsPage = lazy(
   () => import('@/features/admin/booking/pages/AdminBookingDetailsPage')
 );
@@ -68,6 +69,15 @@ const AdminWorkerDocumentsPage = lazy(
 );
 const AdminWorkerServicesPage = lazy(
   () => import('@/features/admin/worker/pages/AdminWorkerServicesPage')
+);
+const AdminWorkerWalletPage = lazy(
+  () => import('@/features/wallet/pages/admin/AdminWorkerWalletPage')
+);
+const AdminWorkerTransactionsPage = lazy(
+  () => import('@/features/wallet/pages/admin/AdminWorkerTransactionsPage')
+);
+const AdminWorkerPayoutsPage = lazy(
+  () => import('@/features/wallet/pages/admin/AdminWorkerPayoutsPage')
 );
 
 export default function AdminRoutes() {
@@ -101,6 +111,9 @@ export default function AdminRoutes() {
                 <Route path="quotes" element={<AdminWorkerQuotesPage />} />
                 <Route path="disputes" element={<AdminWorkerDisputesPage />} />
                 <Route path="payments" element={<AdminWorkerPaymentsPage />} />
+                <Route path="wallet" element={<AdminWorkerWalletPage />} />
+                <Route path="transactions" element={<AdminWorkerTransactionsPage />} />
+                <Route path="payouts" element={<AdminWorkerPayoutsPage />} />
               </Route>
             </Route>
 
@@ -108,6 +121,7 @@ export default function AdminRoutes() {
             <Route path="bookings/:bookingId" element={<AdminBookingDetailsPage />} />
 
             <Route path="payments" element={<AdminPaymentsPage />} />
+            <Route path="payouts" element={<AdminPayoutPage />} />
             <Route path="reviews" element={<AdminReviewsPage />} />
             <Route path="disputes" element={<AdminDisputesPage />} />
             <Route path="categories" element={<CategoryManagementPage />} />

@@ -1,30 +1,23 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import AdminPayoutService from '@/services/admin/payoutManagement.service';
+import { walletKeys, payoutKeys } from '@/features/wallet';
 import PayoutService from '@/services/payout.service';
 import type { PayoutListQuery } from '@/types/payout';
 
-import { payoutKeys } from '../api/payoutKeys';
-import { walletKeys } from '../api/wallletKeys';
-import { getScopeWorkerId, type PayoutFilters, type WalletScope } from '../types';
-
 const LIMIT = 6;
 
-export function usePayouts(scope: WalletScope, filters?: PayoutFilters) {
-  const workerId = getScopeWorkerId(scope);
+export function useWorkerPayouts(filters?: Omit<PayoutListQuery, 'limit' | 'cursor'>) {
   return useInfiniteQuery({
-    queryKey: workerId
-      ? payoutKeys.adminLists({ ...filters, workerId })
-      : payoutKeys.lists(filters),
+    queryKey: payoutKeys.lists(filters),
     queryFn: ({ pageParam }) => {
-      const params: PayoutListQuery = { ...filters, limit: LIMIT, cursor: pageParam ?? null };
-      return workerId
-        ? AdminPayoutService.listPayouts({ ...params, workerId })
-        : PayoutService.getPayoutRequests(params);
+      return PayoutService.getPayoutRequests({
+        ...filters,
+        limit: LIMIT,
+        cursor: pageParam ?? null,
+      });
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
-    enabled: scope.role === 'worker' || Boolean(workerId),
     refetchOnMount: 'always',
     refetchOnWindowFocus: true,
     gcTime: 1000 * 60 * 5,

@@ -23,11 +23,11 @@ export interface WorkerPayout {
   upiDetails?: UpiDetails;
 }
 
-type BankPayoutSnapshot = Pick<
+export type BankPayoutSnapshot = Pick<
   BankDetails,
   'accountHolderName' | 'accountNumber' | 'ifscCode' | 'bankName'
 >;
-type UpiPayoutSnapshot = Pick<UpiDetails, 'upiId'>;
+export type UpiPayoutSnapshot = Pick<UpiDetails, 'upiId'>;
 type PayoutSnapshot = BankPayoutSnapshot | UpiPayoutSnapshot;
 
 export interface PayoutRequest {
@@ -61,8 +61,8 @@ export interface PayoutListQuery {
   cursor?: string | null;
   status?: PayoutRequestStatus | 'all';
   search?: string;
-  fromDate?: Date;
-  toDate?: Date;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export type AdminPayoutListQuery = PayoutListQuery & {
