@@ -8,6 +8,7 @@ import {
   PanelsTopLeft,
   Star,
   FileText,
+  Banknote,
 } from 'lucide-react';
 
 import type { MenuItem } from '@/types/navigation';
@@ -22,6 +23,7 @@ export const adminMenuItems: MenuItem[] = [
   { icon: <FileText />, label: 'Disputes', to: '/admin/disputes' },
   { icon: <Star />, label: 'Reviews', to: '/admin/reviews' },
   { icon: <CreditCard />, label: 'Transactions', to: '/admin/payments' },
+  { icon: <Banknote />, label: 'Payout Requests', to: '/admin/payouts' },
   { icon: <PanelsTopLeft />, label: 'Home Sections', to: '/admin/home' },
 ];
 

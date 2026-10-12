@@ -2,14 +2,13 @@ import { useOutletContext } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import type { PayoutMethod } from '@/constants/payout';
-import type { WorkerProfileDetails } from '@/types/worker';
-
-import WalletOverview from '../../components/WalletOverview';
 import {
   useAdminWorkerWallet,
   useRejectPayoutMethod,
   useVerifyPayoutMethod,
-} from '../../hooks/useAdminWallet';
+  WalletOverview,
+} from '@/features/wallet';
+import type { WorkerProfileDetails } from '@/types/worker';
 
 type WorkerOutletContext = {
   worker: WorkerProfileDetails;
@@ -17,7 +16,7 @@ type WorkerOutletContext = {
 
 export default function AdminWorkerWalletPage() {
   const { worker } = useOutletContext<WorkerOutletContext>();
-  const { data: wallet, isLoading, isError, refetch } = useAdminWorkerWallet(worker.id);
+  const { data: wallet, isLoading, isError, error, refetch } = useAdminWorkerWallet(worker.id);
 
   const verifyMutation = useVerifyPayoutMethod();
   const rejectMutation = useRejectPayoutMethod();
@@ -37,6 +36,7 @@ export default function AdminWorkerWalletPage() {
       wallet={wallet}
       isLoading={isLoading}
       isError={isError}
+      error={error}
       onRetry={refetch}
       role="admin"
       verifyMethod={handleVerify}

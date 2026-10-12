@@ -2,10 +2,8 @@ import { ArrowDownUp, Banknote, CreditCard } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 
 import PageHeader from '@/components/molecules/PageHeader';
+import { useWorkerWallet, WalletOverview } from '@/features/wallet';
 import { cn } from '@/lib/utils';
-
-import WalletOverview from '../../components/WalletOverview';
-import { useWallet } from '../../hooks/useWallet';
 
 const NAV_TABS = [
   { path: 'transactions', label: 'Ledger Transactions', icon: ArrowDownUp },
@@ -14,7 +12,7 @@ const NAV_TABS = [
 ];
 
 export default function WorkerWalletLayout() {
-  const { data: wallet, isLoading, isError, refetch } = useWallet();
+  const { data: wallet, isLoading, isError, refetch, error } = useWorkerWallet();
 
   return (
     <div className="space-y-6 p-4 lg:p-6">
@@ -27,8 +25,8 @@ export default function WorkerWalletLayout() {
         wallet={wallet}
         isLoading={isLoading}
         isError={isError}
+        error={error}
         onRetry={refetch}
-        role="worker"
       />
 
       <div className="pb-16">

@@ -4,7 +4,7 @@ export const approvePayoutSchema = z.object({
   referenceId: z.string().regex(/^[a-zA-Z0-9\-_]{6,40}$/, {
     message: 'Reference ID / UTR must be 6 to 40 alphanumeric characters',
   }),
-  receiptUrl: z.string().url({ message: 'Invalid URL' }),
+  receiptUrl: z.string().url({ message: 'Evidence Image is required' }),
 });
 
 export type ApprovePayoutFormType = z.infer<typeof approvePayoutSchema>;

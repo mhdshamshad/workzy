@@ -40,6 +40,6 @@ export interface WalletTransactionListQuery {
   cursor?: string | null;
   category?: WalletTransactionCategory | 'all';
   type?: WalletTransactionType | 'all';
-  fromDate?: Date;
-  toDate?: Date;
+  fromDate?: string;
+  toDate?: string;
 }

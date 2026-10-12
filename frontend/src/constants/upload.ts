@@ -18,6 +18,7 @@ export const UploadPurposes = {
   CHAT_IMAGE: 'CHAT_IMAGE',
   CHAT_VIDEO: 'CHAT_VIDEO',
   CHAT_AUDIO: 'CHAT_AUDIO',
+  PAYOUT_RECEIPT: 'PAYOUT_RECEIPT',
 } as const;
 
 export type UploadPurpose = (typeof UploadPurposes)[keyof typeof UploadPurposes];

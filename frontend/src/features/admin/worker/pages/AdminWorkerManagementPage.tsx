@@ -12,10 +12,10 @@ import SearchInput from '@/components/molecules/SearchInput';
 import { WORKER_STATUS } from '@/constants';
 import { WALLET_PAYOUT_STATUS } from '@/constants/payout';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
+import { enumToOptions } from '@/utils/selectOptions';
 
 import workerColumns from '../components/workerColumns';
 import { useAdminWorkers } from '../hooks/useAdminWorkers';
-import { enumToOptions } from '@/utils/selectOptions';
 
 const CUSTOM_PARAMS = [{ key: 'payoutStatus', defaultValue: 'all' }];
 
@@ -83,7 +83,7 @@ export default function AdminWorkerManagementPage() {
               value={payoutStatus}
               onChange={v => updateParams({ payoutStatus: v, pageIndex: 0 })}
               leftIcon={<Filter />}
-              options={enumToOptions(WALLET_PAYOUT_STATUS,"All Payout Status")}
+              options={enumToOptions(WALLET_PAYOUT_STATUS, 'All Payout Status')}
             />
           </div>
         </div>
