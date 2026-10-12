@@ -9,18 +9,20 @@ import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
-import { STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from '@/constants';
+import { WORKER_STATUS } from '@/constants';
+import { WALLET_PAYOUT_STATUS } from '@/constants/payout';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 
 import workerColumns from '../components/workerColumns';
 import { useAdminWorkers } from '../hooks/useAdminWorkers';
+import { enumToOptions } from '@/utils/selectOptions';
 
-const CUSTOM_PARAMS = [{ key: 'stripStatus', defaultValue: 'all' }];
+const CUSTOM_PARAMS = [{ key: 'payoutStatus', defaultValue: 'all' }];
 
 export default function AdminWorkerManagementPage() {
   const navigate = useNavigate();
-  const { pageIndex, pageSize, search, status, updateParams, stripStatus } = useUrlFilterParams<{
-    stripStatus: string;
+  const { pageIndex, pageSize, search, status, updateParams, payoutStatus } = useUrlFilterParams<{
+    payoutStatus: string;
   }>(CUSTOM_PARAMS);
 
   const { workers, total, isLoading, isError, error, refetch } = useAdminWorkers({
@@ -28,15 +30,15 @@ export default function AdminWorkerManagementPage() {
     limit: pageSize,
     search,
     status,
-    stripStatus,
+    payoutStatus,
   });
-  const isHideButton = search !== '' || status !== 'all' || stripStatus !== 'all';
+  const isHideButton = search !== '' || status !== 'all' || payoutStatus !== 'all';
 
   const clearAllFilters = useCallback(() => {
     updateParams({
       search: '',
       status: 'all',
-      stripStatus: 'all',
+      payoutStatus: 'all',
       pageIndex: 0,
     });
   }, [updateParams]);
@@ -77,17 +79,11 @@ export default function AdminWorkerManagementPage() {
           </div>
           <div className="col-span-1 sm:col-span-4">
             <Select
-              placeholder="All Status"
-              value={stripStatus}
-              onChange={v => updateParams({ stripStatus: v, pageIndex: 0 })}
+              placeholder="All Payout Status"
+              value={payoutStatus}
+              onChange={v => updateParams({ payoutStatus: v, pageIndex: 0 })}
               leftIcon={<Filter />}
-              options={[
-                { label: 'All Status', value: 'all' },
-                ...Object.values(STRIPE_ACCOUNT_STATUS).map(val => ({
-                  label: val.charAt(0).toUpperCase() + val.slice(1),
-                  value: val,
-                })),
-              ]}
+              options={enumToOptions(WALLET_PAYOUT_STATUS,"All Payout Status")}
             />
           </div>
         </div>

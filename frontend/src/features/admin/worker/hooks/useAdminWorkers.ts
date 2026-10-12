@@ -8,12 +8,12 @@ export function useAdminWorkers({
   limit,
   search,
   status = 'all',
-  stripStatus = 'all',
+  payoutStatus = 'all',
 }: AdminWorkerListQuery) {
   const query = useQuery({
-    queryKey: ['admin-workers', page, limit, search ?? '', status ?? 'all', stripStatus ?? 'all'],
+    queryKey: ['admin-workers', page, limit, search ?? '', status ?? 'all', payoutStatus ?? 'all'],
     queryFn: () =>
-      AdminWorkerService.ListWorkers({ page: page + 1, limit, search, status, stripStatus }),
+      AdminWorkerService.ListWorkers({ page: page + 1, limit, search, status, payoutStatus }),
     placeholderData: prev => prev,
   });
 

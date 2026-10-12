@@ -19,7 +19,7 @@ type StandardParams = {
 export const useUrlFilterParams = <
   TCustom extends Record<string, unknown> = Record<string, unknown>,
 >(
-  customParams: CustomParamConfig[] = []
+  customParams: readonly CustomParamConfig[] = []
 ): StandardParams & TCustom => {
   const [searchParams, setSearchParams] = useSearchParams();
 

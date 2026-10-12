@@ -42,7 +42,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
   }
 
   async listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListItem>> {
-    const { page, limit, search, status, stripStatus } = query;
+    const { page, limit, search, status, payoutStatus } = query;
     const skip = (page - 1) * limit;
 
     const filter: FilterQuery<IWorker> = {};
@@ -53,8 +53,8 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
     if (status !== "all") {
       filter.status = status;
     }
-    if (stripStatus !== "all") {
-      filter.stripeAccountStatus = stripStatus;
+    if (payoutStatus && payoutStatus !== "all") {
+      filter.payoutStatus = payoutStatus;
     }
     const [workers, total] = await Promise.all([
       this.model

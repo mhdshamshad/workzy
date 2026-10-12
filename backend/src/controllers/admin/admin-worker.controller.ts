@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { injectable, inject } from "inversify";
 
-import { HTTPSTATUS, StripeAccountStatus, WORKER } from "@/constants";
+import { HTTPSTATUS, WORKER } from "@/constants";
+import { WalletPayoutStatus } from "@/constants/payout";
 import { IAdminWorkerController } from "@/core/interfaces/controllers/admin/IAdminWorkerController";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
@@ -18,7 +19,7 @@ import { ApiResponse } from "@/utils/apiResponse";
 export class AdminWorkerController implements IAdminWorkerController {
   constructor(
     @inject(TYPES.WorkerService) private _workerService: IWorkerService,
-    @inject(TYPES.ServiceManagement) private _serviceMangement: IServiceManagement
+    @inject(TYPES.ServiceManagement) private _serviceManagement: IServiceManagement
   ) {}
 
   listWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -26,14 +27,14 @@ export class AdminWorkerController implements IAdminWorkerController {
     const limit = parseInt(req.query.limit as string) || 10;
     const search = (req.query.search as string) || "";
     const status = (req.query.status as WorkerStatusFilter) || "all";
-    const stripStatus = (req.query.stripStatus as "all" | StripeAccountStatus) || "all";
+    const payoutStatus = (req.query.payoutStatus as "all" | WalletPayoutStatus) || "all";
 
     const { data, total } = await this._workerService.listWorkers({
       page,
       limit,
       search,
       status,
-      stripStatus,
+      payoutStatus,
     });
 
     res.status(HTTPSTATUS.OK).json(
@@ -81,7 +82,7 @@ export class AdminWorkerController implements IAdminWorkerController {
     const parsedCursor = req.query.cursor
       ? JSON.parse(Buffer.from(req.query.cursor as string, "base64url").toString("utf8"))
       : undefined;
-    const { data, nextCursor } = await this._serviceMangement.getWorkerServices(workerId, {
+    const { data, nextCursor } = await this._serviceManagement.getWorkerServices(workerId, {
       limit,
       search,
       status,
@@ -94,7 +95,7 @@ export class AdminWorkerController implements IAdminWorkerController {
   });
   getWorkerServiceCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
-    const categories = await this._serviceMangement.getWorkerServiceCategories(workerId);
+    const categories = await this._serviceManagement.getWorkerServiceCategories(workerId);
     res.status(HTTPSTATUS.OK).json(new ApiResponse({ categories }));
   });
 }

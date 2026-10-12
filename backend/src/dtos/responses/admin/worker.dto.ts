@@ -1,4 +1,4 @@
-import { StripeAccountStatus, WalletPayoutStatus, WorkerStatus } from "@/constants";
+import { WalletPayoutStatus, WorkerStatus } from "@/constants";
 import { WorkerListItem } from "@/types/worker/worker.projection";
 
 export class WorkerListResponseDto {

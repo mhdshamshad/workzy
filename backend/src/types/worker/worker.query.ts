@@ -1,4 +1,5 @@
-import { StripeAccountStatus, WorkerStatus } from "@/constants";
+import { WorkerStatus } from "@/constants";
+import { WalletPayoutStatus } from "@/constants/payout";
 
 export type WorkerStatusFilter = WorkerStatus | "all";
 
@@ -7,7 +8,7 @@ export type WorkerListQuery = {
   limit: number;
   search?: string;
   status: WorkerStatusFilter;
-  stripStatus: StripeAccountStatus | "all";
+  payoutStatus?: WalletPayoutStatus | "all";
 };
 
 export type NearbyWorkerListQuery = {
