@@ -1,21 +1,12 @@
 import dayjs from 'dayjs';
 import { useCallback } from 'react';
 
+import { DATE_FILTER_PARAMS } from '@/constants/dateFilterParams';
 import type { BillType, PaymentStatus } from '@/constants/payment';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
+import { formatDateForUrl } from '@/utils/time.format';
 
-const CUSTOM_PARAMS = [
-  { key: 'billType', defaultValue: 'all' },
-  { key: 'fromDate', parser: (v: string) => (v ? dayjs(v).toDate() : null) },
-  { key: 'toDate', parser: (v: string) => (v ? dayjs(v).toDate() : null) },
-];
-
-export const formatDateForUrl = (date: Date | null | undefined): string | null => {
-  if (!date) {
-    return null;
-  }
-  return dayjs(date).format('YYYY-MM-DD');
-};
+const CUSTOM_PARAMS = [{ key: 'billType', defaultValue: 'all' }, ...DATE_FILTER_PARAMS];
 
 export function usePaymentFilterParams() {
   const { search, status, billType, updateParams, fromDate, toDate } = useUrlFilterParams<{

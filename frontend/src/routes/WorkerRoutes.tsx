@@ -1,9 +1,15 @@
 import { lazy } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
 
 import ProtectedRoute from './ProtectedRoute';
+
+const WorkerWalletLayout = lazy(() => import('@/features/wallet/pages/worker/WorkerWalletLayout'));
+const WalletTransactionsPage = lazy(
+  () => import('@/features/wallet/pages/worker/WalletTransactionsPage')
+);
+const WalletPayoutsPage = lazy(() => import('@/features/wallet/pages/worker/WalletPayoutsPage'));
 
 const WorkerChatPage = lazy(() => import('@/features/worker/chat/pages/WorkerChatPage'));
 const WorkerPaymentsPage = lazy(() => import('@/features/payments/pages/WorkerPaymentsPage'));
@@ -59,6 +65,12 @@ export default function WorkerRoutes() {
             <Route path="documents" element={<WorkerDocumentsContentPage />} />
             <Route path="account" element={<AccountPage />} />
             <Route path="leaves" element={<WorkerLeaveManagement />} />
+          </Route>
+          <Route path="wallet" element={<WorkerWalletLayout />}>
+            <Route index element={<Navigate to="transactions" />} />
+            <Route path="transactions" element={<WalletTransactionsPage />} />
+            <Route path="payouts" element={<WalletPayoutsPage />} />
+            <Route path="payments" element={<WorkerPaymentsPage />} />
           </Route>
         </Route>
       </Route>

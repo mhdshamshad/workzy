@@ -13,3 +13,4 @@ export * from './notification.routes';
 export * from './dispute.routes';
 export * from './chat.routes';
 export * from './message.routes';
+export * from './wallet.routes';

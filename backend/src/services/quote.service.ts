@@ -12,8 +12,6 @@ import {
   QUOTE,
   QUOTE_STATUS,
   SERVICE_TYPE,
-  STRIPE_ACCOUNT_STATUS,
-  WORKER,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
@@ -108,15 +106,10 @@ export class QuoteService implements IQuoteService {
     if (new Date() > quote.expiresAt) {
       throw new CustomError(QUOTE.EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }
-    const [booking, category, worker] = await Promise.all([
+    const [booking, category] = await Promise.all([
       getEntityOrThrow(this._bookingRepository, quote.bookingId.toString(), BOOKING.NOT_FOUND),
       getEntityOrThrow(this._categoryRepository, quote.categoryId.toString(), CATEGORY.NOT_FOUND),
-      getEntityOrThrow(this._workerRepository, quote.workerId.toString(), WORKER.NOT_FOUND),
     ]);
-
-    if (!worker?.stripeAccountId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
-      throw new CustomError(WORKER.STRIPE_NOT_ACTIVE, HTTPSTATUS.BAD_REQUEST);
-    }
 
     const platformFeePercent = category.platformFee ?? 0;
     const platformFee = Math.floor((quote.totalPrice * platformFeePercent) / 100);
@@ -171,7 +164,6 @@ export class QuoteService implements IQuoteService {
       amount: quote.totalPrice,
       userId,
       platformFee,
-      workerStripeId: worker.stripeAccountId,
       userName: newBooking.snapshot.user.name,
       workerName: newBooking.snapshot.worker.name,
     });

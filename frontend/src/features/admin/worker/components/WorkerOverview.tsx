@@ -18,6 +18,9 @@ const TABS = [
   { name: 'Quotes', path: 'quotes' },
   { name: 'Disputes', path: 'disputes' },
   { name: 'Payments', path: 'payments' },
+  { name: 'Wallet', path: 'wallet' },
+  { name: 'Transactions', path: 'transactions' },
+  { name: 'Payouts', path: 'payouts' },
 ];
 
 interface WorkerOverviewProps {

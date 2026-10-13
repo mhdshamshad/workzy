@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 import { DOCUMENT_STATUS, DOCUMENT_TYPE, STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
+import { WALLET_PAYOUT_STATUS } from "@/constants/payout";
 import {
   IAvailabilitySlots,
   IGeoLocation,
@@ -180,6 +181,12 @@ const workerSchema = new Schema<IWorker>(
       type: String,
       enum: Object.values(STRIPE_ACCOUNT_STATUS),
       default: STRIPE_ACCOUNT_STATUS.NOT_CONNECTED,
+    },
+    payoutStatus: {
+      type: String,
+      enum: Object.values(WALLET_PAYOUT_STATUS),
+      default: WALLET_PAYOUT_STATUS.NOT_CONFIGURED,
+      index: true,
     },
   },
   { timestamps: true }

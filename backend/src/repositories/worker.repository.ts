@@ -42,7 +42,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
   }
 
   async listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListItem>> {
-    const { page, limit, search, status, stripStatus } = query;
+    const { page, limit, search, status, payoutStatus } = query;
     const skip = (page - 1) * limit;
 
     const filter: FilterQuery<IWorker> = {};
@@ -53,13 +53,15 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
     if (status !== "all") {
       filter.status = status;
     }
-    if (stripStatus !== "all") {
-      filter.stripeAccountStatus = stripStatus;
+    if (payoutStatus && payoutStatus !== "all") {
+      filter.payoutStatus = payoutStatus;
     }
     const [workers, total] = await Promise.all([
       this.model
         .find(filter)
-        .select("displayName phone status stripeAccountStatus profileImage createdAt userId")
+        .select(
+          "displayName phone status stripeAccountStatus payoutStatus profileImage createdAt userId"
+        )
         .populate<{ userId: { _id: Types.ObjectId; email: string } }>("userId", "email")
         .skip(skip)
         .limit(limit)
@@ -154,7 +156,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
           spherical: true,
           query: {
             status: WORKER_STATUS.VERIFIED,
-            stripeAccountStatus: STRIPE_ACCOUNT_STATUS.ACTIVE,
+            // stripeAccountStatus: STRIPE_ACCOUNT_STATUS.ACTIVE,
             ...(minRating !== undefined && {
               "reviewStats.averageRating": { $gte: minRating },
             }),

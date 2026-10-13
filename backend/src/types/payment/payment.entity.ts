@@ -33,7 +33,6 @@ export interface BookingCheckoutParams {
   slotId: string;
   userId: string;
   workerId: string;
-  workerStripeId: string;
   bookingId: string;
   amount: number;
   serviceName: string;

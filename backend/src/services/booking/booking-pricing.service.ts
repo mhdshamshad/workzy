@@ -1,14 +1,6 @@
 import { inject, injectable } from "inversify";
 
-import {
-  CATEGORY,
-  HTTPSTATUS,
-  PricingMode,
-  SERVICE,
-  STRIPE_ACCOUNT_STATUS,
-  WORKER,
-  WORKER_STATUS,
-} from "@/constants";
+import { CATEGORY, HTTPSTATUS, PricingMode, SERVICE, WORKER, WORKER_STATUS } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -58,10 +50,6 @@ export class BookingPricingService implements IBookingPricingService {
     if (!category) {
       throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
-    const workerStripeId = worker.stripeAccountId;
-    if (!workerStripeId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
-      throw new CustomError(WORKER.STRIPE_NOT_ACTIVE, HTTPSTATUS.BAD_REQUEST);
-    }
 
     const rate = service.rate ?? category.baseRate;
     const estimatedDuration = service.estimatedDuration ?? category.estimatedDuration ?? 60;
@@ -88,7 +76,6 @@ export class BookingPricingService implements IBookingPricingService {
       category,
       pricingMode,
       rate,
-      workerStripeId,
       estimatedDuration,
       bufferTime,
       platformFeePercent,

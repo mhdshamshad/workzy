@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import type { UploadPurpose } from '@/constants/upload';
 import { cn } from '@/lib/utils';
 import { uploadToS3 } from '@/services/upload.service';
+import { handleApiError } from '@/utils/handleApiError';
 import { compressAndConvertToWebP, validateImage } from '@/utils/imageCompression';
 
 import Button from '../atoms/Button';
@@ -72,8 +73,7 @@ export function ImageUpload({
       setPreview(url);
       onChange?.(url);
     } catch (error) {
-      console.error(error);
-      toast.error('Upload Filed');
+      toast.error(handleApiError(error));
       onChange?.('');
     } finally {
       setIsUploading(false);

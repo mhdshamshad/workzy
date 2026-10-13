@@ -10,7 +10,6 @@ export interface BookingCheckoutSessionParams {
 export interface ExtraChargeCheckoutSessionParams {
   bookingId: string;
   userId: string;
-  workerStripeAccountId: string;
   amount: number;
 }
 

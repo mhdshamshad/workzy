@@ -137,3 +137,28 @@ export function formatLastSeen(lastSeen: string | Date | null | undefined): stri
   }
   return dayjs(lastSeen).fromNow();
 }
+
+export function formatDaysAgo(date?: string | Date | null): string {
+  const days = dayjs().startOf('day').diff(dayjs(date).startOf('day'), 'day');
+  if (days <= 0) {
+    return 'today';
+  }
+  return days === 1 ? '1 day ago' : `${days} days ago`;
+}
+
+export function formatSmartActivityDateTime(dateInput: string | Date): string {
+  const d = dayjs(dateInput);
+  const now = dayjs();
+  const time = d.format('h:mm A');
+
+  const isToday = d.isSame(now, 'day');
+  const isYesterday = d.isSame(now.subtract(1, 'day'), 'day');
+
+  if (isToday) {
+    return `Today · ${time}`;
+  }
+  if (isYesterday) {
+    return `Yesterday · ${time}`;
+  }
+  return `${d.format('DD-MM-YYYY')} · ${time}`;
+}

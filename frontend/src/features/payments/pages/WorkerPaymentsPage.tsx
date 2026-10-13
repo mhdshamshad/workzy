@@ -1,11 +1,9 @@
-import { motion } from 'framer-motion';
 import { CreditCard } from 'lucide-react';
 
 import Button from '@/components/atoms/Button';
 import { DataList } from '@/components/data-table/DataList';
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
-import PageHeader from '@/components/molecules/PageHeader';
 import { ROLE } from '@/constants';
 import { getPaymentColumns } from '@/features/payments/components/paymentColumns';
 import { PaymentFilterBar } from '@/features/payments/components/PaymentFilterBar';
@@ -40,16 +38,7 @@ export default function WorkerPaymentsPage() {
   const payments = data?.pages.flatMap(p => p.payments) ?? [];
 
   return (
-    <div className="space-y-6 p-4 lg:p-6">
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="px-6"
-      >
-        <PageHeader title="Payments" description="Platform-wide transaction management" />
-      </motion.div>
-
+    <div className="space-y-4">
       <PaymentFilterBar
         search={search}
         onSearchChange={handleSearchChange}
@@ -64,40 +53,38 @@ export default function WorkerPaymentsPage() {
         disabled={isError}
       />
 
-      <div className="mt-6">
-        <DataList
-          data={payments}
-          isLoading={isLoading}
-          isError={isError}
-          errorState={
-            <ErrorState
-              title="Couldn't load payments"
-              description="Something went wrong while fetching payment data."
-              onRetry={refetch}
-            />
-          }
-          emptyState={
-            <EmptyState
-              title="No payments found"
-              description="No payments found matching your filters."
-              icon={<CreditCard className="w-8 h-8" />}
-              action={
-                hasActiveFilters ? (
-                  <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-4">
-                    Clear filters
-                  </Button>
-                ) : null
-              }
-            />
-          }
-          columns={getPaymentColumns(ROLE.WORKER)}
-          mode="table"
-          paginationType="cursor"
-          fetchNextPage={fetchNextPage}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-        />
-      </div>
+      <DataList
+        data={payments}
+        isLoading={isLoading}
+        isError={isError}
+        errorState={
+          <ErrorState
+            title="Couldn't load payments"
+            description="Something went wrong while fetching payment data."
+            onRetry={refetch}
+          />
+        }
+        emptyState={
+          <EmptyState
+            title="No payments found"
+            description="No payments found matching your filters."
+            icon={<CreditCard className="w-8 h-8" />}
+            action={
+              hasActiveFilters ? (
+                <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-4">
+                  Clear filters
+                </Button>
+              ) : null
+            }
+          />
+        }
+        columns={getPaymentColumns(ROLE.WORKER)}
+        mode="table"
+        paginationType="cursor"
+        fetchNextPage={fetchNextPage}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+      />
     </div>
   );
 }

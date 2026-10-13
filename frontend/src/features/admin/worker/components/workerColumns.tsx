@@ -4,6 +4,7 @@ import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { Badge } from '@/components/ui/badge';
 import { WORKER_STATUS_CONFIG } from '@/constants';
+import { getStatusBadgeVariant } from '@/features/wallet';
 import type { WorkerListItem } from '@/types/admin/worker';
 import type { TableColumnDef } from '@/types/table.types';
 import { formatDate } from '@/utils/time.format';
@@ -74,25 +75,21 @@ const workerColumns = (
     width: 120,
   },
   {
-    id: 'stripStatus',
-    header: 'Stripe Status',
-    accessorKey: 'stripStatus',
+    id: 'payoutStatus',
+    header: 'Payout Status',
+    accessorKey: 'payoutStatus',
     cell: ({ row }) => {
-      const stripeStatus = row.original.stripeAccountStatus;
+      const status = row.original.payoutStatus;
       return (
-        <Badge
-          variant={
-            stripeStatus === 'active' ? 'green' : stripeStatus === 'pending' ? 'blue' : 'amber'
-          }
-        >
-          {stripeStatus}
+        <Badge variant={getStatusBadgeVariant(status)} className="capitalize">
+          {status}
         </Badge>
       );
     },
     showInMobileHeader: false,
     mobileOrder: 4,
-    mobileLabel: 'Stripe Status',
-    width: 120,
+    mobileLabel: 'Payout Status',
+    width: 130,
   },
   {
     id: 'joinedDate',

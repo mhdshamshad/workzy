@@ -1,4 +1,5 @@
-import type { StripeAccountStatus, WorkerStatus } from '@/constants';
+import type { WorkerStatus } from '@/constants';
+import type { WalletPayoutStatus } from '@/constants/payout';
 
 export interface WorkerListItem {
   email: string;
@@ -8,7 +9,7 @@ export interface WorkerListItem {
   status: WorkerStatus;
   userId: string;
   phone?: string;
-  stripeAccountStatus: StripeAccountStatus;
+  payoutStatus: WalletPayoutStatus;
   createdAt: Date;
 }
 
@@ -22,5 +23,5 @@ export type AdminWorkerListQuery = {
   limit: number;
   search?: string;
   status?: string;
-  stripStatus?: string;
+  payoutStatus?: string;
 };

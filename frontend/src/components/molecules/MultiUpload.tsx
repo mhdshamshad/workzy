@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 
 import type { UploadPurpose } from '@/constants/upload';
 import { uploadToS3 } from '@/services/upload.service';
+import { handleApiError } from '@/utils/handleApiError';
 import { compressAndConvertToWebP } from '@/utils/imageCompression';
 
 interface FileState {
@@ -139,8 +140,7 @@ export function MultiUpload({
       });
       updateFile(fileState.id, { status: 'success', url, progress: 100 });
     } catch (error) {
-      console.error(error);
-      toast.error(`Upload failed: ${fileState.file.name}`);
+      toast.error(handleApiError(error) || `Upload failed: ${fileState.file.name}`);
       setFiles(prev => {
         const next = prev.filter(f => f.id !== fileState.id);
         notifyChange(next);
