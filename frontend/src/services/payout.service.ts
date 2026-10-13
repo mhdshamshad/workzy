@@ -4,9 +4,11 @@ import type { ApiResponse } from '@/types/api';
 import type { PayoutListingResponse, PayoutListQuery } from '@/types/payout';
 
 const PayoutService = {
-  requestPayout: async (amount: number): Promise<void> => {
+  requestPayout: async (amount: number): Promise<{ message: string }> => {
     const res = await api.post<ApiResponse<void>>(PAYOUT_API.REQUEST, { amount });
-    return res.data.data;
+    return {
+      message: res.data.message,
+    };
   },
   getPayoutRequests: async (params: PayoutListQuery): Promise<PayoutListingResponse> => {
     const res = await api.get<ApiResponse<PayoutListingResponse>>(PAYOUT_API.ROOT, { params });

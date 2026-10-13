@@ -10,10 +10,11 @@ export * from './components/ApprovePayoutForm';
 export * from './components/RejectPayoutForm';
 export * from './components/AdminWalletMethodRejectModal';
 export * from './components/WorkerPayoutSettingsModal';
+export * from './components/BankPayoutForm';
+export * from './components/UpiPayoutForm';
+export * from './components/RemovePayoutMethodModal';
 export * from './components/WalletOverviewSkeleton';
 export * from './components/PayoutMethodsCard';
-export * from './components/PayoutSettingsForm';
-export * from './components/PayoutSettingsCard';
 export * from './components/WithdrawModal';
 
 export * from './hooks/useAdminWallet';

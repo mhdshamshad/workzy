@@ -81,7 +81,7 @@ export function TransactionListView({
         }
         emptyState={
           <EmptyState
-            title="No payments found"
+            title="No Transactions  found"
             description={
               hasActiveFilters
                 ? 'No transactions match your filters.'

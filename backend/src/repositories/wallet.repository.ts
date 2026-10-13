@@ -259,43 +259,28 @@ export class WalletRepository extends BaseRepository<IWallet> implements IWallet
                 {
                   $or: [
                     {
-                      $eq: ["$payout.bankDetails.status", PAYOUT_METHOD_STATUS.REJECTED],
+                      $eq: ["$payout.bankDetails.status", PAYOUT_METHOD_STATUS.PENDING],
                     },
                     {
-                      $eq: ["$payout.upiDetails.status", PAYOUT_METHOD_STATUS.REJECTED],
+                      $eq: ["$payout.upiDetails.status", PAYOUT_METHOD_STATUS.PENDING],
                     },
                   ],
                 },
-                WALLET_PAYOUT_STATUS.REJECTED,
+                WALLET_PAYOUT_STATUS.PENDING,
                 {
                   $cond: [
                     {
                       $or: [
                         {
-                          $eq: ["$payout.bankDetails.status", PAYOUT_METHOD_STATUS.PENDING],
+                          $eq: ["$payout.bankDetails.status", PAYOUT_METHOD_STATUS.VERIFIED],
                         },
                         {
-                          $eq: ["$payout.upiDetails.status", PAYOUT_METHOD_STATUS.PENDING],
+                          $eq: ["$payout.upiDetails.status", PAYOUT_METHOD_STATUS.VERIFIED],
                         },
                       ],
                     },
-                    WALLET_PAYOUT_STATUS.PENDING,
-                    {
-                      $cond: [
-                        {
-                          $or: [
-                            {
-                              $eq: ["$payout.bankDetails.status", PAYOUT_METHOD_STATUS.VERIFIED],
-                            },
-                            {
-                              $eq: ["$payout.upiDetails.status", PAYOUT_METHOD_STATUS.VERIFIED],
-                            },
-                          ],
-                        },
-                        WALLET_PAYOUT_STATUS.VERIFIED,
-                        WALLET_PAYOUT_STATUS.REJECTED,
-                      ],
-                    },
+                    WALLET_PAYOUT_STATUS.VERIFIED,
+                    WALLET_PAYOUT_STATUS.REJECTED,
                   ],
                 },
               ],

@@ -75,7 +75,7 @@ export function PayoutListView({
         }
         emptyState={
           <EmptyState
-            title="No payments found"
+            title="No payouts found"
             description={
               hasActiveFilters
                 ? 'No payouts match your filters.'
