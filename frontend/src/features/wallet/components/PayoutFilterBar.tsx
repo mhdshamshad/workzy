@@ -46,8 +46,8 @@ export function PayoutFilterBar({
       className={cn(
         'grid grid-cols-12 gap-3 mt-6 items-start',
         hasActiveFilters
-          ? 'md:grid-cols-[1fr_180px_180px_160px_160px_auto]'
-          : 'md:grid-cols-[1fr_180px_180px_160px_160px]'
+          ? 'md:grid-cols-[1fr_180px_180px_160px_auto]'
+          : 'md:grid-cols-[1fr_180px_160px_160px]'
       )}
     >
       <div
@@ -60,6 +60,7 @@ export function PayoutFilterBar({
           disabled={disabled}
           placeholder="Search by referenceId"
           value={search}
+          className="py-2"
           onChange={onSearchChange}
         />
       </div>

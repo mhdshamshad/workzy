@@ -63,6 +63,7 @@ export function PaymentFilterBar({
       disabled={disabled}
       placeholder="Search by transaction ID or name..."
       value={search}
+      className="py-2"
       onChange={onSearchChange}
     />
   );

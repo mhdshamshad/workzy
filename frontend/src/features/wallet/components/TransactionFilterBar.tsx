@@ -63,6 +63,7 @@ export function TransactionFilterBar({
           disabled={disabled}
           placeholder="Search by transaction ID or description..."
           value={search}
+          className="py-2"
           onChange={onSearchChange}
         />
       </div>
