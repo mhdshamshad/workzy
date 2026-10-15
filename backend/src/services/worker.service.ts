@@ -7,7 +7,6 @@ import {
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
   ROLE,
-  StripeAccountStatus,
   UPCOMING_BOOKING_STATUSES,
   WORKER,
   WORKER_JOIN_DOCUMENT_KEY_MAP,
@@ -233,26 +232,6 @@ export class WorkerService implements IWorkerService {
     }
 
     return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
-  }
-
-  async getStripeStatus(
-    workerId: string
-  ): Promise<{ status: StripeAccountStatus; stripeAccountId: string | null }> {
-    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
-    return {
-      status: worker.stripeAccountStatus,
-      stripeAccountId: worker.stripeAccountId ?? null,
-    };
-  }
-
-  async connectStripe(workerId: string): Promise<string> {
-    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
-
-    if (worker.status !== WORKER_STATUS.VERIFIED) {
-      throw new CustomError(WORKER.NOT_AVAILABLE, HTTPSTATUS.FORBIDDEN);
-    }
-
-    return this._paymentservice.createStripeConnectLink(worker);
   }
 
   async getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics> {

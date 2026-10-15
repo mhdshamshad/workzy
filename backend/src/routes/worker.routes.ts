@@ -58,7 +58,4 @@ router.patch(
   workerController.updateWorkerDocument
 );
 
-router.get("/stripe/connect", workerController.connectStripe);
-router.get("/stripe/status", workerController.getStripeStatus);
-
 export default router;

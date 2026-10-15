@@ -13,8 +13,7 @@ export interface IWorkerController {
   createWorkerProfile: RequestHandler;
   getMyWorkerProfile: RequestHandler;
   reSubmitWorkerDocument: RequestHandler;
-  connectStripe: RequestHandler;
-  getStripeStatus: RequestHandler;
+
   getWorkerDashboardAnalytics: RequestHandler;
   addWorkerDocument: RequestHandler;
   updateWorkerDocument: RequestHandler;

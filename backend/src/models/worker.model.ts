@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-import { DOCUMENT_STATUS, DOCUMENT_TYPE, STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
+import { DOCUMENT_STATUS, DOCUMENT_TYPE, WORKER_STATUS } from "@/constants";
 import { WALLET_PAYOUT_STATUS } from "@/constants/payout";
 import {
   IAvailabilitySlots,
@@ -176,12 +176,7 @@ const workerSchema = new Schema<IWorker>(
       required: true,
     },
     currentLocation: CurrentLocationSchema,
-    stripeAccountId: { type: String },
-    stripeAccountStatus: {
-      type: String,
-      enum: Object.values(STRIPE_ACCOUNT_STATUS),
-      default: STRIPE_ACCOUNT_STATUS.NOT_CONNECTED,
-    },
+
     payoutStatus: {
       type: String,
       enum: Object.values(WALLET_PAYOUT_STATUS),
@@ -194,6 +189,6 @@ const workerSchema = new Schema<IWorker>(
 
 workerSchema.index({ displayName: "text" });
 workerSchema.index({ location: "2dsphere" });
-workerSchema.index({ status: 1, stripeAccountStatus: 1 });
+
 const Worker = mongoose.model<IWorker>("Worker", workerSchema);
 export default Worker;

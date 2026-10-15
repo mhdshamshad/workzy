@@ -10,7 +10,6 @@ import {
   PAYMENT,
   PAYMENT_PROVIDER,
   PAYMENT_STATUS,
-  STRIPE_ACCOUNT_STATUS,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
@@ -28,7 +27,6 @@ import { IBooking } from "@/types/booking/booking.entity";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { BookingCheckoutParams, VerifySessionType } from "@/types/payment/payment.entity";
 import { PaymentListQuery } from "@/types/payment/payment.query";
-import { IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
 
@@ -241,29 +239,9 @@ export class PaymentService implements IPaymentService {
         });
         break;
       }
-      case "account.payouts_enabled": {
-        await this._workerRepository.findOneAndUpdate(
-          { stripeAccountId: event.stripeAccountId },
-          { stripeAccountStatus: "active" }
-        );
-        break;
-      }
       case "unhandled":
         break;
     }
-  }
-
-  async createStripeConnectLink(worker: IWorker): Promise<string> {
-    let accountId = worker?.stripeAccountId;
-    if (!accountId) {
-      const { accountId: newAccountId } = await this._gateway.createExpressAccount();
-      accountId = newAccountId;
-      await this._workerRepository.update(worker._id, {
-        stripeAccountId: accountId,
-        stripeAccountStatus: STRIPE_ACCOUNT_STATUS.PENDING,
-      });
-    }
-    return await this._gateway.createAccountOnboardingLink(accountId);
   }
 
   async refundBookingPayment(bookingId: string, amount?: number): Promise<void> {

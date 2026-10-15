@@ -24,13 +24,6 @@ export interface VerifiedSessionResult {
   receiptUrl?: string;
 }
 
-export interface TransferParams {
-  bookingId: string;
-  workerStripeAccountId: string;
-  amount: number; // in Rupees
-  currency: string;
-}
-
 export interface RefundParams {
   paymentIntentId: string;
   amount?: number; // in Rupees
@@ -66,10 +59,6 @@ export type WebhookDomainEvent =
       sessionId: string;
     }
   | {
-      type: "account.payouts_enabled";
-      stripeAccountId: string;
-    }
-  | {
       type: "unhandled";
     };
 
@@ -81,10 +70,6 @@ export interface IPaymentGateway {
     params: ExtraChargeCheckoutSessionParams
   ): Promise<{ id: string; url: string }>;
   retrieveSession(sessionId: string): Promise<VerifiedSessionResult>;
-  getAccountDefaultCurrency(stripeAccountId: string): Promise<string>;
-  createTransfer(params: TransferParams): Promise<void>;
   createRefund(params: RefundParams): Promise<void>;
-  createExpressAccount(): Promise<{ accountId: string }>;
-  createAccountOnboardingLink(stripeAccountId: string): Promise<string>;
   constructAndVerifyWebhookEvent(rawBody: Buffer, signature: string): WebhookDomainEvent;
 }

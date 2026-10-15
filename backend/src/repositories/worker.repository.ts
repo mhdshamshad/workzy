@@ -6,7 +6,6 @@ import {
   DOCUMENT_STATUS,
   DocumentType,
   SLOT_STATUS,
-  STRIPE_ACCOUNT_STATUS,
   WORKER_STATUS,
   WorkerStatus,
 } from "@/constants";
@@ -59,9 +58,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
     const [workers, total] = await Promise.all([
       this.model
         .find(filter)
-        .select(
-          "displayName phone status stripeAccountStatus payoutStatus profileImage createdAt userId"
-        )
+        .select("displayName phone status payoutStatus profileImage createdAt userId")
         .populate<{ userId: { _id: Types.ObjectId; email: string } }>("userId", "email")
         .skip(skip)
         .limit(limit)
@@ -87,7 +84,6 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
           spherical: true,
           query: {
             status: WORKER_STATUS.VERIFIED,
-            stripeAccountStatus: STRIPE_ACCOUNT_STATUS.ACTIVE,
           },
         },
       },
@@ -156,7 +152,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
           spherical: true,
           query: {
             status: WORKER_STATUS.VERIFIED,
-            // stripeAccountStatus: STRIPE_ACCOUNT_STATUS.ACTIVE,
+
             ...(minRating !== undefined && {
               "reviewStats.averageRating": { $gte: minRating },
             }),
