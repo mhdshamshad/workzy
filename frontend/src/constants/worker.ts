@@ -1,13 +1,5 @@
 import { BadgeCheck, Ban, Clock3, RefreshCcw, SearchCheck, XCircle } from 'lucide-react';
 
-export const STRIPE_ACCOUNT_STATUS = {
-  NOT_CONNECTED: 'not_connected',
-  PENDING: 'pending',
-  ACTIVE: 'active',
-} as const;
-export type StripeAccountStatus =
-  (typeof STRIPE_ACCOUNT_STATUS)[keyof typeof STRIPE_ACCOUNT_STATUS];
-
 export const WORKER_STATUS = {
   PENDING: 'pending',
   IN_REVIEW: 'in_review',

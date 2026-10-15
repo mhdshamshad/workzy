@@ -18,7 +18,6 @@ import { useWorkerProfileImageUpload } from './hooks/useWorkerProfile';
 const TABS = [
   { name: 'About', path: '' },
   { name: 'Documents', path: 'documents' },
-  { name: 'Account', path: 'account' },
   { name: 'Leaves', path: 'leaves' },
 ];
 
