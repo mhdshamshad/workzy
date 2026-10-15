@@ -32,7 +32,6 @@ const WorkerAboutContentPage = lazy(
 const WorkerDocumentsContentPage = lazy(
   () => import('@/features/worker/profile/pages/DocumentsContentPage')
 );
-const AccountPage = lazy(() => import('@/features/worker/profile/pages/AccountPage'));
 
 const WorkerBookingDetailsPage = lazy(
   () => import('@/features/worker/booking/pages/WorkerBookingDetailsPage')
@@ -63,7 +62,6 @@ export default function WorkerRoutes() {
           <Route path="profile" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerAboutContentPage />} />
             <Route path="documents" element={<WorkerDocumentsContentPage />} />
-            <Route path="account" element={<AccountPage />} />
             <Route path="leaves" element={<WorkerLeaveManagement />} />
           </Route>
           <Route path="wallet" element={<WorkerWalletLayout />}>

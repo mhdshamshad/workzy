@@ -124,22 +124,10 @@ export class WorkerController implements IWorkerController {
       .json(new ApiResponse({ worker: workerData }, WORKER.DOCUMENT_UPDATED));
   });
 
-  connectStripe = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const workerId = this.requireWorkerId(req);
-    const url = await this._workerService.connectStripe(workerId);
-    res.status(HTTPSTATUS.OK).json(new ApiResponse({ url }));
-  });
-
   getWorkerDashboardAnalytics = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const stats = await this._workerService.getWorkerDashboardAnalytics(workerId);
     res.status(HTTPSTATUS.OK).json(new ApiResponse(stats));
-  });
-
-  getStripeStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const workerId = this.requireWorkerId(req);
-    const { status, stripeAccountId } = await this._workerService.getStripeStatus(workerId);
-    res.status(HTTPSTATUS.OK).json(new ApiResponse({ status, stripeAccountId }));
   });
 
   addWorkerDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {

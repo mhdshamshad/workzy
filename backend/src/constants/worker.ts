@@ -68,14 +68,6 @@ export const DOCUMENT_STATUS = {
 
 export type DocumentStatus = (typeof DOCUMENT_STATUS)[keyof typeof DOCUMENT_STATUS];
 
-export const STRIPE_ACCOUNT_STATUS = {
-  NOT_CONNECTED: "not_connected",
-  PENDING: "pending",
-  ACTIVE: "active",
-} as const;
-export type StripeAccountStatus =
-  (typeof STRIPE_ACCOUNT_STATUS)[keyof typeof STRIPE_ACCOUNT_STATUS];
-
 export const WORKER_JOIN_DOCUMENT_KEY_MAP = {
   aadhaar: DOCUMENT_TYPE.AADHAAR,
   pan: DOCUMENT_TYPE.PAN,

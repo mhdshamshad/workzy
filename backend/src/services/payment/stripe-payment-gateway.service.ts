@@ -3,19 +3,12 @@ import Stripe from "stripe";
 
 import logger from "@/config/logger";
 import { stripe } from "@/config/stripe";
-import {
-  CLIENT_URL,
-  HTTPSTATUS,
-  PAYMENT,
-  STRIPE_CONNECT_WEBHOOK_SECRET,
-  STRIPE_WEBHOOK_SECRET,
-} from "@/constants";
+import { CLIENT_URL, HTTPSTATUS, PAYMENT, STRIPE_WEBHOOK_SECRET } from "@/constants";
 import {
   BookingCheckoutSessionParams,
   ExtraChargeCheckoutSessionParams,
   IPaymentGateway,
   RefundParams,
-  TransferParams,
   VerifiedSessionResult,
   WebhookDomainEvent,
 } from "@/core/interfaces/services/IPaymentGateway";
@@ -133,23 +126,6 @@ export class StripePaymentGateway implements IPaymentGateway {
       receiptUrl: charge?.receipt_url ?? undefined,
     };
   }
-
-  async getAccountDefaultCurrency(stripeAccountId: string): Promise<string> {
-    const account = await stripe.accounts.retrieve(stripeAccountId);
-    return account.default_currency || "inr";
-  }
-
-  async createTransfer(params: TransferParams): Promise<void> {
-    const { bookingId, workerStripeAccountId, amount, currency } = params;
-
-    await stripe.transfers.create({
-      amount: Math.round(amount * 100),
-      currency,
-      destination: workerStripeAccountId,
-      transfer_group: bookingId,
-    });
-  }
-
   async createRefund(params: RefundParams): Promise<void> {
     const { paymentIntentId, amount } = params;
     const refundParams: Stripe.RefundCreateParams = {
@@ -161,40 +137,15 @@ export class StripePaymentGateway implements IPaymentGateway {
     await stripe.refunds.create(refundParams);
   }
 
-  async createExpressAccount(): Promise<{ accountId: string }> {
-    const account = await stripe.accounts.create({
-      type: "express",
-      country: "AE",
-      capabilities: {
-        transfers: { requested: true },
-      },
-    });
-    return { accountId: account.id };
-  }
-
-  async createAccountOnboardingLink(stripeAccountId: string): Promise<string> {
-    const link = await stripe.accountLinks.create({
-      account: stripeAccountId,
-      refresh_url: `${CLIENT_URL}/worker/profile/account?stripe=refresh`,
-      return_url: `${CLIENT_URL}/worker/profile/account?stripe=success`,
-      type: "account_onboarding",
-    });
-    return link.url;
-  }
-
   constructAndVerifyWebhookEvent(rawBody: Buffer, signature: string): WebhookDomainEvent {
     let event: Stripe.Event;
     try {
       event = stripe.webhooks.constructEvent(rawBody, signature, STRIPE_WEBHOOK_SECRET);
-    } catch {
-      try {
-        event = stripe.webhooks.constructEvent(rawBody, signature, STRIPE_CONNECT_WEBHOOK_SECRET);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          logger.error(`${PAYMENT.WEBHOOK_SIGNATURE_INVALID}:${err.message}`);
-        }
-        throw new CustomError(PAYMENT.WEBHOOK_SIGNATURE_INVALID, HTTPSTATUS.BAD_REQUEST);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        logger.error(`${PAYMENT.WEBHOOK_SIGNATURE_INVALID}:${err.message}`);
       }
+      throw new CustomError(PAYMENT.WEBHOOK_SIGNATURE_INVALID, HTTPSTATUS.BAD_REQUEST);
     }
 
     switch (event.type) {
@@ -239,16 +190,6 @@ export class StripePaymentGateway implements IPaymentGateway {
             slotId: session.metadata?.slotId || "",
             userId: session.metadata?.userId || "",
             sessionId: session.id,
-          };
-        }
-        break;
-      }
-      case "account.updated": {
-        const account = event.data.object as Stripe.Account;
-        if (account.payouts_enabled) {
-          return {
-            type: "account.payouts_enabled",
-            stripeAccountId: account.id,
           };
         }
         break;

@@ -1,4 +1,3 @@
-import { StripeAccountStatus } from "@/constants";
 import {
   WorkerDocumentReviewRequestDTO,
   WorkerReviewRequestDTO,
@@ -45,10 +44,7 @@ export interface IWorkerService {
 
   createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerDetailsResponseDto>;
   reSubmitWorkerDocument(workerId: string, data: JoinUsDTO): Promise<WorkerDetailsResponseDto>;
-  connectStripe(workerId: string): Promise<string>;
-  getStripeStatus(
-    workerId: string
-  ): Promise<{ status: StripeAccountStatus; stripeAccountId: string | null }>;
+
   toggleWorkerStatus(workerId: string, reason: string): Promise<string>;
   getWorkerStats(workerId: string): Promise<WorkerStatsSummary>;
   getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics>;

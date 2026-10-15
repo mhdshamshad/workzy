@@ -20,8 +20,6 @@ export const WORKER_API = {
   BY_ID: (id: string) => worker(`/${id}`),
   DETAILS_BY_ID: (id: string) => worker(`/${id}/details`),
 
-  STRIPE_CONNECT: worker('/stripe/connect'),
-  STRIPE_STATUS: worker('/stripe/status'),
   DOCUMENTS: worker('/documents'),
   UPDATE_DOCUMENT: (id: string) => worker(`/documents/${id}`),
 } as const;

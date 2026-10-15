@@ -1,12 +1,6 @@
 import { Document, Types } from "mongoose";
 
-import {
-  DocumentStatus,
-  DocumentType,
-  StripeAccountStatus,
-  WalletPayoutStatus,
-  WorkerStatus,
-} from "@/constants";
+import { DocumentStatus, DocumentType, WalletPayoutStatus, WorkerStatus } from "@/constants";
 
 export interface ITimeSlot {
   startTime: string;
@@ -83,8 +77,6 @@ export interface IWorker extends Document<string> {
   };
   jobStats: IJobStats;
   reviewStats: IReviewStats;
-  stripeAccountId?: string;
-  stripeAccountStatus: StripeAccountStatus;
   payoutStatus: WalletPayoutStatus;
   createdAt: Date;
   updatedAt: Date;
