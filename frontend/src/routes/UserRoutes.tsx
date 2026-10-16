@@ -3,7 +3,6 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
-import NotFound from '@/pages/NotFound';
 
 import GuestRoute from './GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
@@ -21,6 +20,9 @@ const GoogleCallback = lazy(() => import('@/features/auth/pages/GoogleCallback')
 const UserProfilePage = lazy(() => import('@/features/user/profile/pages/UserProfilePage'));
 const RoleBasedRoot = lazy(() => import('./RoleBasedRoot'));
 const JoinUsPage = lazy(() => import('@/pages/JoinUsPage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const LegalPage = lazy(() => import('@/pages/LegalPage'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
 const UserLayout = lazy(() => import('@/layouts/user/UserLayout'));
 
 const ServicePage = lazy(() => import('@/features/user/services/pages/ServicePage'));
@@ -59,9 +61,16 @@ export default function UserRoutes() {
         <Route element={<UserLayout />}>
           <Route path="/" element={<RoleBasedRoot />} />
           <Route path="/join-us" element={<JoinUsPage />} />
+
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<AboutPage />} />
+          <Route path="/privacy" element={<LegalPage />} />
+          <Route path="/terms" element={<LegalPage />} />
+          <Route path="/refund-policy" element={<LegalPage />} />
+
           <Route path="/services" element={<ServicePage />} />
           <Route path="/services/:serviceId" element={<WorkerListingPage />} />
-          <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
+          <Route element={<ProtectedRoute requiredRoles={[ROLE.USER]} />}>
             <Route path="messages">
               <Route index element={<UserChatPage />} />
               <Route path=":chatId" element={<UserChatPage />} />

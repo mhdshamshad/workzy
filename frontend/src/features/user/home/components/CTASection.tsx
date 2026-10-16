@@ -1,4 +1,4 @@
-import { ArrowRight, Users } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Lock, RotateCcw, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
@@ -7,6 +7,13 @@ interface CTASectionProps {
   onBecomeProvider?: () => void;
   isVerified?: boolean;
 }
+
+const TRUST_POINTS = [
+  { icon: BadgeCheck, label: 'Verified professionals' },
+  { icon: Lock, label: 'Secure payments' },
+  { icon: RotateCcw, label: '10-day rework promise' },
+];
+
 export default function CTASection({ isVerified, onBecomeProvider }: CTASectionProps) {
   const navigate = useNavigate();
   const handleJoinClick = () => {
@@ -18,42 +25,49 @@ export default function CTASection({ isVerified, onBecomeProvider }: CTASectionP
   };
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="absolute inset-0">
-        <img
-          src="https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1200&q=75&auto=format&fit=crop"
-          alt="Workzy Service Platform"
-          width="1200"
-          height="450"
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-[oklch(0.18_0.02_250/0.9)] "></div>
-      </div>
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Get Started?</h2>
+    <section className="bg-background ">
+      <div className="relative overflow-hidden  bg-[oklch(21.48%_0.03444_254.607)] px-6 py-16 text-center shadow-2xl sm:px-12 sm:py-20">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[40px_40px]" />
+        <div className="absolute -top-24 -left-16 h-80 w-80 rounded-full bg-indigo-500/40 blur-3xl" />
+        <div className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full bg-purple-500/30 blur-3xl" />
 
-        <p className="text-xl text-white/90 mb-10 leading-relaxed">
-          Join 12M+ users who trust Workzy for their service needs. Secure payments, verified
-          professionals, and quality guaranteed.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            onClick={() => navigate('/services')}
-            iconRight={<ArrowRight className="w-5 h-5" />}
-            className="bg-white text-indigo-600 px-10 py-7 rounded-full font-bold text-lg shadow-2xl hover:shadow-3xl hover:bg-white hover:-translate-y-1 transition-all"
-          >
-            Book a Service
-          </Button>
-          <Button
-            iconLeft={<Users className="w-5 h-5" />}
-            className="bg-white/10 backdrop-blur-md border-2 border-white text-white px-12 py-7 rounded-full font-bold text-lg hover:bg-white/20 transition-all inline-flex items-center"
-            disabled={isVerified}
-            onClick={handleJoinClick}
-          >
-            Become a Professional
-          </Button>
+        <div className="relative">
+          <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+            Ready to get{' '}
+            <span className="bg-linear-to-r from-golden to-amber-200 bg-clip-text text-transparent">
+              started?
+            </span>
+          </h2>
+          <p className="mx-auto mt-5 max-w-xl text-base text-slate-300 sm:text-lg">
+            Book trusted professionals near you, or grow your own service business on Workzy.
+          </p>
+
+          <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+            <Button
+              onClick={() => navigate('/services')}
+              iconRight={<ArrowRight className="h-5 w-5" />}
+              className="rounded-full bg-white px-8 py-6 text-base font-semibold text-slate-900 shadow-xl transition-all hover:-translate-y-0.5 hover:bg-white"
+            >
+              Book a Service
+            </Button>
+            <Button
+              iconLeft={<Users className="h-5 w-5" />}
+              className="rounded-full border border-white/30 bg-white/10 px-8 py-6 text-base font-semibold text-white backdrop-blur transition-all hover:bg-white/20"
+              disabled={isVerified}
+              onClick={handleJoinClick}
+            >
+              Become a Professional
+            </Button>
+          </div>
+
+          <ul className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-slate-300">
+            {TRUST_POINTS.map(({ icon: Icon, label }) => (
+              <li key={label} className="flex items-center gap-2">
+                <Icon className="h-4 w-4 text-golden" />
+                {label}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

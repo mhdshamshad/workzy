@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { ROLE } from '@/constants';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -84,7 +85,7 @@ export default function AdminRoutes() {
   return (
     <Suspense fallback={<Skeleton />}>
       <Routes>
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute requiredRoles={[ROLE.ADMIN]} />}>
           <Route element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
 
