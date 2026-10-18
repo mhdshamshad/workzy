@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, type MotionProps } from 'framer-motion';
 import { ChevronLeft, SlidersHorizontal, MapPin } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -23,6 +23,7 @@ const fadeUp = (delay = 0): MotionProps => ({
 
 export default function WorkerListingPage() {
   const { serviceId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector(s => s.auth);
@@ -40,7 +41,9 @@ export default function WorkerListingPage() {
 
   const handleBook = (worker: PublicWorkerListItem) => {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: location.pathname } });
+      navigate('/login', {
+        state: { from: `${location.pathname}${location.search}${location.hash}` },
+      });
       return;
     }
     setBookingWorker(worker);

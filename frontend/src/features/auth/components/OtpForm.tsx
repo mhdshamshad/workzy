@@ -8,7 +8,9 @@ import OtpInput from '@/components/atoms/OtpInput';
 import PageHeader from '@/components/molecules/PageHeader';
 import { AUTH_MESSAGES } from '@/constants';
 import { resendOtpService } from '@/services/auth.service';
+import { getInternalRedirectPath } from '@/utils/authRedirect';
 import { handleApiError } from '@/utils/handleApiError';
+import { redirectBasedOnRole } from '@/utils/redirectBasedOnRole';
 
 import { useAuth } from '../hooks/useAuth';
 import { useOtpTimer } from '../hooks/useOtpTimer';
@@ -35,10 +37,15 @@ export default function OtpForm() {
     try {
       await verifyOtp(email, code);
       if (email && password) {
-        await login(email, password);
+        const user = await login(email, password);
+        toast.success(AUTH_MESSAGES.REGISTER_SUCCESS);
+
+        const from = getInternalRedirectPath(state?.from);
+        redirectBasedOnRole(user.role, navigate, from);
+        return;
       }
       toast.success(AUTH_MESSAGES.REGISTER_SUCCESS);
-      navigate('/');
+      navigate(getInternalRedirectPath(state?.from) ?? '/');
     } catch (err) {
       toast.error(handleApiError(err));
     }

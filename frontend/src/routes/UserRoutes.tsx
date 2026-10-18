@@ -1,8 +1,9 @@
 import { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
+import { useAppSelector } from '@/store/hooks';
 
 import GuestRoute from './GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
@@ -45,6 +46,20 @@ const UserBookingDetailsPage = lazy(
 const UserDisputesPage = lazy(() => import('@/features/dispute/pages/UserDisputesPage'));
 const UserPaymentsPage = lazy(() => import('@/features/payments/pages/UserPaymentsPage'));
 
+function UserAreaRoute() {
+  const role = useAppSelector(state => state.auth.user?.role);
+
+  if (role === ROLE.ADMIN) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
+  if (role === ROLE.WORKER) {
+    return <Navigate to="/worker/dashboard" replace />;
+  }
+
+  return <Outlet />;
+}
+
 export default function UserRoutes() {
   return (
     <Suspense fallback={<Skeleton />}>
@@ -55,40 +70,43 @@ export default function UserRoutes() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-otp" element={<OtpPage />} />
-          <Route path="/auth/google/callback" element={<GoogleCallback />} />
         </Route>
 
-        <Route element={<UserLayout />}>
-          <Route path="/" element={<RoleBasedRoot />} />
-          <Route path="/join-us" element={<JoinUsPage />} />
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<AboutPage />} />
-          <Route path="/privacy" element={<LegalPage />} />
-          <Route path="/terms" element={<LegalPage />} />
-          <Route path="/refund-policy" element={<LegalPage />} />
+        <Route element={<UserAreaRoute />}>
+          <Route element={<UserLayout />}>
+            <Route path="/" element={<RoleBasedRoot />} />
+            <Route path="/join-us" element={<JoinUsPage />} />
 
-          <Route path="/services" element={<ServicePage />} />
-          <Route path="/services/:serviceId" element={<WorkerListingPage />} />
-          <Route element={<ProtectedRoute requiredRoles={[ROLE.USER]} />}>
-            <Route path="messages">
-              <Route index element={<UserChatPage />} />
-              <Route path=":chatId" element={<UserChatPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<AboutPage />} />
+            <Route path="/privacy" element={<LegalPage />} />
+            <Route path="/terms" element={<LegalPage />} />
+            <Route path="/refund-policy" element={<LegalPage />} />
+
+            <Route path="/services" element={<ServicePage />} />
+            <Route path="/services/:serviceId" element={<WorkerListingPage />} />
+            <Route element={<ProtectedRoute requiredRoles={[ROLE.USER]} />}>
+              <Route path="messages">
+                <Route index element={<UserChatPage />} />
+                <Route path=":chatId" element={<UserChatPage />} />
+              </Route>
+              <Route path="/bookings" element={<UserBookingsPage />} />
+              <Route path="/bookings/:bookingId" element={<UserBookingDetailsPage />} />
+              <Route path="/profile" element={<UserProfilePage />} />
+              <Route path="/disputes" element={<UserDisputesPage />} />
+              <Route path="/payments" element={<UserPaymentsPage />} />
+              <Route path="/quotes" element={<UserQuotesListPage />} />
             </Route>
-            <Route path="/bookings" element={<UserBookingsPage />} />
-            <Route path="/bookings/:bookingId" element={<UserBookingDetailsPage />} />
-            <Route path="/profile" element={<UserProfilePage />} />
-            <Route path="/disputes" element={<UserDisputesPage />} />
-            <Route path="/payments" element={<UserPaymentsPage />} />
-            <Route path="/quotes" element={<UserQuotesListPage />} />
+            <Route path="/workers/:workerId" element={<WorkerProfileRouteLayout />}>
+              <Route index element={<WorkerProfilePage />} />
+              <Route path="services" element={<WorkerServicesPage />} />
+              <Route path="reviews" element={<WorkerPublicReviewsPage />} />
+            </Route>
+            <Route path="not-found" element={<NotFound />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
-          <Route path="/workers/:workerId" element={<WorkerProfileRouteLayout />}>
-            <Route index element={<WorkerProfilePage />} />
-            <Route path="services" element={<WorkerServicesPage />} />
-            <Route path="reviews" element={<WorkerPublicReviewsPage />} />
-          </Route>
-          <Route path="not-found" element={<NotFound />} />
-          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </Suspense>

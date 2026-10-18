@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { ROLE, type Role } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
@@ -12,6 +12,7 @@ type ProtectedRouteProps = {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRoles }) => {
   const { user, accessToken, status } = useAppSelector((s: RootState) => s.auth);
+  const location = useLocation();
 
   if (status === 'loading') {
     return (
@@ -22,7 +23,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRoles }) => {
   }
 
   if (!accessToken || !user) {
-    return <Navigate to={'/'} replace />;
+    return (
+      <Navigate
+        to="/login"
+        state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+        replace
+      />
+    );
   }
 
   if (requiredRoles && (!user.role || !requiredRoles.includes(user.role))) {

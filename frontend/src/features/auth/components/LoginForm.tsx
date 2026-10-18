@@ -13,6 +13,7 @@ import GoogleIcon from '@/components/icons/GoogleIcon';
 import PageHeader from '@/components/molecules/PageHeader';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AUTH_MESSAGES, GOOGLE_CALLBACK, SERVER_URL } from '@/constants';
+import { AUTH_REDIRECT_STORAGE_KEY, getInternalRedirectPath } from '@/utils/authRedirect';
 import { handleApiError } from '@/utils/handleApiError';
 import { redirectBasedOnRole } from '@/utils/redirectBasedOnRole';
 
@@ -44,7 +45,8 @@ export default function LoginForm() {
       const user = await login(data.email, data.password);
       toast.success(AUTH_MESSAGES.LOGIN_SUCCESS);
 
-      redirectBasedOnRole(user.role, navigate);
+      const from = getInternalRedirectPath(location.state?.from);
+      redirectBasedOnRole(user.role, navigate, from);
     } catch (error) {
       toast.error(handleApiError(error));
     }
@@ -104,7 +106,11 @@ export default function LoginForm() {
       {/* Signup Link */}
       <p className="text-center text-muted-foreground">
         Don’t have an account?{' '}
-        <Link className="text-primary font-medium hover:underline" to="/register">
+        <Link
+          className="text-primary font-medium hover:underline"
+          to="/register"
+          state={{ from: getInternalRedirectPath(location.state?.from) }}
+        >
           Sign up
         </Link>
       </p>
@@ -124,6 +130,12 @@ export default function LoginForm() {
         fullWidth
         iconLeft={<GoogleIcon />}
         onClick={() => {
+          const from = getInternalRedirectPath(location.state?.from);
+          if (from) {
+            sessionStorage.setItem(AUTH_REDIRECT_STORAGE_KEY, from);
+          } else {
+            sessionStorage.removeItem(AUTH_REDIRECT_STORAGE_KEY);
+          }
           window.location.href = `${SERVER_URL}/${GOOGLE_CALLBACK}`;
         }}
       >
