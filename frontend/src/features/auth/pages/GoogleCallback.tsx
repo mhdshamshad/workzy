@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import { AUTH_MESSAGES } from '@/constants';
 import { useAppDispatch } from '@/store/hooks';
 import { refreshAccessToken } from '@/store/slices/authSlice';
+import { AUTH_REDIRECT_STORAGE_KEY, getInternalRedirectPath } from '@/utils/authRedirect';
+import { redirectBasedOnRole } from '@/utils/redirectBasedOnRole';
 
 export default function GoogleCallback() {
   const [searchParams] = useSearchParams();
@@ -12,27 +14,23 @@ export default function GoogleCallback() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    const from = getInternalRedirectPath(sessionStorage.getItem(AUTH_REDIRECT_STORAGE_KEY));
     const error = searchParams.get('error');
     if (error === 'blocked') {
-      navigate('/login', { state: { blocked: true } });
+      sessionStorage.removeItem(AUTH_REDIRECT_STORAGE_KEY);
+      navigate('/login', { state: { blocked: true, from }, replace: true });
       return;
     }
     dispatch(refreshAccessToken())
       .unwrap()
       .then(data => {
-        const role = data.user.role;
-
-        if (role === 'worker') {
-          navigate('/worker/dashboard', { replace: true });
-        } else if (role === 'admin') {
-          navigate('/admin/dashboard', { replace: true });
-        } else {
-          navigate('/', { replace: true });
-        }
+        sessionStorage.removeItem(AUTH_REDIRECT_STORAGE_KEY);
+        redirectBasedOnRole(data.user.role, navigate, from);
       })
       .catch(() => {
+        sessionStorage.removeItem(AUTH_REDIRECT_STORAGE_KEY);
         toast.error(AUTH_MESSAGES.AUTH_FAILED);
-        navigate('/login', { replace: true });
+        navigate('/login', { state: { from }, replace: true });
       });
   }, [searchParams, navigate, dispatch]);
 

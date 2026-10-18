@@ -293,7 +293,13 @@ export default function Header() {
                 </DropdownMenu>
               ) : (
                 <button
-                  onClick={() => navigate('/login')}
+                  onClick={() =>
+                    navigate('/login', {
+                      state: {
+                        from: `${location.pathname}${location.search}${location.hash}`,
+                      },
+                    })
+                  }
                   className="hidden lg:block px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
                 >
                   Login
@@ -425,7 +431,11 @@ export default function Header() {
                       ) : (
                         <button
                           onClick={() => {
-                            navigate('/login');
+                            navigate('/login', {
+                              state: {
+                                from: `${location.pathname}${location.search}${location.hash}`,
+                              },
+                            });
                             setMobileMenuOpen(false);
                           }}
                           className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"

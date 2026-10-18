@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, PawPrint, Phone, Settings, Smartphone } from 'lucide-react';
 import { lazy, Suspense, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import Button from '@/components/atoms/Button';
@@ -26,6 +26,7 @@ import workerImg from '../assets/images/worker_image.webp';
 const BecomeWorkerForm = lazy(() => import('@/features/user/JoinUs/components/BecomeWorkerForm'));
 
 export default function JoinUsPage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const applyNowRef = useRef<HTMLElement | null>(null);
   const [formOpen, setFormOpen] = useState<boolean>(false);
@@ -52,7 +53,10 @@ export default function JoinUsPage() {
 
   const openFormAndScroll = () => {
     if (!user) {
-      navigate('/login');
+      navigate('/login', {
+        state: { from: `${location.pathname}${location.search}${location.hash}` },
+      });
+      return;
     }
     setFormOpen(true);
     requestAnimationFrame(() => {

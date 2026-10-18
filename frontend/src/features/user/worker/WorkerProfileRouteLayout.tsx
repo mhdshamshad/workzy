@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import ErrorState from '@/components/molecules/ErrorState';
 import WorkerProfileHeader from '@/components/organisms/WorkerProfileHeader';
@@ -7,6 +7,7 @@ import { useGetOrCreateChat } from '@/features/chat/hooks/useChats';
 import { useWorkerProfile } from '@/features/profile/hooks/useWorkerProfile';
 import WorkerProfileLayoutSkeleton from '@/features/worker/profile/components/WorkeAboutSkeleton';
 import { cn } from '@/lib/utils';
+import { useAppSelector } from '@/store/hooks';
 
 const TABS = [
   { name: 'About', path: '' },
@@ -16,7 +17,9 @@ const TABS = [
 
 export default function WorkerProfileRouteLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { workerId } = useParams();
+  const { isAuthenticated } = useAppSelector(s => s.auth);
   const { data, isLoading, error, isError, refetch } = useWorkerProfile(workerId);
   const { mutateAsync: createChat, isPending } = useGetOrCreateChat();
 
@@ -29,6 +32,12 @@ export default function WorkerProfileRouteLayout() {
     );
 
   const handleStartChat = async () => {
+    if (!isAuthenticated) {
+      navigate('/login', {
+        state: { from: `${location.pathname}${location.search}${location.hash}` },
+      });
+      return;
+    }
     const res = await createChat({ participantId: workerId! });
     navigate(`/messages/${res.id}`);
   };

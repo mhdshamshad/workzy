@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Mail, User } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import Button from '@/components/atoms/Button';
@@ -10,11 +10,13 @@ import Label from '@/components/atoms/Label';
 import PasswordInput from '@/components/atoms/PasswordInput';
 import PageHeader from '@/components/molecules/PageHeader';
 import { registerService } from '@/services/auth.service';
+import { getInternalRedirectPath } from '@/utils/authRedirect';
 import { handleApiError } from '@/utils/handleApiError';
 
 import { signupSchema, type SignupSchemaType } from '../validation/signupSchema';
 
 export default function SignupForm() {
+  const location = useLocation();
   const navigate = useNavigate();
 
   const {
@@ -30,7 +32,13 @@ export default function SignupForm() {
     try {
       const res = await registerService(data);
       toast.success(res.message);
-      navigate('/verify-otp', { state: { email: data.email, password: data.password } });
+      navigate('/verify-otp', {
+        state: {
+          email: data.email,
+          password: data.password,
+          from: getInternalRedirectPath(location.state?.from),
+        },
+      });
     } catch (error) {
       toast.error(handleApiError(error));
     }
@@ -86,7 +94,11 @@ export default function SignupForm() {
       {/* login Link */}
       <p className="text-center text-muted-foreground">
         Already have an account?{' '}
-        <Link className="text-primary font-medium hover:underline" to="/login">
+        <Link
+          className="text-primary font-medium hover:underline"
+          to="/login"
+          state={{ from: getInternalRedirectPath(location.state?.from) }}
+        >
           Log in
         </Link>
       </p>
