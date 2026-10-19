@@ -14,9 +14,9 @@ const errorMiddleware = (
   const message = err.message || SERVER.ERROR;
 
   if (statusCode >= 500) {
-    logger.error(`[${statusCode}] ${req.method} ${req.url} - Server Error:`, err);
+    logger.error(`[${statusCode}] ${req.method} ${req.path} - Server Error:`, err);
   } else if (statusCode !== 401) {
-    logger.warn(`[${statusCode}] ${req.method} ${req.url} - ${message}`);
+    logger.warn(`[${statusCode}] ${req.method} ${req.path} - ${message}`);
     console.log(err);
   }
 

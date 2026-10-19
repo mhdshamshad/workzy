@@ -13,8 +13,8 @@ interface PageErrorProps {
 }
 
 export default function PageError({
-  title = 'Something went wrong',
-  description = 'We ran into an unexpected error. Please try again or go back home.',
+  title = 'Service Unavailable',
+  description = 'Service is not responding. Please try again later.',
   onRetry,
   showHome = true,
   fullScreen = true,

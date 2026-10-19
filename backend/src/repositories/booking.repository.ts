@@ -49,7 +49,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     }
     if (paymentStatus && paymentStatus !== "all") {
       query.paymentStatus = paymentStatus as BookingPaymentStatus;
-    } else if (!paymentStatus) {
+    } else {
       query.paymentStatus = { $ne: BOOKING_PAYMENT_STATUS.PENDING };
     }
     if (search) {

@@ -21,6 +21,17 @@ export default function GoogleCallback() {
       navigate('/login', { state: { blocked: true, from }, replace: true });
       return;
     }
+    if (error) {
+      sessionStorage.removeItem(AUTH_REDIRECT_STORAGE_KEY);
+      toast.error(
+        error === 'google_auth_failed'
+          ? "We couldn't complete Google sign-in. Please try again."
+          : AUTH_MESSAGES.AUTH_FAILED
+      );
+      navigate('/login', { state: { from }, replace: true });
+      return;
+    }
+
     dispatch(refreshAccessToken())
       .unwrap()
       .then(data => {

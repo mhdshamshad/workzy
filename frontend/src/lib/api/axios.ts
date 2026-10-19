@@ -129,13 +129,29 @@ api.interceptors.response.use(
       }
     }
 
-    const status = error.response?.status ?? 500;
+    const status = error.response?.status ?? 503;
     const responseData = error.response?.data as
       | { message?: string; errors?: Array<{ field: string; messages: string }> }
       | undefined;
     const backendMessage = responseData?.message;
     const backendErrors = responseData?.errors;
-    return Promise.reject(new ApiError(status, backendMessage ?? error.message, backendErrors));
+
+    let finalMessage = backendMessage;
+    if (!finalMessage) {
+      if (!error.response) {
+        if (error.code === 'ECONNABORTED' || error.message?.toLowerCase().includes('timeout')) {
+          finalMessage = 'The server took too long to respond. Please try again later.';
+        } else {
+          finalMessage = 'Service is not responding. Please try again later.';
+        }
+      } else if (status === 502 || status === 503 || status === 504) {
+        finalMessage = 'Service is temporarily unavailable. Please try again later.';
+      } else {
+        finalMessage = error.message || 'An unexpected error occurred. Please try again.';
+      }
+    }
+
+    return Promise.reject(new ApiError(status, finalMessage, backendErrors));
   }
 );
 
