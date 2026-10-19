@@ -10,7 +10,6 @@ import passport from "./config/passport";
 import { CLIENT_URL, DUMMY_URL } from "./constants";
 import { startCleanupJob } from "./jobs/cleanup-slots";
 import { startQuoteExpiryJob } from "./jobs/quote-expiry";
-import { apiLogger } from "./middlewares/apiLogger";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import { globalLimiter } from "./middlewares/rateLimit.middleware";
 import apiRouter from "./routes";
@@ -40,7 +39,6 @@ app.use(
 app.use(compression());
 app.use(cors(corsOptions));
 
-app.use(apiLogger);
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use((req, _res, next) => {
@@ -50,6 +48,14 @@ app.use((req, _res, next) => {
 });
 app.use(cookieParser());
 app.use(passport.initialize());
+
+app.get("/api/health", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.use("/api", globalLimiter, apiRouter);
 

@@ -44,7 +44,14 @@ export default function HomePage() {
     return <LoadingHome />;
   }
   if (error || !homeData) {
-    return <PageError title={error?.message} fullScreen />;
+    return (
+      <PageError
+        title="Service Unavailable"
+        description="Service is not responding. Please try again later."
+        onRetry={() => window.location.reload()}
+        fullScreen
+      />
+    );
   }
 
   const sections = [...homeData.sections].sort((a, b) => a.order - b.order);
