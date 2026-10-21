@@ -40,6 +40,12 @@ export const BOOKING_STATUS_META: Record<
     accent: 'border-l-emerald-500',
     dot: 'bg-emerald-500',
   },
+  rework: {
+    label: 'Rework Warranty',
+    badge: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30',
+    accent: 'border-l-amber-500',
+    dot: 'bg-amber-500',
+  },
   approved: {
     label: 'Approved',
     badge: 'bg-green-500/15 text-emerald-800 dark:text-emerald-300 border-green-500/30',

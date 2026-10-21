@@ -31,6 +31,9 @@ interface BookingListProps {
   onReqExtra?: (id: string) => void;
   onPayExtra?: (id: string) => void;
   onReview?: (data: { id: string; reviewId?: string }) => void;
+  onRequestRework?: (booking: BookingListItem | BookingDetails) => void;
+  onScheduleReworkSlot?: (booking: BookingListItem | BookingDetails) => void;
+  onCompleteRework?: (booking: BookingListItem | BookingDetails) => void;
   detailBasePath?: string;
   workerId?: string;
   userId?: string;
@@ -57,6 +60,9 @@ export function BookingList({
   onReview,
   onPayExtra,
   onDispute,
+  onRequestRework,
+  onScheduleReworkSlot,
+  onCompleteRework,
   detailBasePath = '/bookings',
   workerId,
   userId,
@@ -115,6 +121,9 @@ export function BookingList({
               onDispute,
               onPayExtra,
               onReview,
+              onRequestRework,
+              onScheduleReworkSlot,
+              onCompleteRework,
             }}
           />
         ))}

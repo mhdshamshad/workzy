@@ -13,6 +13,7 @@ import {
   Navigation,
   PlayCircle,
   ShieldAlert,
+  Wrench,
   XCircle,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -43,6 +44,9 @@ export interface BookingCardHandlers {
   onApprove?: (id: string) => void;
   onDispute?: (id: string) => void;
   onReschedule?: (id: string) => void;
+  onRequestRework?: (booking: BookingListItem | BookingDetails) => void;
+  onScheduleReworkSlot?: (booking: BookingListItem | BookingDetails) => void;
+  onCompleteRework?: (booking: BookingListItem | BookingDetails) => void;
 }
 
 export function StatusBadge({ status }: { status: BookingStatus }) {
@@ -335,6 +339,21 @@ export default function BookingCard({
                     Pay Extra
                   </Button>
                 )}
+
+                {isCompletedOrApproved &&
+                  b.category?.serviceType !== 'Consultation' &&
+                  b.warranty?.validUntil &&
+                  new Date() <= new Date(b.warranty.validUntil) &&
+                  !b.rework && (
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      iconLeft={<Wrench size={12} />}
+                      onClick={() => handlers?.onRequestRework?.(b)}
+                    >
+                      Claim Rework
+                    </Button>
+                  )}
               </>
             )}
 
@@ -431,6 +450,38 @@ export default function BookingCard({
                   >
                     Finish Job
                   </Button>
+                )}
+
+                {b.status === BOOKING_STATUS.REWORK && b.rework?.status === 'requested' && (
+                  <Button
+                    variant="blue"
+                    size="sm"
+                    iconLeft={<Calendar size={12} />}
+                    onClick={() => handlers?.onScheduleReworkSlot?.(b)}
+                  >
+                    Schedule Rework
+                  </Button>
+                )}
+
+                {b.status === BOOKING_STATUS.REWORK && b.rework?.status === 'scheduled' && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      iconLeft={<Calendar size={12} />}
+                      onClick={() => handlers?.onScheduleReworkSlot?.(b)}
+                    >
+                      Change Slot
+                    </Button>
+                    <Button
+                      variant="green"
+                      size="sm"
+                      iconLeft={<CheckCircle size={12} />}
+                      onClick={() => handlers?.onCompleteRework?.(b)}
+                    >
+                      Complete Rework
+                    </Button>
+                  </div>
                 )}
 
                 {hasVisibleReview && (

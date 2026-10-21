@@ -5,7 +5,9 @@ import { ROLE, type BookingFilterStatus } from '@/constants';
 import { useBookings } from '@/features/booking';
 import { BookingList } from '@/features/booking/components/BookingList';
 import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTabs';
+import RequestReworkModal from '@/features/booking/components/rework/RequestReworkModal';
 import { DisputeModal } from '@/features/dispute';
+import type { BookingDetails, BookingListItem } from '@/types/booking';
 
 import ApproveModal from '../components/bookingActions/ApproveModal';
 import CancelModal from '../components/bookingActions/CancelModal';
@@ -16,6 +18,7 @@ import { useUserBookingHandler } from '../hooks/useUserBooking';
 export default function UserBookingsPage() {
   const [status, setStatus] = useState<BookingFilterStatus>('all');
   const [disputeBId, setDisputeBId] = useState<string | null>(null);
+  const [reworkB, setReworkB] = useState<BookingListItem | BookingDetails | null>(null);
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useBookings({ status });
 
@@ -47,6 +50,7 @@ export default function UserBookingsPage() {
         onPayExtra={id => setPayExtraBId(id)}
         onReview={data => setReviewData({ id: data.id, reviewId: data.reviewId })}
         onDispute={id => setDisputeBId(id)}
+        onRequestRework={booking => setReworkB(booking)}
         detailBasePath="/bookings"
       />
       <CancelModal
@@ -83,6 +87,9 @@ export default function UserBookingsPage() {
         onClose={() => setDisputeBId(null)}
         bookingId={disputeBId}
       />
+      {reworkB && (
+        <RequestReworkModal isOpen={!!reworkB} booking={reworkB} onClose={() => setReworkB(null)} />
+      )}
     </div>
   );
 }

@@ -1,12 +1,19 @@
 import type { Role } from '@/constants';
 import { BOOKING_API } from '@/constants/apiRoutes/booking.routes';
 import type { bookingRescheduleFormType } from '@/features/booking/validation/bookingRescheduleFormData';
+import type { CompleteReworkFormType } from '@/features/booking/validation/completeReworkFormData';
+import type { RequestReworkFormType } from '@/features/booking/validation/requestReworkFormData';
 import type { bookingFormData } from '@/features/user/booking/validation/bookingFormData';
 import type { BookigCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '@/features/worker/booking/validation/extraChargeSchema';
 import api from '@/lib/api/axios';
 import type { ApiResponse } from '@/types/api';
-import type { BookingDetails, BookingListingResponse, BookingListQuery } from '@/types/booking';
+import type {
+  BookingDetails,
+  BookingListingResponse,
+  BookingListQuery,
+  ScheduleReworkSlotPayload,
+} from '@/types/booking';
 
 const BookingService = {
   getBookings: async (params: BookingListQuery): Promise<BookingListingResponse> => {
@@ -103,6 +110,44 @@ const BookingService = {
     data: { requestedBy: Role }
   ): Promise<{ message: string }> => {
     const res = await api.delete<ApiResponse<null>>(BOOKING_API.RESCHEDULE(bookingId), { data });
+    return { message: res.data.message };
+  },
+  requestRework: async (
+    bookingId: string,
+    data: RequestReworkFormType
+  ): Promise<{ message: string }> => {
+    const res = await api.post<ApiResponse<null>>(BOOKING_API.REWORK_REQUEST(bookingId), data);
+    return { message: res.data.message };
+  },
+  scheduleReworkSlot: async (
+    bookingId: string,
+    data: ScheduleReworkSlotPayload
+  ): Promise<{ message: string }> => {
+    const res = await api.post<ApiResponse<null>>(
+      BOOKING_API.REWORK_SCHEDULE_SLOT(bookingId),
+      data
+    );
+    return { message: res.data.message };
+  },
+  rescheduleReworkSlot: async (
+    bookingId: string,
+    data: ScheduleReworkSlotPayload
+  ): Promise<{ message: string }> => {
+    const res = await api.put<ApiResponse<null>>(
+      BOOKING_API.REWORK_RESCHEDULE_SLOT(bookingId),
+      data
+    );
+    return { message: res.data.message };
+  },
+  sendReworkOtp: async (bookingId: string): Promise<{ message: string }> => {
+    const res = await api.post<ApiResponse<null>>(BOOKING_API.REWORK_SEND_OTP(bookingId));
+    return { message: res.data.message };
+  },
+  completeRework: async (
+    bookingId: string,
+    data: CompleteReworkFormType
+  ): Promise<{ message: string }> => {
+    const res = await api.post<ApiResponse<null>>(BOOKING_API.REWORK_COMPLETE(bookingId), data);
     return { message: res.data.message };
   },
 };

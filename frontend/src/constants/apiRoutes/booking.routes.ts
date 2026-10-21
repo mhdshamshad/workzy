@@ -29,4 +29,10 @@ export const BOOKING_API = {
   DAY_VERIFY_OTP: (id: string, dayIndex: number) => booking(`/${id}/day/${dayIndex}/verify-otp`),
   DAY_COMPLETE: (id: string, dayIndex: number) => booking(`/${id}/day/${dayIndex}/complete`),
   DAY_SKIP: (id: string, dayIndex: number) => booking(`/${id}/day/${dayIndex}/skip`),
+
+  REWORK_REQUEST: (id: string) => booking(`/${id}/rework/request`),
+  REWORK_SCHEDULE_SLOT: (id: string) => booking(`/${id}/rework/schedule-slot`),
+  REWORK_RESCHEDULE_SLOT: (id: string) => booking(`/${id}/rework/reschedule-slot`),
+  REWORK_SEND_OTP: (id: string) => booking(`/${id}/rework/send-otp`),
+  REWORK_COMPLETE: (id: string) => booking(`/${id}/rework/complete`),
 } as const;

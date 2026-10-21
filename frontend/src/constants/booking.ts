@@ -36,6 +36,7 @@ export const BOOKING_STATUS = {
   REACHED: 'reached',
   IN_PROGRESS: 'in_progress',
   COMPLETED: 'completed',
+  REWORK: 'rework',
   APPROVED: 'approved',
   CANCELLED: 'cancelled',
   REJECTED: 'rejected',
@@ -46,6 +47,16 @@ export const BOOKING_STATUS = {
 export const BOOKING_STATUS_VALUES = Object.values(BOOKING_STATUS);
 export type BookingStatus = (typeof BOOKING_STATUS)[keyof typeof BOOKING_STATUS];
 export type BookingFilterStatus = BookingStatus | 'all' | 'upcoming';
+
+export const WARRANTY_VALIDITY_DAYS = 10;
+
+export const REWORK_STATUS = {
+  REQUESTED: 'requested',
+  SCHEDULED: 'scheduled',
+  COMPLETED: 'completed',
+} as const;
+export const REWORK_STATUS_VALUES = Object.values(REWORK_STATUS);
+export type ReworkStatus = (typeof REWORK_STATUS)[keyof typeof REWORK_STATUS];
 
 export const BOOKING_PAYMENT_STATUS = {
   PENDING: 'pending',
@@ -89,6 +100,10 @@ export const BOOKING_EMPTY_MESSAGES: Record<BookingFilterStatus, { title: string
   completed: {
     title: 'No completed jobs',
     sub: 'Jobs awaiting your approval appear here.',
+  },
+  rework: {
+    title: 'No rework bookings',
+    sub: 'Bookings undergoing 10-day warranty rework will appear here.',
   },
   approved: {
     title: 'No approved jobs',
