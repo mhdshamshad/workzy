@@ -23,6 +23,9 @@ import {
   RequestRescheduleDto,
   RespondRescheduleDto,
   CancelRescheduleDto,
+  CompleteReworkDTO,
+  RequestReworkDTO,
+  ScheduleReworkSlotDTO,
 } from "@/dtos/requests/booking.dto";
 import { BookingListQuery, ListingStatus } from "@/types/booking/booking.query";
 import { ApiResponse } from "@/utils/apiResponse";
@@ -172,6 +175,45 @@ export class BookingController implements IBookingController {
       data.requestedBy === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
     await this._bookingService.cancelReschedule(bookingId, initiatorId, data);
     res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING.RESCHEDULE_CANCELLED_SUCCESS));
+  });
+
+  requestRework = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
+    const { bookingId } = req.params;
+    const data = req.body as RequestReworkDTO;
+    await this._bookingService.requestRework(bookingId, userId, data);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING.REWORK_REQUESTED_SUCCESS));
+  });
+
+  scheduleReworkSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { bookingId } = req.params;
+    const data = req.body as ScheduleReworkSlotDTO;
+    await this._bookingService.scheduleReworkSlot(bookingId, workerId, data);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING.REWORK_SCHEDULED_SUCCESS));
+  });
+
+  rescheduleReworkSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { bookingId } = req.params;
+    const data = req.body as ScheduleReworkSlotDTO;
+    await this._bookingService.rescheduleReworkSlot(bookingId, workerId, data);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING.REWORK_RESCHEDULED_SUCCESS));
+  });
+
+  sendReworkCompletionOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { bookingId } = req.params;
+    await this._bookingService.sendReworkCompletionOtp(bookingId, workerId);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING.REWORK_OTP_SENT_SUCCESS));
+  });
+
+  completeRework = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { bookingId } = req.params;
+    const data = req.body as CompleteReworkDTO;
+    await this._bookingService.completeRework(bookingId, workerId, data);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING.REWORK_COMPLETED_SUCCESS));
   });
 
   private parseQuery(req: Request): BookingListQuery {

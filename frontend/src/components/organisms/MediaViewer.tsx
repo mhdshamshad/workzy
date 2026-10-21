@@ -11,6 +11,7 @@ import {
   Video,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export interface MediaItem {
   url: string;
@@ -209,7 +210,7 @@ export function MediaViewer({
     };
   }, []);
 
-  return (
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -304,6 +305,7 @@ export function MediaViewer({
           <p className="text-white/80 text-sm text-center max-w-lg">{item.caption}</p>
         </div>
       )}
-    </motion.div>
+    </motion.div>,
+    document.body
   );
 }

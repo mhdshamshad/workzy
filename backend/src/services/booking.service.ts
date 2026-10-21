@@ -18,10 +18,13 @@ import { TYPES } from "@/di/types";
 import {
   CancelRescheduleDto,
   CompleteBookingDTO,
+  CompleteReworkDTO,
   CreatebookingDTO,
   ExtraChargeDTO,
   RequestRescheduleDto,
+  RequestReworkDTO,
   RespondRescheduleDto,
+  ScheduleReworkSlotDTO,
 } from "@/dtos/requests/booking.dto";
 import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
 import { BookingListQuery } from "@/types/booking/booking.query";
@@ -233,5 +236,37 @@ export class BookingService implements IBookingService {
     data: CancelRescheduleDto
   ): Promise<void> {
     return this._rescheduleService.cancelReschedule(bookingId, initiatorId, data);
+  }
+
+  async requestRework(bookingId: string, userId: string, data: RequestReworkDTO): Promise<void> {
+    return this._lifecycleService.requestRework(bookingId, userId, data);
+  }
+
+  async scheduleReworkSlot(
+    bookingId: string,
+    workerId: string,
+    data: ScheduleReworkSlotDTO
+  ): Promise<void> {
+    return this._lifecycleService.scheduleReworkSlot(bookingId, workerId, data);
+  }
+
+  async rescheduleReworkSlot(
+    bookingId: string,
+    workerId: string,
+    data: ScheduleReworkSlotDTO
+  ): Promise<void> {
+    return this._lifecycleService.rescheduleReworkSlot(bookingId, workerId, data);
+  }
+
+  async sendReworkCompletionOtp(bookingId: string, workerId: string): Promise<void> {
+    return this._lifecycleService.sendReworkCompletionOtp(bookingId, workerId);
+  }
+
+  async completeRework(
+    bookingId: string,
+    workerId: string,
+    data: CompleteReworkDTO
+  ): Promise<void> {
+    return this._lifecycleService.completeRework(bookingId, workerId, data);
   }
 }

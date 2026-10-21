@@ -14,6 +14,8 @@ import {
   IEvidence,
   IExtraCharge,
   IRescheduleRequest,
+  IRework,
+  IWarranty,
 } from "@/types/booking/booking.entity";
 import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
 import { resolveS3Url } from "@/utils/s3.utils";
@@ -63,6 +65,8 @@ export class BookingListItemDTO {
     status: ExtraChargeStatus;
   };
   isRescheduleRequested!: boolean;
+  warranty?: IWarranty;
+  rework?: IRework;
   createdAt!: Date;
   completedAt!: Date | null;
 
@@ -120,6 +124,8 @@ export class BookingListItemDTO {
       ? { amount: extraCharge.amount, status: extraCharge.status }
       : undefined;
     dto.completedAt = entity.completedAt || null;
+    dto.warranty = entity.warranty;
+    dto.rework = entity.rework;
 
     return dto;
   }
@@ -194,6 +200,8 @@ export class BookingResponseDTO {
   reviewId?: string;
   chatId?: string;
   userNote?: string;
+  warranty?: IWarranty;
+  rework?: IRework;
   createdAt!: Date;
   completedAt!: Date | null;
 
@@ -270,6 +278,8 @@ export class BookingResponseDTO {
     dto.userNote = entity.userNote;
 
     dto.completedAt = entity.completedAt || null;
+    dto.warranty = entity.warranty;
+    dto.rework = entity.rework;
     dto.createdAt = entity.createdAt;
     return dto;
   }

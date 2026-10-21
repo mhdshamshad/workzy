@@ -14,9 +14,12 @@ import {
   RequestRescheduleDto,
   RespondRescheduleDto,
   CancelRescheduleDto,
+  CompleteReworkDTO,
+  RequestReworkDTO,
+  ScheduleReworkSlotDTO,
 } from "@/dtos/requests/booking.dto";
 import { authenticate } from "@/middlewares/auth.middleware";
-import { bookingLimiter } from "@/middlewares/rateLimit.middleware";
+import { bookingLimiter, otpVerifyLimiter } from "@/middlewares/rateLimit.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 
 import bookingDayRouter from "./booking-day.routes";
@@ -57,6 +60,7 @@ router.patch("/:bookingId/en-route", authenticate([ROLE.WORKER]), controller.mar
 router.patch("/:bookingId/reached", controller.markReached);
 router.patch(
   "/:bookingId/start",
+  otpVerifyLimiter,
   authenticate([ROLE.WORKER]),
   validateDto(VerifyBookingOtpDTO),
   controller.startJob
@@ -92,6 +96,48 @@ router.delete(
   "/:bookingId/reschedule",
   validateDto(CancelRescheduleDto),
   controller.cancelReschedule
+);
+
+router.post(
+  "/:bookingId/rework/request",
+  authenticate([ROLE.USER]),
+  validateDto(RequestReworkDTO),
+  controller.requestRework
+);
+
+router.post(
+  "/:bookingId/rework/schedule-slot",
+  authenticate([ROLE.WORKER]),
+  validateDto(ScheduleReworkSlotDTO),
+  controller.scheduleReworkSlot
+);
+
+router.put(
+  "/:bookingId/rework/reschedule-slot",
+  authenticate([ROLE.WORKER]),
+  validateDto(ScheduleReworkSlotDTO),
+  controller.rescheduleReworkSlot
+);
+
+router.post(
+  "/:bookingId/rework/reschedule-slot",
+  authenticate([ROLE.WORKER]),
+  validateDto(ScheduleReworkSlotDTO),
+  controller.rescheduleReworkSlot
+);
+
+router.post(
+  "/:bookingId/rework/send-otp",
+  authenticate([ROLE.WORKER]),
+  controller.sendReworkCompletionOtp
+);
+
+router.post(
+  "/:bookingId/rework/complete",
+  otpVerifyLimiter,
+  authenticate([ROLE.WORKER]),
+  validateDto(CompleteReworkDTO),
+  controller.completeRework
 );
 
 router.use("/:bookingId/day", bookingDayRouter);

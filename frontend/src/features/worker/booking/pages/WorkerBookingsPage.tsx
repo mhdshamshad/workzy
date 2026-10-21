@@ -5,7 +5,10 @@ import { ROLE, type BookingFilterStatus } from '@/constants';
 import { useBookings } from '@/features/booking';
 import { BookingList } from '@/features/booking/components/BookingList';
 import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTabs';
+import CompleteReworkModal from '@/features/booking/components/rework/CompleteReworkModal';
+import ScheduleReworkModal from '@/features/booking/components/rework/ScheduleReworkModal';
 import { DisputeModal } from '@/features/dispute';
+import type { BookingDetails, BookingListItem } from '@/types/booking';
 
 import WorkerAcceptModal from '../components/WorkerAcceptModal';
 import WorkerCompleteModal from '../components/WorkerCompleteModal';
@@ -19,6 +22,12 @@ import { useWorkerBookingHandler } from '../hooks/useWorkerBooking';
 export default function WorkerBookingsPage() {
   const [disputeBId, setDisputeBId] = useState<string | null>(null);
   const [status, setStatus] = useState<BookingFilterStatus>('all');
+  const [scheduleReworkB, setScheduleReworkB] = useState<BookingListItem | BookingDetails | null>(
+    null
+  );
+  const [completeReworkB, setCompleteReworkB] = useState<BookingListItem | BookingDetails | null>(
+    null
+  );
 
   const { accept, start, reject, finish, extraCharge, review, enRoute, reached } =
     useWorkerBookingHandler();
@@ -61,6 +70,8 @@ export default function WorkerBookingsPage() {
         onReqExtra={id => setExtraChargeBId(id)}
         // onCancel={id => reject(id)}
         onReview={data => setReviewData({ id: data.id, reviewId: data.reviewId })}
+        onScheduleReworkSlot={booking => setScheduleReworkB(booking)}
+        onCompleteRework={booking => setCompleteReworkB(booking)}
         detailBasePath="/worker/bookings"
         onDispute={id => setDisputeBId(id)}
       />
@@ -138,6 +149,22 @@ export default function WorkerBookingsPage() {
         onClose={() => setDisputeBId(null)}
         bookingId={disputeBId}
       />
+
+      {scheduleReworkB && (
+        <ScheduleReworkModal
+          isOpen={!!scheduleReworkB}
+          booking={scheduleReworkB}
+          onClose={() => setScheduleReworkB(null)}
+        />
+      )}
+
+      {completeReworkB && (
+        <CompleteReworkModal
+          isOpen={!!completeReworkB}
+          booking={completeReworkB}
+          onClose={() => setCompleteReworkB(null)}
+        />
+      )}
     </div>
   );
 }

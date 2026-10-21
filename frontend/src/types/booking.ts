@@ -121,6 +121,36 @@ export interface RescheduleRequest {
   reason: string;
   requestedAt: Date;
 }
+
+export interface Warranty {
+  validUntil: Date | string;
+}
+
+export interface ReworkSlot {
+  slotId?: string;
+  date: Date | string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface Rework {
+  status: 'requested' | 'scheduled' | 'completed';
+  reason: string;
+  evidence?: EvidenceItem[];
+  completionEvidence?: EvidenceItem[];
+  preferredDate?: Date | string;
+  scheduledSlot?: ReworkSlot;
+  workerNote?: string;
+  requestedAt: Date | string;
+  completedAt?: Date | string;
+}
+
+export interface ScheduleReworkSlotPayload {
+  date: string;
+  startTime: string;
+  endTime: string;
+}
+
 export interface Booking {
   id: string;
   bookingId: string;
@@ -152,6 +182,8 @@ export interface Booking {
   extraCharge?: ExtraCharge;
   evidence?: Evidence;
   rescheduleRequest?: RescheduleRequest;
+  warranty?: Warranty;
+  rework?: Rework;
 
   chatId?: string;
   snapshot: BookingSnapshot;
@@ -191,6 +223,8 @@ export type BookingListItem = {
   totalDays: number;
   status: BookingStatus;
   paymentStatus: BookingPaymentStatus;
+  warranty?: Warranty;
+  rework?: Rework;
   userNote?: string;
   hasVisibleReview: boolean;
   reviewId?: string;

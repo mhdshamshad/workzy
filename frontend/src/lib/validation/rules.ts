@@ -78,3 +78,8 @@ export const createDescriptionRule = (
 
   return required ? schema : schema.or(z.literal('')).optional();
 };
+
+export const evidenceItemSchema = z.object({
+  url: z.string().url(),
+  type: z.enum(['image', 'video']),
+});

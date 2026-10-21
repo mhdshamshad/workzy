@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
@@ -10,9 +11,12 @@ import {
   BOOKING_STATUS_MESSAGES,
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
+  REWORK_STATUS,
   ROLE,
+  SERVICE_TYPE,
   SLOT_STATUS,
   USER,
+  WARRANTY_VALIDITY_DAYS,
 } from "@/constants";
 import { REDIS_KEYS } from "@/constants/redis";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
@@ -28,8 +32,13 @@ import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
-import { CompleteBookingDTO } from "@/dtos/requests/booking.dto";
-import { IBooking, IEvidence } from "@/types/booking/booking.entity";
+import {
+  CompleteBookingDTO,
+  CompleteReworkDTO,
+  RequestReworkDTO,
+  ScheduleReworkSlotDTO,
+} from "@/dtos/requests/booking.dto";
+import { IBooking, IEvidence, IRework } from "@/types/booking/booking.entity";
 import {
   assertWorkerOwnership,
   createStatusHistoryEntry,
@@ -306,6 +315,10 @@ export class BookingLifecycleService implements IBookingLifecycleService {
 
   async completeJob(bookingId: string, workerId: string, data: CompleteBookingDTO): Promise<void> {
     const { evidence, note } = data;
+    const existing = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(existing, workerId);
+    const isConsultation = existing.snapshot?.category?.serviceType === SERVICE_TYPE.CONSULTATION;
+
     const bookingEvidence: IEvidence = {
       after: evidence.after,
       before: evidence.before,
@@ -323,6 +336,11 @@ export class BookingLifecycleService implements IBookingLifecycleService {
           evidence: bookingEvidence,
           workerNote: note,
           completedAt: new Date(),
+          warranty: isConsultation
+            ? undefined
+            : {
+                validUntil: dayjs().add(WARRANTY_VALIDITY_DAYS, "day").toDate(),
+              },
           $push: {
             statusHistory: createStatusHistoryEntry(
               BOOKING_STATUS.COMPLETED,
@@ -380,7 +398,7 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     await this._bookingRepository.update(bookingId, {
       status: BOOKING_STATUS.APPROVED,
       paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
-      completedAt: new Date(),
+      completedAt: booking.completedAt || new Date(),
       $push: {
         statusHistory: createStatusHistoryEntry(
           BOOKING_STATUS.APPROVED,
@@ -398,6 +416,240 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     void this._notificationService.createNotification(
       booking.workerId.toString(),
       NOTIFICATION_TEMPLATES.JOB_APPROVED(booking.bookingId, booking.snapshot.user.name)
+    );
+  }
+
+  async requestRework(bookingId: string, userId: string, data: RequestReworkDTO): Promise<void> {
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    if (booking.userId.toString() !== userId) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+    if (booking.snapshot?.category?.serviceType === SERVICE_TYPE.CONSULTATION) {
+      throw new CustomError(BOOKING.REWORK_NOT_APPLICABLE_CONSULTATION, HTTPSTATUS.BAD_REQUEST);
+    }
+    const eligibleStatuses = [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.APPROVED];
+    if (!eligibleStatuses.includes(booking.status as (typeof eligibleStatuses)[number])) {
+      throw new CustomError(BOOKING.REWORK_NOT_ALLOWED(booking.status), HTTPSTATUS.BAD_REQUEST);
+    }
+    if (!booking.warranty?.validUntil || new Date() > new Date(booking.warranty.validUntil)) {
+      throw new CustomError(BOOKING.WARRANTY_EXPIRED, HTTPSTATUS.BAD_REQUEST);
+    }
+    if (booking.rework) {
+      if (booking.rework.status === REWORK_STATUS.COMPLETED) {
+        throw new CustomError(BOOKING.REWORK_ALREADY_FULFILLED, HTTPSTATUS.BAD_REQUEST);
+      }
+      throw new CustomError(BOOKING.REWORK_ALREADY_ACTIVE, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const reworkData: IRework = {
+      status: REWORK_STATUS.REQUESTED,
+      reason: data.reason,
+      preferredDate: data.preferredDate ? new Date(data.preferredDate) : undefined,
+      evidence: data.evidence ?? [],
+      requestedAt: new Date(),
+    };
+
+    await this._bookingRepository.update(bookingId, {
+      status: BOOKING_STATUS.REWORK,
+      rework: reworkData,
+      $push: {
+        statusHistory: createStatusHistoryEntry(
+          BOOKING_STATUS.REWORK,
+          ROLE.USER,
+          BOOKING_STATUS_MESSAGES.REWORK_REQUESTED(data.reason)
+        ),
+      },
+    });
+
+    void this._notificationService.createNotification(
+      booking.workerId.toString(),
+      NOTIFICATION_TEMPLATES.REWORK_REQUESTED(booking.bookingId, booking.snapshot.user.name)
+    );
+  }
+
+  async scheduleReworkSlot(
+    bookingId: string,
+    workerId: string,
+    data: ScheduleReworkSlotDTO
+  ): Promise<void> {
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
+
+    if (booking.status !== BOOKING_STATUS.REWORK || !booking.rework) {
+      throw new CustomError(BOOKING.REWORK_NOT_REQUESTED, HTTPSTATUS.BAD_REQUEST);
+    }
+    if (booking.rework.scheduledSlot?.slotId) {
+      await this._slotRepository.delete(booking.rework.scheduledSlot.slotId.toString());
+    }
+    await this._unitOfWork.execute(async (options) => {
+      const reworkDate = new Date(data.date);
+      const slot = await this._slotRepository.create({
+        workerId: new Types.ObjectId(workerId),
+        serviceId: booking.serviceId,
+        bookingId: new Types.ObjectId(bookingId),
+        date: reworkDate,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        duration: booking.duration || 60,
+        status: SLOT_STATUS.BOOKED,
+        location: booking.address?.location,
+      },options);
+
+      await this._bookingRepository.update(bookingId, {
+        "rework.status": REWORK_STATUS.SCHEDULED,
+        "rework.scheduledSlot": {
+          slotId: slot._id,
+          date: reworkDate,
+          startTime: data.startTime,
+          endTime: data.endTime,
+        },
+        $push: {
+          statusHistory: createStatusHistoryEntry(
+            BOOKING_STATUS.REWORK,
+            ROLE.WORKER,
+            BOOKING_STATUS_MESSAGES.REWORK_SCHEDULED(data.date, `${data.startTime} - ${data.endTime}`)
+          ),
+        },
+      } ,options);
+    })
+
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.REWORK_SCHEDULED(
+        booking.bookingId,
+        data.date,
+        `${data.startTime} - ${data.endTime}`
+      )
+    );
+  }
+
+  async rescheduleReworkSlot(
+    bookingId: string,
+    workerId: string,
+    data: ScheduleReworkSlotDTO
+  ): Promise<void> {
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
+
+    if (booking.status !== BOOKING_STATUS.REWORK || !booking.rework) {
+      throw new CustomError(BOOKING.REWORK_NOT_REQUESTED, HTTPSTATUS.BAD_REQUEST);
+    }
+    if (booking.rework.scheduledSlot?.slotId) {
+      await this._slotRepository.delete(booking.rework.scheduledSlot.slotId.toString());
+    }
+    await this._unitOfWork.execute(async (options) => {
+      const reworkDate = new Date(data.date);
+      const slot = await this._slotRepository.create({
+        workerId: new Types.ObjectId(workerId),
+        serviceId: booking.serviceId,
+        bookingId: new Types.ObjectId(bookingId),
+        date: reworkDate,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        duration: booking.duration || 60,
+        status: SLOT_STATUS.BOOKED,
+        location: booking.address?.location,
+      },options);
+      
+      await this._bookingRepository.update(bookingId, {
+        "rework.status": REWORK_STATUS.SCHEDULED,
+        "rework.scheduledSlot": {
+          slotId: slot._id,
+          date: reworkDate,
+          startTime: data.startTime,
+          endTime: data.endTime,
+        },
+        $push: {
+          statusHistory: createStatusHistoryEntry(
+            BOOKING_STATUS.REWORK,
+            ROLE.WORKER,
+            BOOKING_STATUS_MESSAGES.REWORK_RESCHEDULED(
+              data.date,
+              `${data.startTime} - ${data.endTime}`
+            )
+          ),
+        },
+      } ,options);
+    })
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.REWORK_RESCHEDULED(
+        booking.bookingId,
+        data.date,
+        `${data.startTime} - ${data.endTime}`
+      )
+    );
+  }
+
+  async sendReworkCompletionOtp(bookingId: string, workerId: string): Promise<void> {
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
+
+    if (booking.status !== BOOKING_STATUS.REWORK || !booking.rework) {
+      throw new CustomError(BOOKING.REWORK_NOT_REQUESTED, HTTPSTATUS.BAD_REQUEST);
+    }
+    const user = await this._userRepository.findById(booking.userId);
+    if (!user) {
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    const otp = this._otpService.generateOTP();
+    const redisKey = REDIS_KEYS.BOOKING.REWORK_OTP(bookingId);
+    await Promise.all([
+      this._redisService.setWithTTL(redisKey, otp, 3600),
+      this._emailService.sendEmail(user.email, otp),
+    ]);
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.REWORK_OTP_SENT(booking.bookingId, otp)
+    );
+  }
+
+  async completeRework(
+    bookingId: string,
+    workerId: string,
+    data: CompleteReworkDTO
+  ): Promise<void> {
+    const booking = await getBookingOrThrow(this._bookingRepository, bookingId);
+    assertWorkerOwnership(booking, workerId);
+
+    if (booking.status !== BOOKING_STATUS.REWORK || !booking.rework) {
+      throw new CustomError(BOOKING.REWORK_NOT_REQUESTED, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const redisKey = REDIS_KEYS.BOOKING.REWORK_OTP(bookingId);
+    const storedOtp = await this._redisService.get(redisKey);
+    if (!storedOtp || storedOtp !== data.otp) {
+      throw new CustomError(BOOKING.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
+    }
+    await this._slotRepository.deleteMany({
+      bookingId: new Types.ObjectId(bookingId),
+      status: SLOT_STATUS.BOOKED,
+    });
+
+    const nextStatus =
+      booking.paymentStatus === BOOKING_PAYMENT_STATUS.RELEASED
+        ? BOOKING_STATUS.APPROVED
+        : BOOKING_STATUS.COMPLETED;
+
+    await this._bookingRepository.update(bookingId, {
+      status: nextStatus,
+      "rework.status": REWORK_STATUS.COMPLETED,
+      "rework.completedAt": new Date(),
+      "rework.workerNote": data.workerNote,
+      "rework.completionEvidence": data.completionEvidence ?? [],
+      $push: {
+        statusHistory: createStatusHistoryEntry(
+          nextStatus,
+          ROLE.WORKER,
+          BOOKING_STATUS_MESSAGES.REWORK_COMPLETED
+        ),
+      },
+    });
+
+    void this._redisService.delete(redisKey);
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.REWORK_COMPLETED(booking.bookingId)
     );
   }
 

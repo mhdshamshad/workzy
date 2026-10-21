@@ -80,7 +80,7 @@ export const authLimiter = rateLimit({
 });
 
 export const otpVerifyLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
+  windowMs: 5 * 60 * 1000,
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
@@ -94,7 +94,7 @@ export const otpVerifyLimiter = rateLimit({
   },
   store: createRedisStore("otp-verify"),
   handler: createLimiterResponse(
-    "Too many failed OTP verification attempts. Please wait 10 minutes or request a new OTP."
+    "Too many failed OTP verification attempts. Please wait 5 minutes"
   ),
 });
 

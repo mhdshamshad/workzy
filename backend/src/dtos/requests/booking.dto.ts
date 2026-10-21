@@ -3,6 +3,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsDateString,
   IsEnum,
   IsIn,
   IsInt,
@@ -164,4 +165,53 @@ export class DayCompleteDTO {
   @ValidateNested()
   @Type(() => EvidenceDTO)
   evidence!: EvidenceDTO;
+}
+
+export class RequestReworkDTO {
+  @IsString()
+  @MinLength(5, { message: "Reason must be at least 5 characters" })
+  @MaxLength(1000)
+  reason!: string;
+
+  @IsOptional()
+  @IsDateString()
+  preferredDate?: string;
+
+  @IsArray()
+  @ArrayMinSize(1, { message: "At least one evidence item is required" })
+  @ArrayMaxSize(3, { message: "Maximum 3 evidence items allowed" })
+  @ValidateNested({ each: true })
+  @Type(() => EvidenceItemDTO)
+  evidence!: EvidenceItemDTO[];
+}
+
+export class ScheduleReworkSlotDTO {
+  @IsDateString()
+  date!: string;
+
+  @IsString()
+  @Matches(/^\d{2}:\d{2}$/, { message: "Invalid startTime format (HH:mm)" })
+  startTime!: string;
+
+  @IsString()
+  @Matches(/^\d{2}:\d{2}$/, { message: "Invalid endTime format (HH:mm)" })
+  endTime!: string;
+}
+
+export class CompleteReworkDTO {
+  @IsString()
+  @Matches(/^\d{6}$/, { message: "Invalid OTP format (6 digits required)" })
+  otp!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  workerNote?: string;
+
+  @IsArray()
+  @ArrayMinSize(1, { message: "At least one completion evidence item is required" })
+  @ArrayMaxSize(3, { message: "Maximum 3 completion evidence items allowed" })
+  @ValidateNested({ each: true })
+  @Type(() => EvidenceItemDTO)
+  completionEvidence!: EvidenceItemDTO[];
 }

@@ -5,6 +5,7 @@ export const BOOKING_STATUS = {
   REACHED: "reached", // worker arrived
   IN_PROGRESS: "in_progress", // worker started job
   COMPLETED: "completed",
+  REWORK: "rework",
   APPROVED: "approved",
   SETTLED: "settled",
   CANCELLED: "cancelled", // cancelled before start
@@ -21,6 +22,7 @@ export const UPCOMING_BOOKING_STATUSES = [
   BOOKING_STATUS.EN_ROUTE,
   BOOKING_STATUS.REACHED,
   BOOKING_STATUS.IN_PROGRESS,
+  BOOKING_STATUS.REWORK,
 ] as const;
 
 export const BOOKING_TYPE = {
@@ -50,14 +52,25 @@ export const PROJECT_BOOKING_STATUS_EXTRA = {
   SETTLED: "settled",
 } as const;
 
+export const WARRANTY_VALIDITY_DAYS = 10;
+
+export const REWORK_STATUS = {
+  REQUESTED: "requested",
+  SCHEDULED: "scheduled",
+  COMPLETED: "completed",
+} as const;
+export const REWORK_STATUS_VALUES = Object.values(REWORK_STATUS);
+export type ReworkStatus = (typeof REWORK_STATUS)[keyof typeof REWORK_STATUS];
+
 export const ALLOWED_BOOKING_TRANSITIONS: Record<string, string[]> = {
   pending: ["confirmed", "cancelled", "expired"],
   confirmed: ["en_route", "cancelled", "in_progress"],
   en_route: ["reached", "cancelled"],
   reached: ["in_progress"],
   in_progress: ["completed", "disputed"],
-  completed: ["approved", "disputed"],
-  approved: ["settled"],
+  completed: ["approved", "disputed", "rework"],
+  approved: ["settled", "rework"],
+  rework: ["completed", "approved", "disputed"],
   settled: [],
   disputed: ["cancelled", "approved", "settled"],
   cancelled: [],

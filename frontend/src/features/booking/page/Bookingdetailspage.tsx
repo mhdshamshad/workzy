@@ -27,6 +27,7 @@ import {
   XCircle,
   CheckCircle,
   ShieldAlert,
+  Wrench,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Navigate, useParams, useNavigate, Link } from 'react-router-dom';
@@ -49,6 +50,10 @@ import { formatDuration, formatSmartDateTime, formatTime12 } from '@/utils/time.
 
 import { StatusBadge } from '../components/BookingCard';
 import RescheduleModal from '../components/RescheduleModal';
+import CompleteReworkModal from '../components/rework/CompleteReworkModal';
+import RequestReworkModal from '../components/rework/RequestReworkModal';
+import ScheduleReworkModal from '../components/rework/ScheduleReworkModal';
+import WarrantyReworkCard from '../components/rework/WarrantyReworkCard';
 import { BOOKING_STATUS_META, PAYMENT_STATUS_META } from '../helper/bookingStatus.config';
 
 import type { BookingCardHandlers } from '../components/BookingCard';
@@ -115,6 +120,9 @@ export default function BookingDetailsPage({
 
   const { booking, isLoading, error, refetch } = useBookingDetails(id);
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [isReworkRequestOpen, setIsReworkRequestOpen] = useState(false);
+  const [isReworkScheduleOpen, setIsReworkScheduleOpen] = useState(false);
+  const [isReworkCompleteOpen, setIsReworkCompleteOpen] = useState(false);
 
   if (isLoading) {
     return <BookingDetailsSkeleton />;
@@ -443,6 +451,15 @@ export default function BookingDetailsPage({
         >
           {/* Status Timeline */}
           <motion.div variants={fadeUp} className="lg:col-span-2 space-y-5">
+            {b.category?.serviceType !== 'Consultation' && (b.warranty || b.rework) && (
+              <WarrantyReworkCard
+                booking={b}
+                role={role}
+                onRequestRework={() => setIsReworkRequestOpen(true)}
+                onScheduleSlot={() => setIsReworkScheduleOpen(true)}
+                onCompleteRework={() => setIsReworkCompleteOpen(true)}
+              />
+            )}
             {b.dailyLogs && b.dailyLogs.length > 0 && (
               <ProjectDayTimeline bookingId={b.id} dailyLogs={b.dailyLogs} role={role} />
             )}
@@ -457,7 +474,13 @@ export default function BookingDetailsPage({
                 booking={b}
                 role={role}
                 allowReschedule={allowReschedule}
-                handlers={{ ...handlers, onReschedule: () => setIsRescheduleOpen(true) }}
+                handlers={{
+                  ...handlers,
+                  onReschedule: () => setIsRescheduleOpen(true),
+                  onRequestRework: () => setIsReworkRequestOpen(true),
+                  onScheduleReworkSlot: () => setIsReworkScheduleOpen(true),
+                  onCompleteRework: () => setIsReworkCompleteOpen(true),
+                }}
               />
             </GlassCard>
             <GlassCard title="Extra Charge" icon={Receipt}>
@@ -519,6 +542,24 @@ export default function BookingDetailsPage({
         onClose={() => setIsRescheduleOpen(false)}
         booking={b}
         role={role}
+      />
+
+      <RequestReworkModal
+        isOpen={isReworkRequestOpen}
+        onClose={() => setIsReworkRequestOpen(false)}
+        booking={b}
+      />
+
+      <ScheduleReworkModal
+        isOpen={isReworkScheduleOpen}
+        onClose={() => setIsReworkScheduleOpen(false)}
+        booking={b}
+      />
+
+      <CompleteReworkModal
+        isOpen={isReworkCompleteOpen}
+        onClose={() => setIsReworkCompleteOpen(false)}
+        booking={b}
       />
     </div>
   );
@@ -601,11 +642,49 @@ function ActionPanel({
               full
             />
           )}
+          {b.category?.serviceType !== 'Consultation' &&
+            (b.status === BOOKING_STATUS.COMPLETED || b.status === BOOKING_STATUS.APPROVED) &&
+            b.warranty?.validUntil &&
+            new Date() <= new Date(b.warranty.validUntil) &&
+            !b.rework && (
+              <ActionBtn
+                icon={Wrench}
+                label="Claim Rework"
+                accent="amber"
+                onClick={() => handlers?.onRequestRework?.(b)}
+                full
+              />
+            )}
         </>
       )}
 
       {isWorker && (
         <>
+          {b.status === BOOKING_STATUS.REWORK && b.rework?.status === 'requested' && (
+            <ActionBtn
+              icon={Calendar}
+              label="Schedule Rework"
+              accent="sky"
+              onClick={() => handlers?.onScheduleReworkSlot?.(b)}
+              full
+            />
+          )}
+          {b.status === BOOKING_STATUS.REWORK && b.rework?.status === 'scheduled' && (
+            <div className="grid grid-cols-2 gap-2">
+              <ActionBtn
+                icon={Calendar}
+                label="Change Slot"
+                accent="sky"
+                onClick={() => handlers?.onScheduleReworkSlot?.(b)}
+              />
+              <ActionBtn
+                icon={CheckCircle}
+                label="Complete Rework"
+                accent="green"
+                onClick={() => handlers?.onCompleteRework?.(b)}
+              />
+            </div>
+          )}
           {b.status === BOOKING_STATUS.PENDING && (
             <div className="grid grid-cols-2 gap-2">
               <ActionBtn

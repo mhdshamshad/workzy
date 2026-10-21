@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import BookingService from '@/services/booking.service';
+import type { ScheduleReworkSlotPayload } from '@/types/booking';
+
+import type { CompleteReworkFormType } from '../validation/completeReworkFormData';
+import type { RequestReworkFormType } from '../validation/requestReworkFormData';
 
 export const bookingKeys = {
   all: ['bookings'] as const,
@@ -54,6 +58,56 @@ export function usePayExtraCharge() {
   return useMutation({
     mutationFn: (id: string) => BookingService.payExtraCharge(id),
     onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
+  });
+}
+
+export function useRequestRework() {
+  const qc = useQueryClient();
+  return useMutation<{ message: string }, Error, { id: string; data: RequestReworkFormType }>({
+    mutationFn: ({ id, data }) => BookingService.requestRework(id, data),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
+  });
+}
+
+export function useScheduleReworkSlot() {
+  const qc = useQueryClient();
+  return useMutation<{ message: string }, Error, { id: string; data: ScheduleReworkSlotPayload }>({
+    mutationFn: ({ id, data }) => BookingService.scheduleReworkSlot(id, data),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
+  });
+}
+
+export function useRescheduleReworkSlot() {
+  const qc = useQueryClient();
+  return useMutation<{ message: string }, Error, { id: string; data: ScheduleReworkSlotPayload }>({
+    mutationFn: ({ id, data }) => BookingService.rescheduleReworkSlot(id, data),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
+  });
+}
+
+export function useSendReworkOtp() {
+  return useMutation<{ message: string }, Error, string>({
+    mutationFn: (id: string) => BookingService.sendReworkOtp(id),
+  });
+}
+
+export function useCompleteRework() {
+  const qc = useQueryClient();
+  return useMutation<{ message: string }, Error, { id: string; data: CompleteReworkFormType }>({
+    mutationFn: ({ id, data }) => BookingService.completeRework(id, data),
+    onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: bookingKeys.lists() });
       qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
     },
