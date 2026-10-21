@@ -8,6 +8,8 @@ import {
   BOOKING_STATUS_VALUES,
   BOOKING_TYPE,
   PRICING_MODE_VALUES,
+  REWORK_STATUS,
+  REWORK_STATUS_VALUES,
   ROLE_VALUES,
   SERVICE_TYPE_VALUES,
 } from "@/constants";
@@ -184,6 +186,43 @@ const RescheduleRequestSchema = new Schema(
   { _id: false }
 );
 
+const WarrantySchema = new Schema(
+  {
+    validUntil: { type: Date, required: true },
+  },
+  { _id: false }
+);
+
+const ReworkSlotSchema = new Schema(
+  {
+    slotId: { type: Schema.Types.ObjectId, ref: "Slot" },
+    date: { type: Date, required: true },
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true },
+  },
+  { _id: false }
+);
+
+const ReworkSchema = new Schema(
+  {
+    status: {
+      type: String,
+      enum: REWORK_STATUS_VALUES,
+      default: REWORK_STATUS.REQUESTED,
+      required: true,
+    },
+    reason: { type: String, required: true, trim: true, maxlength: 1000 },
+    evidence: { type: [EvidenceItemSchema], default: [] },
+    completionEvidence: { type: [EvidenceItemSchema], default: [] },
+    preferredDate: { type: Date },
+    scheduledSlot: { type: ReworkSlotSchema, default: null },
+    workerNote: { type: String, trim: true, maxlength: 1000 },
+    requestedAt: { type: Date, default: Date.now },
+    completedAt: { type: Date },
+  },
+  { _id: false }
+);
+
 const BookingSchema: Schema<IBooking> = new Schema(
   {
     bookingId: {
@@ -332,6 +371,8 @@ const BookingSchema: Schema<IBooking> = new Schema(
       trim: true,
     },
     rescheduleRequest: { type: RescheduleRequestSchema, default: null },
+    warranty: { type: WarrantySchema, default: null },
+    rework: { type: ReworkSchema, default: null },
     completedAt: { type: Date },
   },
   { timestamps: true }

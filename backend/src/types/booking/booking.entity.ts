@@ -92,6 +92,29 @@ export interface IRescheduleRequest {
   requestedAt: Date;
 }
 
+export interface IWarranty {
+  validUntil: Date;
+}
+
+export interface IReworkSlot {
+  slotId?: Types.ObjectId;
+  date: Date;
+  startTime: string;
+  endTime: string;
+}
+
+export interface IRework {
+  status: "requested" | "scheduled" | "completed";
+  reason: string;
+  evidence?: IEvidenceItem[];
+  completionEvidence?: IEvidenceItem[];
+  preferredDate?: Date;
+  scheduledSlot?: IReworkSlot;
+  workerNote?: string;
+  requestedAt: Date;
+  completedAt?: Date;
+}
+
 export interface IBooking extends Document<string> {
   bookingId: string;
   userId: Types.ObjectId;
@@ -127,6 +150,8 @@ export interface IBooking extends Document<string> {
   status: BookingStatus;
   statusHistory: IBookingStatusHistory[];
   rescheduleRequest?: IRescheduleRequest;
+  warranty?: IWarranty;
+  rework?: IRework;
 
   reviewId?: Types.ObjectId;
   hasVisibleReview: boolean;
