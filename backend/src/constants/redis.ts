@@ -33,6 +33,7 @@ export const REDIS_KEYS = {
   BOOKING: {
     OTP: (bookingId: string) => `booking-otp:${bookingId}`,
     DAY_OTP: (bookingId: string, dayIndex: number) => `booking-day-otp:${bookingId}:${dayIndex}`,
+    REWORK_OTP: (bookingId: string) => `booking-rework-otp:${bookingId}`,
   },
 
   AUTH: {

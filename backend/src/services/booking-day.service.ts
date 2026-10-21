@@ -1,8 +1,17 @@
+import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
 import logger from "@/config/logger";
-import { BOOKING, BOOKING_STATUS, BOOKING_DAY_STATUS, HTTPSTATUS } from "@/constants";
+import {
+  BOOKING,
+  BOOKING_STATUS,
+  BOOKING_STATUS_MESSAGES,
+  BOOKING_DAY_STATUS,
+  HTTPSTATUS,
+  ROLE,
+  WARRANTY_VALIDITY_DAYS,
+} from "@/constants";
 import { REDIS_KEYS } from "@/constants/redis";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
@@ -15,7 +24,11 @@ import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { DayCompleteDTO } from "@/dtos/requests/booking.dto";
 import { IBooking, IDailyLog, IEvidence } from "@/types/booking/booking.entity";
-import { assertWorkerOwnership, getBookingOrThrow } from "@/utils/booking.helper";
+import {
+  assertWorkerOwnership,
+  createStatusHistoryEntry,
+  getBookingOrThrow,
+} from "@/utils/booking.helper";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -136,6 +149,9 @@ export class BookingDayService implements IBookingDayService {
     );
     const newStatus = allFinished ? BOOKING_STATUS.COMPLETED : booking.status;
     const completedAt = allFinished ? new Date() : booking.completedAt;
+    const bookingMessage = allFinished
+      ? BOOKING_STATUS_MESSAGES.PROJECT_COMPLETED
+      : BOOKING_STATUS_MESSAGES.DAY_COMPLETED(dayIndex);
 
     await this._unitOfWork.execute(async (options) => {
       await this._bookingRepository.update(
@@ -144,6 +160,12 @@ export class BookingDayService implements IBookingDayService {
           dailyLogs,
           status: newStatus,
           completedAt,
+          warranty: allFinished
+            ? { validUntil: dayjs().add(WARRANTY_VALIDITY_DAYS, "day").toDate() }
+            : undefined,
+          $push: {
+            statusHistory: createStatusHistoryEntry(newStatus, ROLE.WORKER, bookingMessage),
+          },
         },
         options
       );
@@ -184,6 +206,9 @@ export class BookingDayService implements IBookingDayService {
     );
     const newStatus = allFinished ? BOOKING_STATUS.COMPLETED : booking.status;
     const completedAt = allFinished ? new Date() : booking.completedAt;
+    const bookingMessage = allFinished
+      ? BOOKING_STATUS_MESSAGES.PROJECT_COMPLETED
+      : BOOKING_STATUS_MESSAGES.DAY_SKIPPED(dayIndex);
 
     await this._unitOfWork.execute(async (options) => {
       await this._bookingRepository.update(
@@ -192,6 +217,12 @@ export class BookingDayService implements IBookingDayService {
           dailyLogs,
           status: newStatus,
           completedAt,
+          warranty: allFinished
+            ? { validUntil: dayjs().add(WARRANTY_VALIDITY_DAYS, "day").toDate() }
+            : undefined,
+          $push: {
+            statusHistory: createStatusHistoryEntry(newStatus, ROLE.WORKER, bookingMessage),
+          },
         },
         options
       );

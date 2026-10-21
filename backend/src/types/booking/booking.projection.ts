@@ -28,6 +28,8 @@ export type BookingListItem = Omit<
     | "completedAt"
     | "extraCharge"
     | "rescheduleRequest"
+    | "warranty"
+    | "rework"
   >,
   "workerId" | "userId" | "categoryId"
 > & {

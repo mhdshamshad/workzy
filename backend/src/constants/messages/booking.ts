@@ -17,6 +17,25 @@ export const BOOKING_STATUS_MESSAGES = {
   RESCHEDULE_ACCEPTED: (name: string, date: string) =>
     `Reschedule request accepted by ${name}. Moved slot to ${date}`,
   RESCHEDULE_REJECTED: (name: string) => `Reschedule request rejected by ${name}`,
+  REWORK_REQUESTED: (reason: string) => `Rework requested under 10-day warranty: ${reason}`,
+  REWORK_SCHEDULED: (date: string, time: string) =>
+    `Rework appointment scheduled for ${date} at ${time}`,
+  REWORK_RESCHEDULED: (date: string, time: string) =>
+    `Rework appointment rescheduled for ${date} at ${time}`,
+  REWORK_COMPLETED: "Rework completed by worker",
+  PROJECT_COMPLETED: "All project days completed — project marked as completed",
+  DAY_COMPLETED: (dayIndex: number) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = dayIndex % 100;
+    const ord = `${dayIndex}${s[(v - 20) % 10] || s[v] || s[0]}`;
+    return `${ord} day of project is completed`;
+  },
+  DAY_SKIPPED: (dayIndex: number) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = dayIndex % 100;
+    const ord = `${dayIndex}${s[(v - 20) % 10] || s[v] || s[0]}`;
+    return `${ord} day of project is skipped$`;
+  },
 };
 
 export const BOOKING = {
@@ -40,6 +59,23 @@ export const BOOKING = {
   CANNOT_START: (s: string) => `Cannot start job from status: ${s}`,
   CANNOT_APPROVE: (s: string) => `Cannot approve booking with status: ${s}`,
   UPDATE_FAILED: "Failed to process booking.",
+
+  // Warranty & Rework
+  WARRANTY_EXPIRED: "The 10-day rework warranty period for this booking has expired.",
+  REWORK_NOT_ALLOWED: (s: string) =>
+    `Rework can only be requested for completed or approved bookings. Current status: ${s}`,
+  REWORK_NOT_APPLICABLE_CONSULTATION:
+    "Rework warranty is not applicable for consultation services.",
+  REWORK_ALREADY_ACTIVE: "A rework request is already active for this booking.",
+  REWORK_ALREADY_FULFILLED:
+    "Warranty rework has already been claimed and completed for this booking.",
+  REWORK_NOT_REQUESTED: "No pending rework request found to schedule or complete.",
+  REWORK_SLOT_REQUIRED: "Date, start time, and end time are required to schedule a rework slot.",
+  REWORK_REQUESTED_SUCCESS: "Rework request submitted successfully under 10-day warranty.",
+  REWORK_SCHEDULED_SUCCESS: "Rework appointment slot scheduled successfully.",
+  REWORK_RESCHEDULED_SUCCESS: "Rework appointment slot rescheduled successfully.",
+  REWORK_OTP_SENT_SUCCESS: "Verification OTP sent to customer successfully.",
+  REWORK_COMPLETED_SUCCESS: "Rework marked as completed.",
 
   // Day-based booking messages
   DAY_INDEX_OUT_OF_RANGE: "Day index out of range for this project booking",

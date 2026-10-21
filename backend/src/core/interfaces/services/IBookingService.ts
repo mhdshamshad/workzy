@@ -1,10 +1,13 @@
 import {
   CancelRescheduleDto,
   CompleteBookingDTO,
+  CompleteReworkDTO,
   CreatebookingDTO,
   ExtraChargeDTO,
   RequestRescheduleDto,
+  RequestReworkDTO,
   RespondRescheduleDto,
+  ScheduleReworkSlotDTO,
 } from "@/dtos/requests/booking.dto";
 import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
 import { BookingListQuery } from "@/types/booking/booking.query";
@@ -42,4 +45,18 @@ export interface IBookingService {
     initiatorId: string,
     data: CancelRescheduleDto
   ): Promise<void>;
+
+  requestRework(bookingId: string, userId: string, data: RequestReworkDTO): Promise<void>;
+  scheduleReworkSlot(
+    bookingId: string,
+    workerId: string,
+    data: ScheduleReworkSlotDTO
+  ): Promise<void>;
+  rescheduleReworkSlot(
+    bookingId: string,
+    workerId: string,
+    data: ScheduleReworkSlotDTO
+  ): Promise<void>;
+  sendReworkCompletionOtp(bookingId: string, workerId: string): Promise<void>;
+  completeRework(bookingId: string, workerId: string, data: CompleteReworkDTO): Promise<void>;
 }

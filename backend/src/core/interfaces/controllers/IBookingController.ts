@@ -21,4 +21,10 @@ export interface IBookingController {
   requestReschedule: RequestHandler;
   respondReschedule: RequestHandler;
   cancelReschedule: RequestHandler;
+
+  requestRework: RequestHandler;
+  scheduleReworkSlot: RequestHandler;
+  rescheduleReworkSlot: RequestHandler;
+  sendReworkCompletionOtp: RequestHandler;
+  completeRework: RequestHandler;
 }

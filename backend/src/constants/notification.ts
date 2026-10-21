@@ -205,4 +205,29 @@ export const NOTIFICATION_TEMPLATES = {
     heading: "Document In Review",
     message: `Your **${documentType}** is now **in review**.`,
   }),
+  REWORK_REQUESTED: (bookingId: string, userName: string) => ({
+    type: "rework_requested",
+    heading: "Rework Requested",
+    message: `Customer **${userName}** has requested a rework under warranty for booking **${bookingId}**.`,
+  }),
+  REWORK_SCHEDULED: (bookingId: string, dateStr: string, timeStr: string) => ({
+    type: "rework_scheduled",
+    heading: "Rework Scheduled",
+    message: `Worker has scheduled your rework visit for booking **${bookingId}** on **${dateStr}** at **${timeStr}**.`,
+  }),
+  REWORK_RESCHEDULED: (bookingId: string, dateStr: string, timeStr: string) => ({
+    type: "rework_rescheduled",
+    heading: "Rework Rescheduled",
+    message: `Worker has rescheduled your rework visit for booking **${bookingId}** to **${dateStr}** at **${timeStr}**.`,
+  }),
+  REWORK_COMPLETED: (bookingId: string) => ({
+    type: "rework_completed",
+    heading: "Rework Completed",
+    message: `The rework for booking **${bookingId}** has been completed by your service professional.`,
+  }),
+  REWORK_OTP_SENT: (bookingId: string, otp: string) => ({
+    type: "rework_otp_sent",
+    heading: "Rework Completion OTP",
+    message: `Your verification OTP for completing rework on booking **${bookingId}** is **${otp}**. Share this only after inspecting the completed work.`,
+  }),
 };
