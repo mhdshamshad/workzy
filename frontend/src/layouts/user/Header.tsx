@@ -35,11 +35,13 @@ import ModeToggle from '@/components/ui/ModeToggle';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ROLE } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
+import { queryClient } from '@/lib/react-query/queryClient';
 import { logoutService, switchRoleService } from '@/services/auth.service';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearUser, setCredentials } from '@/store/slices/authSlice';
 import { setLocation } from '@/store/slices/locationSlice';
 import type { CategorySuggestion } from '@/types/category';
+import { broadcastAuthEvent } from '@/utils/crossTabAuth';
 import { syncUserLocation } from '@/utils/locationSync';
 
 const LocationSearchModal = lazy(() => import('@/components/molecules/LocationSearchModal'));
@@ -101,6 +103,8 @@ export default function Header() {
     } finally {
       dispatch(clearUser());
       setAxiosToken(null);
+      queryClient.clear();
+      broadcastAuthEvent({ type: 'LOGOUT' });
       navigate('/login');
       setMobileMenuOpen(false);
     }

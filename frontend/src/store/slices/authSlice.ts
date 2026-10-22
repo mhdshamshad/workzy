@@ -3,6 +3,7 @@ import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/tool
 import { AUTH_API, HOST, SESSION_MESSAGES } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
 import type { UpdateUserPayload, User } from '@/types/user';
+import { broadcastAuthEvent } from '@/utils/crossTabAuth';
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -53,6 +54,7 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.status = 'succeeded';
       setAxiosToken(action.payload.accessToken);
+      broadcastAuthEvent({ type: 'LOGIN' });
     },
     // update access token after refresh
     updateToken: (state, action: PayloadAction<string>) => {
@@ -79,6 +81,7 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.isAuthenticated = false;
       state.status = 'failed';
+      setAxiosToken(null);
     },
   },
   extraReducers: builder => {

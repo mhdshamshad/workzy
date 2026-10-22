@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
+import { queryClient } from '@/lib/react-query/queryClient';
 import { cn } from '@/lib/utils';
 import { logoutService, switchRoleService } from '@/services/auth.service';
 import { useAppDispatch } from '@/store/hooks';
 import { clearUser, setCredentials } from '@/store/slices/authSlice';
 import type { MenuItem } from '@/types/navigation';
 import type { User } from '@/types/user';
+import { broadcastAuthEvent } from '@/utils/crossTabAuth';
 import { syncUserLocation } from '@/utils/locationSync';
 
 import workzyLogo from '../../assets/icons/logo_image.svg';
@@ -56,6 +58,8 @@ export function BaseSidebar({
     } finally {
       dispatch(clearUser());
       setAxiosToken(null);
+      queryClient.clear();
+      broadcastAuthEvent({ type: 'LOGOUT' });
       navigate('/login');
     }
   };
