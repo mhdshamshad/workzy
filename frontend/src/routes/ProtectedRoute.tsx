@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
+import AppLoader from '@/components/atoms/AppLoader';
 import { ROLE, type Role } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
@@ -16,9 +17,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRoles }) => {
 
   if (status === 'loading') {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-9 w-9 border-4 border-gray-200 border-t-blue-500" />
-      </div>
+      <AppLoader title="Checking authorization..." subtitle="Verifying your account access." />
     );
   }
 

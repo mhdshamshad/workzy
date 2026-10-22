@@ -176,19 +176,19 @@ export default function CompleteReworkModal({ isOpen, onClose, booking }: Props)
           </p>
 
           <div className="space-y-1 pt-1">
-              <Input
-                leftIcon={<KeyRound className="h-4 w-4 text-muted-foreground" /> }
-                type="text"
-                maxLength={6}
-                placeholder="Enter 6-digit OTP"
-                disabled={isPending}
-                error={errors.otp?.message}
-                {...register('otp', {
-                  onChange: e => {
-                    e.target.value = e.target.value.replace(/\D/g, '');
-                  },
-                })}
-              />
+            <Input
+              leftIcon={<KeyRound className="h-4 w-4 text-muted-foreground" />}
+              type="text"
+              maxLength={6}
+              placeholder="Enter 6-digit OTP"
+              disabled={isPending}
+              error={errors.otp?.message}
+              {...register('otp', {
+                onChange: e => {
+                  e.target.value = e.target.value.replace(/\D/g, '');
+                },
+              })}
+            />
           </div>
         </div>
       </div>

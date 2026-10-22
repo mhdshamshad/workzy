@@ -1,7 +1,8 @@
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
+import AppLoader from '@/components/atoms/AppLoader';
 import { Topbar } from '@/components/organisms/Topbar';
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 
@@ -33,7 +34,9 @@ export default function AdminLayout() {
           }}
         />
         <main className="flex-1 overflow-y-auto no-scrollbar bg-background overflow-x-hidden min-w-0">
-          <Outlet />
+          <Suspense fallback={<AppLoader />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

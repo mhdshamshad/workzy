@@ -1,9 +1,9 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import AppLoader from './components/atoms/AppLoader';
 import AuthSyncListener from './components/providers/AuthSyncListener';
 import ScrollToTop from './components/providers/ScrollToTop';
-import { Skeleton } from './components/ui/skeleton';
 import PaymentSuccess from './pages/PaymentSuccess';
 
 const UserRoutes = lazy(() => import('./routes/UserRoutes'));
@@ -15,7 +15,7 @@ export default function App() {
     <BrowserRouter>
       <AuthSyncListener />
       <ScrollToTop />
-      <Suspense fallback={<Skeleton />}>
+      <Suspense fallback={<AppLoader title="Loading page..." subtitle="Please wait a moment." />}>
         <Routes>
           <Route path="/*" element={<UserRoutes />} />
           <Route path="/worker/*" element={<WorkerRoutes />} />

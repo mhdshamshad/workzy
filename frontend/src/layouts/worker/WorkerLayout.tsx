@@ -2,6 +2,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Suspense, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
+import AppLoader from '@/components/atoms/AppLoader';
 import { Topbar } from '@/components/organisms/Topbar';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 
@@ -33,7 +34,7 @@ export default function WorkerLayout() {
           }}
         />
         <main className="flex-1 overflow-y-auto no-scrollbar bg-background min-w-0 overflow-x-hidden">
-          <Suspense fallback={<div className="opacity-50" />}>
+          <Suspense fallback={<AppLoader />}>
             <Outlet />
           </Suspense>
         </main>
