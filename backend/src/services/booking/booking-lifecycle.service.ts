@@ -483,35 +483,45 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     }
     await this._unitOfWork.execute(async (options) => {
       const reworkDate = new Date(data.date);
-      const slot = await this._slotRepository.create({
-        workerId: new Types.ObjectId(workerId),
-        serviceId: booking.serviceId,
-        bookingId: new Types.ObjectId(bookingId),
-        date: reworkDate,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        duration: booking.duration || 60,
-        status: SLOT_STATUS.BOOKED,
-        location: booking.address?.location,
-      },options);
-
-      await this._bookingRepository.update(bookingId, {
-        "rework.status": REWORK_STATUS.SCHEDULED,
-        "rework.scheduledSlot": {
-          slotId: slot._id,
+      const slot = await this._slotRepository.create(
+        {
+          workerId: new Types.ObjectId(workerId),
+          serviceId: booking.serviceId,
+          bookingId: new Types.ObjectId(bookingId),
           date: reworkDate,
           startTime: data.startTime,
           endTime: data.endTime,
+          duration: booking.duration || 60,
+          status: SLOT_STATUS.BOOKED,
+          location: booking.address?.location,
         },
-        $push: {
-          statusHistory: createStatusHistoryEntry(
-            BOOKING_STATUS.REWORK,
-            ROLE.WORKER,
-            BOOKING_STATUS_MESSAGES.REWORK_SCHEDULED(data.date, `${data.startTime} - ${data.endTime}`)
-          ),
+        options
+      );
+
+      await this._bookingRepository.update(
+        bookingId,
+        {
+          "rework.status": REWORK_STATUS.SCHEDULED,
+          "rework.scheduledSlot": {
+            slotId: slot._id,
+            date: reworkDate,
+            startTime: data.startTime,
+            endTime: data.endTime,
+          },
+          $push: {
+            statusHistory: createStatusHistoryEntry(
+              BOOKING_STATUS.REWORK,
+              ROLE.WORKER,
+              BOOKING_STATUS_MESSAGES.REWORK_SCHEDULED(
+                data.date,
+                `${data.startTime} - ${data.endTime}`
+              )
+            ),
+          },
         },
-      } ,options);
-    })
+        options
+      );
+    });
 
     void this._notificationService.createNotification(
       booking.userId.toString(),
@@ -539,38 +549,45 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     }
     await this._unitOfWork.execute(async (options) => {
       const reworkDate = new Date(data.date);
-      const slot = await this._slotRepository.create({
-        workerId: new Types.ObjectId(workerId),
-        serviceId: booking.serviceId,
-        bookingId: new Types.ObjectId(bookingId),
-        date: reworkDate,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        duration: booking.duration || 60,
-        status: SLOT_STATUS.BOOKED,
-        location: booking.address?.location,
-      },options);
-      
-      await this._bookingRepository.update(bookingId, {
-        "rework.status": REWORK_STATUS.SCHEDULED,
-        "rework.scheduledSlot": {
-          slotId: slot._id,
+      const slot = await this._slotRepository.create(
+        {
+          workerId: new Types.ObjectId(workerId),
+          serviceId: booking.serviceId,
+          bookingId: new Types.ObjectId(bookingId),
           date: reworkDate,
           startTime: data.startTime,
           endTime: data.endTime,
+          duration: booking.duration || 60,
+          status: SLOT_STATUS.BOOKED,
+          location: booking.address?.location,
         },
-        $push: {
-          statusHistory: createStatusHistoryEntry(
-            BOOKING_STATUS.REWORK,
-            ROLE.WORKER,
-            BOOKING_STATUS_MESSAGES.REWORK_RESCHEDULED(
-              data.date,
-              `${data.startTime} - ${data.endTime}`
-            )
-          ),
+        options
+      );
+
+      await this._bookingRepository.update(
+        bookingId,
+        {
+          "rework.status": REWORK_STATUS.SCHEDULED,
+          "rework.scheduledSlot": {
+            slotId: slot._id,
+            date: reworkDate,
+            startTime: data.startTime,
+            endTime: data.endTime,
+          },
+          $push: {
+            statusHistory: createStatusHistoryEntry(
+              BOOKING_STATUS.REWORK,
+              ROLE.WORKER,
+              BOOKING_STATUS_MESSAGES.REWORK_RESCHEDULED(
+                data.date,
+                `${data.startTime} - ${data.endTime}`
+              )
+            ),
+          },
         },
-      } ,options);
-    })
+        options
+      );
+    });
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.REWORK_RESCHEDULED(

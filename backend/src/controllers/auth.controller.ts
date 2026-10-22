@@ -5,7 +5,17 @@ import { Profile } from "passport";
 import validator from "validator";
 
 import logger from "@/config/logger";
-import { AUTH, CLIENT_URL, EMAIL, HTTPSTATUS, ROLE, Role, USER, WORKER } from "@/constants";
+import {
+  AUTH,
+  CLIENT_URL,
+  EMAIL,
+  HTTPSTATUS,
+  REFRESH_TOKEN_TTL_SECONDS,
+  ROLE,
+  Role,
+  USER,
+  WORKER,
+} from "@/constants";
 import { REDIS_KEYS } from "@/constants/redis";
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
@@ -21,7 +31,7 @@ import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { ApiResponse } from "@/utils/apiResponse";
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/auth/cookieUtils";
-import { generateAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
+import { generateAccessToken, verifyAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -63,6 +73,8 @@ export class AuthController implements IAuthController {
 
     const user = await this._authService.register(userData);
 
+    await this._redisService.delete(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(user.id.toString()));
+
     setRefreshTokenCookie(res, { id: user.id, role: user.role as Role });
 
     const accessToken = generateAccessToken({ ...user });
@@ -84,6 +96,7 @@ export class AuthController implements IAuthController {
 
   login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const user = await this._authService.login(req.body as LoginRequestDTO);
+    await this._redisService.delete(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(user.id.toString()));
     setRefreshTokenCookie(res, { id: user.id.toString(), role: user.role as Role });
 
     const accessToken = generateAccessToken({
@@ -96,11 +109,13 @@ export class AuthController implements IAuthController {
 
   logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { refreshToken } = req.cookies;
+    let userId: string | null = null;
+
     if (refreshToken) {
       try {
         const decodedToken = verifyRefreshToken(refreshToken);
         if (decodedToken?.user?.id) {
-          const userId = decodedToken.user.id;
+          userId = decodedToken.user.id;
           await this._presenceService.forceOffline(userId);
           if (decodedToken.user.role === ROLE.WORKER) {
             const worker = await this._workerService.getWorkerByUserId(userId);
@@ -113,6 +128,38 @@ export class AuthController implements IAuthController {
         logger.error("Error clearing presence during logout:", err);
       }
     }
+
+    const authHeader = req.headers.authorization;
+    const accessToken = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+
+    if (accessToken) {
+      try {
+        const decoded = verifyAccessToken(accessToken);
+        if (decoded?.id && !userId) {
+          userId = decoded.id;
+        }
+        if (decoded?.exp) {
+          const ttlSeconds = Math.max(1, decoded.exp - Math.floor(Date.now() / 1000));
+          await this._redisService.setWithTTL(
+            REDIS_KEYS.AUTH.BLACKLISTED_TOKEN(accessToken),
+            "revoked",
+            ttlSeconds
+          );
+        }
+      } catch (err) {
+        logger.debug("Access token during logout could not be decoded or was expired:", err);
+      }
+    }
+
+    if (userId) {
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      await this._redisService.setWithTTL(
+        REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(userId),
+        nowInSeconds.toString(),
+        REFRESH_TOKEN_TTL_SECONDS || 604800
+      );
+    }
+
     await clearRefreshTokenCookie(res);
     res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.LOGOUT_SUCCESS));
   });
@@ -131,6 +178,12 @@ export class AuthController implements IAuthController {
     }
     const userId = decodedToken.user.id;
     const role = decodedToken.user.role;
+
+    const isLoggedOut = await this._redisService.get(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(userId));
+    if (isLoggedOut && decodedToken.iat && decodedToken.iat < Number(isLoggedOut)) {
+      clearRefreshTokenCookie(res);
+      throw new CustomError(AUTH.INVALID_TOKEN, HTTPSTATUS.UNAUTHORIZED);
+    }
 
     const isBlocked = await this._redisService.get(REDIS_KEYS.AUTH.BLOCKED_USER(userId));
     if (isBlocked) {
@@ -218,6 +271,7 @@ export class AuthController implements IAuthController {
     if (isBlocked) {
       return res.redirect(`${CLIENT_URL}/auth/google/callback?error=blocked`);
     }
+    await this._redisService.delete(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(user.id.toString()));
     setRefreshTokenCookie(res, { id: user.id, role: user.role as Role });
 
     res.redirect(`${CLIENT_URL}/auth/google/callback`);

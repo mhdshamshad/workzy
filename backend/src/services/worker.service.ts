@@ -11,6 +11,8 @@ import {
   WORKER,
   WORKER_JOIN_DOCUMENT_KEY_MAP,
   WORKER_STATUS,
+  REDIS_KEYS,
+  REFRESH_TOKEN_TTL_SECONDS,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
@@ -249,9 +251,20 @@ export class WorkerService implements IWorkerService {
     const newStatus = isVerified ? WORKER_STATUS.SUSPENDED : WORKER_STATUS.VERIFIED;
     const updated = await this._workerRepository.updateWorkerStatus(workerId, newStatus, reason);
     if (isVerified) {
-      await this._redisService.set(`blocked_user:${worker.userId.toString()}`, "1");
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      await Promise.all([
+        this._redisService.set(REDIS_KEYS.AUTH.BLOCKED_USER(worker.userId.toString()), "1"),
+        this._redisService.setWithTTL(
+          REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(worker.userId.toString()),
+          nowInSeconds.toString(),
+          REFRESH_TOKEN_TTL_SECONDS || 604800
+        ),
+      ]);
     } else {
-      await this._redisService.delete(`blocked_user:${worker.userId.toString()}`);
+      await Promise.all([
+        this._redisService.delete(REDIS_KEYS.AUTH.BLOCKED_USER(worker.userId.toString())),
+        this._redisService.delete(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(worker.userId.toString())),
+      ]);
     }
 
     if (!updated) {

@@ -10,6 +10,7 @@ import {
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
   USER,
+  REFRESH_TOKEN_TTL_SECONDS,
 } from "@/constants";
 import { REDIS_KEYS } from "@/constants/redis";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
@@ -70,13 +71,24 @@ export class UserService implements IUserService {
     await this._userRepository.update(userId, { isBlocked: newStatus });
 
     if (newStatus) {
-      await this._redisService.set(`blocked_user:${userId}`, "1");
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      await Promise.all([
+        this._redisService.set(REDIS_KEYS.AUTH.BLOCKED_USER(userId), "1"),
+        this._redisService.setWithTTL(
+          REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(userId),
+          nowInSeconds.toString(),
+          REFRESH_TOKEN_TTL_SECONDS || 604800
+        ),
+      ]);
       void this._notificationService.createNotification(
         userId,
         NOTIFICATION_TEMPLATES.ACCOUNT_BLOCKED()
       );
     } else {
-      await this._redisService.delete(`blocked_user:${userId}`);
+      await Promise.all([
+        this._redisService.delete(REDIS_KEYS.AUTH.BLOCKED_USER(userId)),
+        this._redisService.delete(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(userId)),
+      ]);
       void this._notificationService.createNotification(
         userId,
         NOTIFICATION_TEMPLATES.ACCOUNT_UNBLOCKED()
