@@ -7,7 +7,10 @@ import { handleApiError } from '@/utils/handleApiError';
 import { AppModal } from './AppModal';
 import SearchInput from './SearchInput';
 
-const INDIA_BBOX = '68.1766,6.7479,97.4025,35.5087';
+const INDIA_BOUNDS: [[number, number], [number, number]] = [
+  [68.1, 6.5], // Southwest
+  [97.5, 37.2], // Northeast
+];
 
 interface LocationResult {
   id: string;
@@ -60,7 +63,7 @@ export default function LocationSearchModal({
         const response = await fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
             searchQuery
-          )}.json?access_token=${MAPBOX_TOKEN}&types=place,locality,district,region&limit=5&country=IN&bbox=${INDIA_BBOX}`
+          )}.json?access_token=${MAPBOX_TOKEN}&types=place,locality,district,region&limit=5&country=IN&bbox=${INDIA_BOUNDS}`
         );
 
         if (!response.ok) {
@@ -106,7 +109,7 @@ export default function LocationSearchModal({
         const { latitude, longitude } = position.coords;
         try {
           const response = await fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&types=place,locality,district,region&country=IN&bbox=${INDIA_BBOX}`
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&types=place,locality,district,region&country=IN&bbox=${INDIA_BOUNDS}`
           );
 
           if (!response.ok) {

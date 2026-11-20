@@ -1,9 +1,9 @@
 import { BOOKING_API } from '@/constants/apiRoutes/booking.routes';
-import type { BookigCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
+import type { BookingCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
 import api from '@/lib/api/axios';
 import type { ApiResponse } from '@/types/api';
 
-export type DayCompleteData = BookigCompleteForm;
+export type DayCompleteData = BookingCompleteForm;
 
 export const BookingDayService = {
   checkIn: async (bookingId: string, dayIndex: number): Promise<{ message: string }> => {

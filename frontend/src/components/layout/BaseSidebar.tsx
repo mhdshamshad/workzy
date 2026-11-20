@@ -13,7 +13,7 @@ import type { User } from '@/types/user';
 import { broadcastAuthEvent } from '@/utils/crossTabAuth';
 import { syncUserLocation } from '@/utils/locationSync';
 
-import workzyLogo from '../../assets/icons/logo_image.svg';
+import { WorkzyLogo } from '../atoms/WorkzyLogo';
 import ProfileImage from '../molecules/ProfileImage';
 import { SidebarItem } from '../molecules/SidebarItem';
 import {
@@ -89,16 +89,7 @@ export function BaseSidebar({
       <div
         className={cn('flex items-center p-4', collapsed ? 'justify-center' : 'justify-between')}
       >
-        <div className="flex items-center gap-3">
-          <img
-            src={workzyLogo}
-            alt="Workzy Logo"
-            width={40}
-            height={40}
-            className="h-10 w-10 object-contain"
-          />
-          {!collapsed && <span className="text-lg font-semibold">WorkZy</span>}
-        </div>
+        <WorkzyLogo collapsed={collapsed} />
 
         {!collapsed && !mobile && (
           <button
@@ -120,7 +111,6 @@ export function BaseSidebar({
           </button>
         )}
       </div>
-
       {/* menu items  */}
       <div className="flex-1 overflow-y-auto pr-1 space-y-2 no-scrollbar">
         {menuItems.map((item, i) => (

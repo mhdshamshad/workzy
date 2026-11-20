@@ -1,5 +1,5 @@
 import loginImage from '@/assets/auth/login.webp';
-import logo from '@/assets/icons/workzy-logo.svg';
+import logo from '@/assets/icons/workzy-icon-logo.png';
 import AuthLayout from '@/layouts/auth/AuthLayout';
 
 import ForgotForm from '../components/ForgotPasswordForm';

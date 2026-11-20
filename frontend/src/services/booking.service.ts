@@ -4,7 +4,7 @@ import type { bookingRescheduleFormType } from '@/features/booking/validation/bo
 import type { CompleteReworkFormType } from '@/features/booking/validation/completeReworkFormData';
 import type { RequestReworkFormType } from '@/features/booking/validation/requestReworkFormData';
 import type { bookingFormData } from '@/features/user/booking/validation/bookingFormData';
-import type { BookigCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
+import type { BookingCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '@/features/worker/booking/validation/extraChargeSchema';
 import api from '@/lib/api/axios';
 import type { ApiResponse } from '@/types/api';
@@ -53,7 +53,7 @@ const BookingService = {
   },
   completeJob: async (
     bookingId: string,
-    data: BookigCompleteForm
+    data: BookingCompleteForm
   ): Promise<{ message: string }> => {
     const res = await api.patch<ApiResponse<null>>(BOOKING_API.COMPLETE(bookingId), data);
     return { message: res.data.message };

@@ -36,7 +36,9 @@ export function subscribeToAuthSync(onEvent: (event: AuthSyncEvent) => void): ()
   let lastProcessedTimestamp = 0;
 
   const handleMessage = (eventPayload: AuthSyncEvent) => {
-    if (!eventPayload || !eventPayload.type) {return;}
+    if (!eventPayload || !eventPayload.type) {
+      return;
+    }
     if (eventPayload.timestamp && eventPayload.timestamp <= lastProcessedTimestamp) {
       return;
     }

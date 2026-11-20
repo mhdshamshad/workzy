@@ -7,7 +7,7 @@ import { useAddReviewReply } from '@/features/review';
 import BookingService from '@/services/booking.service';
 import type { BookingDetails, BookingListItem } from '@/types/booking';
 
-import type { BookigCompleteForm } from '../components/WorkerCompleteModal';
+import type { BookingCompleteForm } from '../components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '../validation/extraChargeSchema';
 
 export function useMarkEnRoute() {
@@ -61,7 +61,7 @@ export function useRejectBooking() {
 export function useFinishJob() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: BookigCompleteForm }) =>
+    mutationFn: ({ id, data }: { id: string; data: BookingCompleteForm }) =>
       BookingService.completeJob(id, data),
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: bookingKeys.lists() });
@@ -128,7 +128,7 @@ export function useWorkerBookingHandler() {
     setRejectBId(null);
   }
 
-  async function handleFinishJob(data: BookigCompleteForm) {
+  async function handleFinishJob(data: BookingCompleteForm) {
     if (!finishBId) {
       return;
     }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -8,7 +8,7 @@ import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import { handleApiError } from '@/utils/handleApiError';
 
-import WorkeAboutSkeleton from '../components/WorkeAboutSkeleton';
+import WorkerAboutSkeleton from '../components/WorkerAboutSkeleton';
 import WorkerProfileSection from '../components/WorkerProfileSection';
 import {
   useUpdateWorkerProfile,
@@ -22,13 +22,19 @@ type OutletContext = {
   reloadWorkerData: () => Promise<unknown>;
 };
 
-export default function WorkeAboutContentPage() {
+export default function WorkerAboutContentPage() {
   const { reloadWorkerData } = useOutletContext<OutletContext>();
   const [phoneModalOpen, setPhoneModalOpen] = useState(false);
   const { user } = useAppSelector((s: RootState) => s.auth);
-  const { data: workerData, isLoading, isError, refetch } = useWorkerProfileDetails();
+  const { data: workerData, isLoading, isError, error, refetch } = useWorkerProfileDetails();
   const { updateProfile } = useUpdateWorkerProfile();
   const { changePhone, isChangePhone } = useWorkerPhoneChange();
+
+  useEffect(() => {
+    if (isError && workerData) {
+      toast.error(handleApiError(error));
+    }
+  }, [error, isError, workerData]);
 
   const handleWorkerProfileSubmit = async (data: WorkerProfileSchemaType): Promise<string> => {
     try {
@@ -48,9 +54,13 @@ export default function WorkeAboutContentPage() {
   return (
     <div>
       {isLoading ? (
-        <WorkeAboutSkeleton />
-      ) : isError || !workerData ? (
-        <PageError fullScreen={false} onRetry={() => refetch()} />
+        <WorkerAboutSkeleton />
+      ) : !workerData ? (
+        <PageError
+          fullScreen={false}
+          description={isError ? handleApiError(error) : undefined}
+          onRetry={() => refetch()}
+        />
       ) : (
         <WorkerProfileSection
           workerData={workerData}

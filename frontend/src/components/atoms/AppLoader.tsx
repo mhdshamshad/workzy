@@ -1,5 +1,6 @@
 import React from 'react';
 
+import logoAsset from '@/assets/icons/workzy-logo.png';
 import { cn } from '@/lib/utils';
 
 interface AppLoaderProps {
@@ -21,10 +22,11 @@ const AppLoader: React.FC<AppLoaderProps> = ({
       )}
     >
       <div className="relative mb-3 flex items-center justify-center">
-        <div className="absolute -inset-3 rounded-full bg-linear-to-r from-primary/25 via-purple-600/25 to-pink-600/25 blur-xl animate-pulse pointer-events-none" />
-        <span className="relative text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-linear-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-sm animate-[float_3s_ease-in-out_infinite]">
-          Workzy
-        </span>
+        <img
+          src={logoAsset}
+          alt="Workzy — Skilled Hands. Right Nearby."
+          className="h-28 w-auto rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-border"
+        />
       </div>
 
       <div className="relative w-36 sm:w-44 md:w-52 h-1.5 sm:h-2 rounded-full bg-muted/70 overflow-hidden mb-3">

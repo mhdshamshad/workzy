@@ -18,6 +18,7 @@ import {
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
+import { WorkzyLogo } from '@/components/atoms/WorkzyLogo';
 import type { SelectedLocation } from '@/components/molecules/LocationSearchModal';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import SearchInput from '@/components/molecules/SearchInput';
@@ -175,9 +176,8 @@ export default function Header() {
             <Link
               to="/"
               onClick={() => handleNavClick('/')}
-              className="text-xl lg:text-2xl font-bold bg-linear-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent shrink-0"
             >
-              Workzy
+              <WorkzyLogo />
             </Link>
             <nav className="hidden lg:flex items-center gap-1">
               {NAV_LINKS.map(link => (

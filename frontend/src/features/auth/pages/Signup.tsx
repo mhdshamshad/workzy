@@ -1,5 +1,5 @@
 import signupImage from '@/assets/auth/signup.webp';
-import logo from '@/assets/icons/workzy-logo.svg';
+import logo from '@/assets/icons/workzy-icon-logo.png';
 import AuthLayout from '@/layouts/auth/AuthLayout';
 
 import SignupForm from '../components/SignupForm';

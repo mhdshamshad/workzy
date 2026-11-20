@@ -10,7 +10,7 @@ import { MultiUpload } from '@/components/molecules/MultiUpload';
 import type { EvidenceItem } from '@/types/booking';
 
 type EvidenceItemForm = Pick<EvidenceItem, 'type' | 'url'>;
-export interface BookigCompleteForm {
+export interface BookingCompleteForm {
   evidence: {
     before: EvidenceItemForm[];
     after: EvidenceItemForm[];
@@ -21,7 +21,7 @@ export interface BookigCompleteForm {
 interface WorkerCompleteModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: BookigCompleteForm) => Promise<void>;
+  onSubmit: (data: BookingCompleteForm) => Promise<void>;
   bookingId: string | null;
   isSubmitting?: boolean;
   title?: string;
@@ -97,7 +97,6 @@ export default function WorkerCompleteModal({
       onClose={onClose}
       title={title}
       canCloseOnOutsideClick={!isSubmitting}
-      className="max-w-2xl"
       footer={footer}
     >
       <div className="flex flex-col gap-8 py-2">
