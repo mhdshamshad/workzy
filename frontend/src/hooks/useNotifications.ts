@@ -106,7 +106,11 @@ export const useNotificationCount = (role: Role = ROLE.USER) => {
   }, [socket, queryClient, activeChatIdRef, role]);
 };
 
-export const useNotifications = (role: Role = ROLE.USER, filterRead?: string) => {
+export const useNotifications = (
+  role: Role = ROLE.USER,
+  filterRead?: string,
+  enabled: boolean = true
+) => {
   const { user } = useAppSelector((s: RootState) => s.auth);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
@@ -120,6 +124,7 @@ export const useNotifications = (role: Role = ROLE.USER, filterRead?: string) =>
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: NotificationListingResponse) => lastPage.nextCursor ?? undefined,
+    enabled: Boolean(user?.id) && enabled,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 5,
   });
