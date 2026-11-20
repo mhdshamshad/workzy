@@ -5,7 +5,7 @@ export interface UploadUrlResponse {
   publicUrl: string;
 }
 
-export interface IS3Service {
+export interface IStorageService {
   generateUploadPresignedUrl(data: RequestUploadUrlDTO): Promise<UploadUrlResponse>;
   generateSignedUrl(fileUrl: string, expiresIn?: number): Promise<string>;
   deleteFile(fileUrl: string): Promise<boolean>;

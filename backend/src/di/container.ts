@@ -105,9 +105,9 @@ import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IReviewService } from "@/core/interfaces/services/IReviewService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { IUserService } from "@/core/interfaces/services/IUserService";
@@ -162,7 +162,7 @@ import { PresenceService } from "@/services/presence.service";
 import { QuoteService } from "@/services/quote.service";
 import { RedisService } from "@/services/redis.service";
 import { ReviewService } from "@/services/review.service";
-import { S3Service } from "@/services/s3.service";
+import { S3StorageService } from "@/services/s3-storage.service";
 import { ServiceManagement } from "@/services/service-management.service";
 import { SlotService } from "@/services/slot.service";
 import { UnitOfWork } from "@/services/unit-of-work.service";
@@ -207,7 +207,7 @@ container
   .bind<ICategoryManagementService>(TYPES.CategoryManagementService)
   .to(CategoryManagementService);
 
-container.bind<IS3Service>(TYPES.S3Service).to(S3Service);
+container.bind<IStorageService>(TYPES.StorageService).to(S3StorageService);
 container.bind<IUploadController>(TYPES.UploadController).to(UploadController);
 
 container.bind<IRedisService>(TYPES.RedisService).to(RedisService);

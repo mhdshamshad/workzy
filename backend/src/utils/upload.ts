@@ -1,12 +1,7 @@
 import crypto from "crypto";
 
-import { AWS_REGION, AWS_S3_BUCKET } from "@/constants";
-
-export function generateUniqueFileName(prefix: string, extension: string): string {
-  const randomId = crypto.randomBytes(6).toString("hex");
-  const timestamp = Date.now();
-  return `${prefix}_${timestamp}_${randomId}.${extension}`;
-}
+import { HTTPSTATUS, PURPOSE_POLICY, UploadPurpose } from "@/constants";
+import CustomError from "@/utils/customError";
 
 export const MIME_TO_EXT: Record<string, string> = {
   // Images
@@ -39,23 +34,62 @@ export const MIME_TO_EXT: Record<string, string> = {
   "application/x-tar": "tar",
 };
 
-export function getFileExtension(mimetype: string, originalName?: string): string {
-  if (MIME_TO_EXT[mimetype]) {
-    return MIME_TO_EXT[mimetype];
+export const normalizeMimeType = (mimeType: string): string =>
+  mimeType.split(";")[0].trim().toLowerCase();
+
+export function getFileExtension(mimetype: string, originalFileName?: string): string {
+  const normalized = normalizeMimeType(mimetype);
+  if (MIME_TO_EXT[normalized]) {
+    return MIME_TO_EXT[normalized];
   }
 
-  if (originalName) {
-    const ext = originalName.split(".").pop()?.toLowerCase();
-    if (ext && Object.values(MIME_TO_EXT).includes(ext)) return ext; // Validate fallback
+  if (originalFileName) {
+    const ext = originalFileName.split(".").pop()?.toLowerCase();
+    if (ext && Object.values(MIME_TO_EXT).includes(ext)) return ext;
   }
 
-  throw new Error(`Unsupported mimetype: ${mimetype}`);
+  throw new CustomError(`Unsupported mimetype: ${mimetype}`, HTTPSTATUS.BAD_REQUEST);
 }
 
-export function getDefaultPrefix(folder: string): string {
-  const last = folder.split("/").pop() || "file";
-  return last.endsWith("s") ? last.slice(0, -1) : last;
-}
+export const generateStorageKey = (
+  purpose: UploadPurpose,
+  mimeType: string,
+  originalFileName?: string
+): string => {
+  const folder = PURPOSE_POLICY[purpose].folder;
+  const extension = getFileExtension(mimeType, originalFileName);
+  const randomHex = crypto.randomBytes(6).toString("hex");
+  return `${folder}/${Date.now()}_${randomHex}.${extension}`;
+};
+
+export const validateUploadPolicy = (
+  purpose: UploadPurpose,
+  mimeType: string,
+  fileSizeBytes: number
+): void => {
+  const policy = PURPOSE_POLICY[purpose];
+  if (!policy) {
+    throw new CustomError(`Invalid upload purpose: "${purpose}".`, HTTPSTATUS.BAD_REQUEST);
+  }
+
+  const normalized = normalizeMimeType(mimeType);
+  const allowed = policy.allowedTypes as readonly string[];
+
+  if (!allowed.includes(normalized)) {
+    throw new CustomError(
+      `File type "${mimeType}" is not allowed for "${purpose}".`,
+      HTTPSTATUS.BAD_REQUEST
+    );
+  }
+
+  const maxBytes = policy.maxSizeMB * 1024 * 1024;
+  if (fileSizeBytes > maxBytes) {
+    throw new CustomError(
+      `File size exceeds maximum allowed ${policy.maxSizeMB}MB for "${purpose}".`,
+      HTTPSTATUS.BAD_REQUEST
+    );
+  }
+};
 
 export function extractKeyFromUrl(fileUrl: string): string {
   if (!fileUrl.startsWith("http")) return fileUrl;
@@ -69,9 +103,4 @@ export function extractKeyFromUrl(fileUrl: string): string {
   if (legacyMatch) return decodeURIComponent(legacyMatch[1]);
 
   return fileUrl;
-}
-
-export function getPublicImageUrl(fileUrl: string): string {
-  const key = extractKeyFromUrl(fileUrl);
-  return `https://${AWS_S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${key}`;
 }

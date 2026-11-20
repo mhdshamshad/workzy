@@ -37,7 +37,7 @@ const TYPES = {
 
   // Upload
   UploadController: Symbol.for("UploadController"),
-  S3Service: Symbol.for("S3Service"),
+  StorageService: Symbol.for("IStorageService"),
   RedisService: Symbol.for("RedisService"),
 
   // services

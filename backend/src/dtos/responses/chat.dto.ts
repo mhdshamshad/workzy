@@ -1,7 +1,7 @@
 import { MessageType, SenderRole } from "@/constants";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { ChatListItem } from "@/types/chat/chat.projection";
-import { resolveS3Url } from "@/utils/s3.utils";
+import { resolveStorageUrl } from "@/utils/storage.utils";
 
 export interface ChatRoomListItem {
   chat: ChatListItem;
@@ -38,7 +38,7 @@ export class ChatResponseDTO {
   };
   static async fromEntity(
     { chat, unread }: ChatRoomListItem,
-    s3Service: IS3Service,
+    storageService: IStorageService,
     presence?: { userLastSeen?: string | null; workerLastSeen?: string | null }
   ): Promise<ChatResponseDTO> {
     const dto = new ChatResponseDTO();
@@ -50,7 +50,7 @@ export class ChatResponseDTO {
       user: {
         id: chat.userId._id.toString(),
         name: chat.userId.name,
-        profileImage: await resolveS3Url(chat.userId.profileImage, s3Service),
+        profileImage: await resolveStorageUrl(chat.userId.profileImage, storageService),
         ...(presence?.userLastSeen !== undefined ? { lastSeen: presence.userLastSeen } : {}),
       },
       worker: {
@@ -75,8 +75,8 @@ export class ChatResponseDTO {
 
   static async fromEntities(
     entities: ChatRoomListItem[],
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<ChatResponseDTO[]> {
-    return await Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+    return await Promise.all(entities.map((entity) => this.fromEntity(entity, storageService)));
   }
 }

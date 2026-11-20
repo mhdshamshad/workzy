@@ -1,6 +1,7 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
+import logger from "@/config/logger";
 import { HOME_SECTION, HTTPSTATUS, PURPOSE_POLICY, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
@@ -10,7 +11,7 @@ import {
   ListType,
 } from "@/core/interfaces/services/IHomeSectionService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { TYPES } from "@/di/types";
 import {
   HomeSectionRequestDTO,
@@ -29,7 +30,7 @@ export class HomeSectionService implements IHomeSectionService {
     @inject(TYPES.HomeSectionRepository) private _homeSectionRepository: IHomeSectionRepository,
     @inject(TYPES.HomeLayoutRepository) private _homeLayoutRepository: IHomeLayoutRepository,
     @inject(TYPES.RedisService) private _redisService: IRedisService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.StorageService) private _storageService: IStorageService
   ) {}
   async createSection(payload: HomeSectionRequestDTO): Promise<HomeSectionResponseDTO> {
     const exists = await this._homeSectionRepository.findOne({ name: payload.name });
@@ -95,11 +96,23 @@ export class HomeSectionService implements IHomeSectionService {
     if (!updated) {
       if (!updated) throw new CustomError(HOME_SECTION.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    await Promise.allSettled(removed.map((k) => this._s3Service.deleteFile(k)));
+    void Promise.allSettled(removed.map((k) => this._storageService.deleteFile(k)));
 
-    await this._redisService.clearPattern("sections:list");
-    await this._redisService.clearPattern("layout:admin");
-    await this._redisService.clearPattern("home:public");
+    const cachePatterns = ["sections:list", "layout:admin", "home:public"];
+
+    const cacheResults = await Promise.allSettled(
+      cachePatterns.map((pattern) => this._redisService.clearPattern(pattern))
+    );
+
+    cacheResults.forEach((result, index) => {
+      if (result.status === "rejected") {
+        logger.error("Failed to invalidate home section cache", {
+          pattern: cachePatterns[index],
+          error: result.reason,
+        });
+      }
+    });
+
     return HomeSectionResponseDTO.fromEntity(updated);
   }
 
@@ -134,7 +147,7 @@ export class HomeSectionService implements IHomeSectionService {
     const deleted = await this._homeSectionRepository.delete(sectionId);
     if (!deleted) throw new CustomError(HOME_SECTION.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
 
-    await Promise.allSettled(urlKeys.map((k) => this._s3Service.deleteFile(k)));
+    void Promise.allSettled(urlKeys.map((k) => this._storageService.deleteFile(k)));
     await this._redisService.clearPattern("sections:list");
     return HOME_SECTION.DELETED;
   }

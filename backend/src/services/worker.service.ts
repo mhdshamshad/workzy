@@ -18,9 +18,8 @@ import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepos
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
-import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
 import {
@@ -56,9 +55,8 @@ export class WorkerService implements IWorkerService {
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.StorageService) private _storageService: IStorageService,
     @inject(TYPES.RedisService) private _redisService: IRedisService,
-    @inject(TYPES.PaymentService) private _paymentservice: IPaymentService,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
 
@@ -104,7 +102,7 @@ export class WorkerService implements IWorkerService {
     if (!worker) {
       throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
-    return WorkerDetailsResponseDto.fromEntity(worker, this._s3Service);
+    return WorkerDetailsResponseDto.fromEntity(worker, this._storageService);
   }
 
   async updateWorkerProfile(
@@ -122,9 +120,9 @@ export class WorkerService implements IWorkerService {
     }
 
     if (worker?.coverImage && coverImage !== worker.coverImage) {
-      await this._s3Service.deleteFile(worker.coverImage);
+      await this._storageService.deleteFile(worker.coverImage);
     }
-    return await WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+    return await WorkerDetailsResponseDto.fromEntity(updatedWorker, this._storageService);
   }
 
   async updateWorkerPhone(workerId: string, phone: string): Promise<boolean> {
@@ -143,7 +141,7 @@ export class WorkerService implements IWorkerService {
       throw new CustomError(WORKER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
     }
     if (worker.profileImage?.includes("public/worker/profiles")) {
-      void this._s3Service.deleteFile(worker.profileImage);
+      void this._storageService.deleteFile(worker.profileImage);
     }
     return updateWorker.profileImage;
   }
@@ -153,12 +151,12 @@ export class WorkerService implements IWorkerService {
     if (!worker) {
       return null;
     }
-    return await WorkerDetailsResponseDto.fromEntity(worker, this._s3Service);
+    return await WorkerDetailsResponseDto.fromEntity(worker, this._storageService);
   }
 
   async createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerDetailsResponseDto> {
-    const isAlredyWorker = await this._workerRepository.findOne({ userId });
-    if (isAlredyWorker) {
+    const isAlreadyWorker = await this._workerRepository.findOne({ userId });
+    if (isAlreadyWorker) {
       throw new CustomError(WORKER.ALREADY_EXISTS, HTTPSTATUS.BAD_REQUEST);
     }
 
@@ -175,7 +173,7 @@ export class WorkerService implements IWorkerService {
       documents,
     });
 
-    return WorkerDetailsResponseDto.fromEntity(worker, this._s3Service);
+    return WorkerDetailsResponseDto.fromEntity(worker, this._storageService);
   }
 
   async reSubmitWorkerDocument(
@@ -230,10 +228,10 @@ export class WorkerService implements IWorkerService {
     }
 
     if (deleteKeys.length > 0) {
-      void Promise.allSettled(deleteKeys.map((url) => this._s3Service.deleteFile(url)));
+      void Promise.allSettled(deleteKeys.map((url) => this._storageService.deleteFile(url)));
     }
 
-    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._storageService);
   }
 
   async getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics> {
@@ -363,7 +361,7 @@ export class WorkerService implements IWorkerService {
         NOTIFICATION_TEMPLATES.WORKER_REJECTED(rejectReason ?? "No reason provided")
       );
     }
-    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._storageService);
   }
 
   async reviewWorkerDocument(
@@ -422,7 +420,7 @@ export class WorkerService implements IWorkerService {
             )
           : NOTIFICATION_TEMPLATES.WORKER_DOCUMENT_IN_REVIEW(document.type)
     );
-    return await WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+    return await WorkerDetailsResponseDto.fromEntity(updatedWorker, this._storageService);
   }
 
   async addWorkerDocument(
@@ -440,7 +438,7 @@ export class WorkerService implements IWorkerService {
         HTTPSTATUS.BAD_REQUEST
       );
     }
-    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._storageService);
   }
 
   async updateWorkerDocument(
@@ -470,8 +468,8 @@ export class WorkerService implements IWorkerService {
     }
 
     if (oldKey && oldKey !== newKey) {
-      void this._s3Service.deleteFile(oldKey);
+      void this._storageService.deleteFile(oldKey);
     }
-    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._storageService);
   }
 }

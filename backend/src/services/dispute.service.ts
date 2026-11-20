@@ -23,7 +23,7 @@ import { IDisputeService } from "@/core/interfaces/services/IDisputeService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { CreateDisputeDto, ResolveDisputeDto } from "@/dtos/requests/dispute.dto";
@@ -50,7 +50,7 @@ export class DisputeService implements IDisputeService {
 
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
     @inject(TYPES.MessageService) private _messageService: IMessageService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.StorageService) private _storageService: IStorageService,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
@@ -160,7 +160,7 @@ export class DisputeService implements IDisputeService {
     if (!dispute) {
       return null;
     }
-    return await DisputeResponseDto.fromEntity(dispute, this._s3Service);
+    return await DisputeResponseDto.fromEntity(dispute, this._storageService);
   }
 
   async getAllDisputes(
@@ -168,7 +168,7 @@ export class DisputeService implements IDisputeService {
   ): Promise<CursorPaginatedResult<DisputeListItemDto>> {
     const { data, nextCursor } = await this._disputeRepository.getAllDisputes(input);
     return {
-      data: await DisputeListItemDto.fromEntities(data, this._s3Service),
+      data: await DisputeListItemDto.fromEntities(data, this._storageService),
       nextCursor,
     };
   }
@@ -199,13 +199,15 @@ export class DisputeService implements IDisputeService {
     const removedUrls = oldUrls.filter((url) => !newUrls.includes(url));
     const updated = await this._disputeRepository.update(disputeId, data);
 
-    const [_, disputeResponse] = await Promise.all([
-      Promise.allSettled(removedUrls.map((url) => this._s3Service.deleteFile(url))).then(() => {}),
-      this.getDisputeByBookingId(dispute.bookingId.toString()),
-    ]);
+    const disputeResponse = await this.getDisputeByBookingId(dispute.bookingId.toString());
     if (!updated || !disputeResponse) {
       throw new CustomError(DISPUTE.FAILED, HTTPSTATUS.INTERNAL_SERVER_ERROR);
     }
+
+    if (removedUrls.length > 0) {
+      void Promise.allSettled(removedUrls.map((url) => this._storageService.deleteFile(url)));
+    }
+
     return disputeResponse;
   }
 

@@ -21,7 +21,7 @@ import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { TYPES } from "@/di/types";
 import {
@@ -46,7 +46,7 @@ export class UserService implements IUserService {
     @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.StorageService) private _storageService: IStorageService,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.DisputeRepository) private _disputeRepository: IDisputeRepository
@@ -59,7 +59,7 @@ export class UserService implements IUserService {
   async listUsers(query: UserListQuery): Promise<PaginatedResult<UsersResponseDTO>> {
     const { data, total } = await this._userRepository.listUsers(query);
     return {
-      data: await UsersResponseDTO.fromEntities(data, this._s3Service),
+      data: await UsersResponseDTO.fromEntities(data, this._storageService),
       total,
     };
   }
@@ -94,12 +94,12 @@ export class UserService implements IUserService {
         NOTIFICATION_TEMPLATES.ACCOUNT_UNBLOCKED()
       );
     }
-    return newStatus ? USER.BLOCKEDSUCCESS : USER.UNBLOCKED;
+    return newStatus ? USER.BLOCKED_SUCCESS : USER.UNBLOCKED;
   }
 
   async getUserById(userId: string): Promise<UserProfileResponseDto> {
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
-    return UserProfileResponseDto.fromEntity(user, this._s3Service);
+    return UserProfileResponseDto.fromEntity(user, this._storageService);
   }
 
   async getUserStats(userId: string): Promise<{
@@ -126,9 +126,9 @@ export class UserService implements IUserService {
       throw new CustomError(USER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
     }
     if (user.profileImage?.includes("private/user/profiles")) {
-      void this._s3Service.deleteFile(user.profileImage);
+      void this._storageService.deleteFile(user.profileImage);
     }
-    return await this._s3Service.generateSignedUrl(updatedUser.profileImage);
+    return await this._storageService.generateSignedUrl(updatedUser.profileImage);
   }
 
   async updateProfile(
@@ -145,7 +145,7 @@ export class UserService implements IUserService {
     if (!user) {
       throw new CustomError(USER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
     }
-    return UserProfileResponseDto.fromEntity(user, this._s3Service);
+    return UserProfileResponseDto.fromEntity(user, this._storageService);
   }
 
   async confirmOtpAndUpdateContact(
@@ -171,7 +171,7 @@ export class UserService implements IUserService {
       throw new CustomError(USER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
     }
     return {
-      user: await UserProfileResponseDto.fromEntity(updatedUser, this._s3Service),
+      user: await UserProfileResponseDto.fromEntity(updatedUser, this._storageService),
       message: `${type} Updated successfully`,
     };
   }

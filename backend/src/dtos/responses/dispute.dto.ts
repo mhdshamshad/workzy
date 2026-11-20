@@ -1,8 +1,8 @@
 import { DisputeReason, DisputeResolution, DisputeStatus, Role } from "@/constants";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IEvidenceItem } from "@/types/booking/booking.entity";
 import { DisputeDetails, DisputeListItem } from "@/types/dispute/dispute.projection";
-import { resolveS3Url } from "@/utils/s3.utils";
+import { resolveStorageUrl } from "@/utils/storage.utils";
 
 export class DisputeListItemDto {
   id!: string;
@@ -25,7 +25,7 @@ export class DisputeListItemDto {
 
   static async fromEntity(
     entity: DisputeListItem,
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<DisputeListItemDto> {
     const dto = new DisputeListItemDto();
     const { bookingId, userId, workerId, _id, disputeId, createdAt, raisedBy, reason, status } =
@@ -37,12 +37,12 @@ export class DisputeListItemDto {
     dto.user = {
       id: userId._id.toString(),
       name: userId.name,
-      profileImage: await resolveS3Url(userId.profileImage, s3Service),
+      profileImage: await resolveStorageUrl(userId.profileImage, storageService),
     };
     dto.worker = {
       id: workerId._id.toString(),
       name: workerId.displayName,
-      profileImage: await resolveS3Url(workerId.profileImage, s3Service),
+      profileImage: await resolveStorageUrl(workerId.profileImage, storageService),
     };
     dto.raisedBy = raisedBy;
     dto.status = status;
@@ -53,9 +53,9 @@ export class DisputeListItemDto {
 
   static async fromEntities(
     entities: DisputeListItem[],
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<DisputeListItemDto[]> {
-    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+    return Promise.all(entities.map((entity) => this.fromEntity(entity, storageService)));
   }
 }
 
@@ -91,7 +91,7 @@ export class DisputeResponseDto {
 
   static async fromEntity(
     entity: DisputeDetails,
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<DisputeResponseDto> {
     const dto = new DisputeResponseDto();
     const {
@@ -120,13 +120,13 @@ export class DisputeResponseDto {
       id: userId._id.toString(),
       name: userId.name,
       phone: userId.phone,
-      profileImage: await resolveS3Url(userId.profileImage, s3Service),
+      profileImage: await resolveStorageUrl(userId.profileImage, storageService),
     };
     dto.worker = {
       id: workerId._id.toString(),
       name: workerId.displayName,
       phone: workerId.phone,
-      profileImage: await resolveS3Url(workerId.profileImage, s3Service),
+      profileImage: await resolveStorageUrl(workerId.profileImage, storageService),
     };
     dto.raisedBy = raisedBy;
     dto.status = status;

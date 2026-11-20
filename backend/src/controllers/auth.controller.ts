@@ -23,7 +23,6 @@ import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { AccessTokenPayload } from "@/core/types/global/jwt";
@@ -42,7 +41,6 @@ export class AuthController implements IAuthController {
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.TokenService) private _tokenService: ITokenService,
     @inject(TYPES.WorkerService) private _workerService: IWorkerService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
     @inject(TYPES.PresenceService) private _presenceService: IPresenceService,
     @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}

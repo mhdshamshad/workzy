@@ -1,5 +1,5 @@
 import { PayoutMethod, PayoutRequestStatus } from "@/constants/payout";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IPayoutSnapshot } from "@/types/payout/payout.entity";
 import { PayoutListItem } from "@/types/payout/payout.projection";
 
@@ -25,7 +25,7 @@ export class PayoutResponseDto {
 
   static async fromEntity(
     entity: PayoutListItem,
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<PayoutResponseDto> {
     const dto = new PayoutResponseDto();
     dto.id = entity._id.toString();
@@ -45,7 +45,7 @@ export class PayoutResponseDto {
     dto.processedAt = entity.processedAt;
     dto.referenceId = entity.referenceId;
     dto.receiptUrl = entity.receiptUrl
-      ? await s3Service.generateSignedUrl(entity.receiptUrl)
+      ? await storageService.generateSignedUrl(entity.receiptUrl)
       : undefined;
     dto.rejectionReason = entity.rejectionReason;
     dto.createdAt = entity.createdAt;
@@ -55,8 +55,8 @@ export class PayoutResponseDto {
 
   static async fromEntities(
     entities: PayoutListItem[],
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<PayoutResponseDto[]> {
-    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+    return Promise.all(entities.map((entity) => this.fromEntity(entity, storageService)));
   }
 }

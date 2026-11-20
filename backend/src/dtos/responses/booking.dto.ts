@@ -5,7 +5,7 @@ import {
   PricingMode,
   ServiceType,
 } from "@/constants";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import {
   ExtraChargeStatus,
   IBookingLocation,
@@ -18,7 +18,7 @@ import {
   IWarranty,
 } from "@/types/booking/booking.entity";
 import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
-import { resolveS3Url } from "@/utils/s3.utils";
+import { resolveStorageUrl } from "@/utils/storage.utils";
 
 export class BookingListItemDTO {
   id!: string;
@@ -72,7 +72,7 @@ export class BookingListItemDTO {
 
   static async fromEntity(
     entity: BookingListItem,
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<BookingListItemDTO> {
     const dto = new BookingListItemDTO();
 
@@ -91,7 +91,7 @@ export class BookingListItemDTO {
       ...user,
       id: entity.userId._id.toString(),
       phone: user.phone || "",
-      profileImage: await resolveS3Url(entity.userId.profileImage, s3Service),
+      profileImage: await resolveStorageUrl(entity.userId.profileImage, storageService),
     };
     dto.worker = {
       id: entity.workerId._id.toString(),
@@ -132,9 +132,9 @@ export class BookingListItemDTO {
 
   static async fromEntities(
     entities: BookingListItem[],
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<BookingListItemDTO[]> {
-    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+    return Promise.all(entities.map((entity) => this.fromEntity(entity, storageService)));
   }
 }
 
@@ -207,7 +207,7 @@ export class BookingResponseDTO {
 
   static async fromEntity(
     entity: BookingDetails,
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<BookingResponseDTO> {
     const dto = new BookingResponseDTO();
 
@@ -224,7 +224,7 @@ export class BookingResponseDTO {
       ...user,
       id: entity.userId._id.toString(),
       phone: user.phone || "",
-      profileImage: await resolveS3Url(entity.userId.profileImage, s3Service),
+      profileImage: await resolveStorageUrl(entity.userId.profileImage, storageService),
     };
     dto.worker = {
       id: entity.workerId._id.toString(),
