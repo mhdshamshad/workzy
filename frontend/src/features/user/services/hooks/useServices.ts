@@ -5,8 +5,7 @@ import { homeService } from '@/services/home.service';
 import ServiceManagement from '@/services/service.service';
 import type { Category, CategoryLite } from '@/types/category';
 import type { CategoryShowcaseContent } from '@/types/home/home.sectionContent';
-
-import type { WorkerListParams } from '../components/WorkerList';
+import type { PublicWorkerListParams, PublicWorkerResponse } from '@/types/worker';
 
 type PublicServicesResponse = {
   categories: Category[];
@@ -69,10 +68,19 @@ export const useServiceDetails = (serviceId?: string | null) => {
   });
 };
 
-export const useListWorkers = (serviceId: string | null, params: WorkerListParams) => {
-  return useQuery({
-    queryKey: ['useListWorkers', serviceId, params],
-    queryFn: () => ServiceManagement.listWorkers(serviceId!, params),
+export const useListWorkers = (serviceId: string | null, params: PublicWorkerListParams) => {
+  return useInfiniteQuery<
+    PublicWorkerResponse,
+    Error,
+    InfiniteData<PublicWorkerResponse>,
+    [string, string | null, PublicWorkerListParams],
+    string | undefined
+  >({
+    queryKey: ['public-workers-by-service', serviceId, params],
+    queryFn: ({ pageParam }) =>
+      ServiceManagement.listWorkers(serviceId!, { ...params, cursor: pageParam }),
+    initialPageParam: undefined,
+    getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
     enabled: !!serviceId,
   });
 };

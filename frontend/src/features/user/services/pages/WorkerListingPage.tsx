@@ -11,9 +11,11 @@ import type { PublicWorkerListItem } from '@/types/worker';
 
 import BookingModal from '../../booking/components/bookingForm/BookingModal';
 import FilterSidebar from '../components/FilterSidebar';
-import { WorkerList, type WorkerListParams } from '../components/WorkerList';
+import { WorkerList } from '../components/WorkerList';
 import { getFilterConfig } from '../helper/filterConfig';
 import { useServiceDetails, useListWorkers } from '../hooks/useServices';
+
+const WORKER_LIST_LIMIT = 10;
 
 const fadeUp = (delay = 0): MotionProps => ({
   initial: { opacity: 0, y: 16 },
@@ -34,8 +36,6 @@ export default function WorkerListingPage() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [minRating, setMinRating] = useState<number>(0);
   const [availableNow, setAvailableNow] = useState<boolean>(false);
-  const [page, setPage] = useState(1);
-  const limit = 10;
   const { data: selectedService } = useServiceDetails(serviceId);
   const filterConfig = useMemo(() => getFilterConfig(selectedService ?? null), [selectedService]);
 
@@ -58,6 +58,7 @@ export default function WorkerListingPage() {
       lat: latitude,
       lng: longitude,
       radiusKm: radius,
+      limit: WORKER_LIST_LIMIT,
     }),
     [priceRange, minRating, availableNow, latitude, longitude, radius]
   );
@@ -68,22 +69,18 @@ export default function WorkerListingPage() {
     priceRange[1] !== filterConfig.maxPrice;
 
   const debouncedFilterParams = useDebounce(filterParams, 600);
-  const workerParams: WorkerListParams = useMemo(
-    () => ({ page, limit, ...debouncedFilterParams }),
-    [page, limit, debouncedFilterParams]
-  );
   const {
     data: workersData,
     isLoading: isWorkersLoading,
     error: workerListingError,
     refetch,
-  } = useListWorkers(serviceId || null, workerParams);
-  useEffect(() => {
-    setPage(1);
-  }, [radius, priceRange, minRating, availableNow]);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useListWorkers(serviceId || null, debouncedFilterParams);
+  const workers = workersData?.pages.flatMap(page => page.workers) ?? [];
 
   const resetFilters = () => {
-    setPage(1);
     setMinRating(0);
     setAvailableNow(false);
     if (selectedService) {
@@ -133,7 +130,8 @@ export default function WorkerListingPage() {
             </h1>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <span className="text-xs font-bold text-primary bg-primary/8 px-2.5 py-1 rounded-full border border-primary/15">
-                {workersData?.total || 0} experts
+                {workers.length}
+                {hasNextPage ? '+' : ''} experts
               </span>
               <span className="w-1 h-1 rounded-full bg-border" />
               <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
@@ -165,14 +163,13 @@ export default function WorkerListingPage() {
             {!!selectedService && (
               <motion.div key="workers" {...fadeUp(0.05)} className="flex flex-col gap-4">
                 <WorkerList
-                  workers={workersData?.workers ?? []}
+                  workers={workers}
                   isLoading={isWorkersLoading}
                   error={workerListingError}
-                  total={workersData?.total ?? 0}
-                  page={page}
                   onRetry={refetch}
-                  limit={limit}
-                  onPageChange={setPage}
+                  hasNextPage={hasNextPage}
+                  isFetchingNextPage={isFetchingNextPage}
+                  onLoadMore={fetchNextPage}
                   hasActiveFilters={hasActiveFilters}
                   onClearFilters={resetFilters}
                   onBook={handleBook}

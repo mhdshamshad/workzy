@@ -79,6 +79,23 @@ export interface PublicWorkerListItem {
   totalAmount: number;
 }
 
+export interface PublicWorkerListParams {
+  limit: number;
+  lat: number;
+  lng: number;
+  radiusKm: number;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  availableNow?: boolean;
+  cursor?: string;
+}
+
+export interface PublicWorkerResponse {
+  workers: PublicWorkerListItem[];
+  nextCursor: string | null;
+}
+
 export type WorkerProfile = {
   id: string;
   displayName: string;

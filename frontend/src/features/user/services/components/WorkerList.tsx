@@ -4,7 +4,7 @@ import { SearchX } from 'lucide-react';
 import Button from '@/components/atoms/Button';
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
-import Pagination from '@/components/molecules/Pagination';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import type { PublicWorkerListItem } from '@/types/worker';
 
 import { WorkerCard } from './WorkerCard';
@@ -13,43 +13,29 @@ import WorkerCardSkeleton from './WorkerCardSkeleton';
 type WorkerListProps = {
   workers: PublicWorkerListItem[];
   isLoading: boolean;
-  total: number;
   error: null | Error;
   hasActiveFilters: boolean;
   onClearFilters: () => void;
   onRetry: () => void;
-  page: number;
-  limit: number;
-  onPageChange: (page: number) => void;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onLoadMore: () => void;
   onBook: (worker: PublicWorkerListItem) => void;
 };
-
-export interface WorkerListParams {
-  page: number;
-  limit: number;
-  lat: number;
-  lng: number;
-  radiusKm: number;
-  minPrice?: number;
-  maxPrice?: number;
-  minRating?: number;
-  availableNow?: boolean;
-}
 
 export function WorkerList({
   workers,
   error,
   onRetry,
   isLoading,
-  limit,
-  onPageChange,
   hasActiveFilters,
   onClearFilters,
-  page,
-  total,
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
   onBook,
 }: WorkerListProps) {
-  const pageCount = Math.ceil(total / limit);
+  const sentinelRef = useInfiniteScroll(onLoadMore, hasNextPage, isFetchingNextPage);
 
   return (
     <div className="flex flex-col gap-4">
@@ -95,7 +81,7 @@ export function WorkerList({
           </motion.div>
         ) : (
           <motion.div
-            key={`page-${page}`}
+            key="workers"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -109,12 +95,14 @@ export function WorkerList({
         )}
       </AnimatePresence>
 
-      {pageCount > 1 && (
-        <Pagination
-          onPageChange={i => onPageChange(i + 1)}
-          pageCount={pageCount}
-          pageIndex={page - 1}
-        />
+      {workers.length > 0 && error && <ErrorState description={error.message} onRetry={onRetry} />}
+      {hasNextPage && <div ref={sentinelRef} className="h-4" />}
+      {isFetchingNextPage && (
+        <div className="flex flex-col gap-4">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <WorkerCardSkeleton key={i} />
+          ))}
+        </div>
       )}
     </div>
   );
