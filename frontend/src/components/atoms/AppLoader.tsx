@@ -17,7 +17,7 @@ const AppLoader: React.FC<AppLoaderProps> = ({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center text-center select-none px-4 fixed inset-0 z-50 min-h-screen',
+        'flex flex-1 w-full min-h-[calc(100vh-4rem)] flex-col items-center justify-center text-center select-none px-4 bg-background',
         className
       )}
     >
@@ -25,7 +25,7 @@ const AppLoader: React.FC<AppLoaderProps> = ({
         <img
           src={logoAsset}
           alt="Workzy — Skilled Hands. Right Nearby."
-          className="h-28 w-auto rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-border"
+          className="h-24 w-auto rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-border"
         />
       </div>
 
@@ -41,11 +41,6 @@ const AppLoader: React.FC<AppLoaderProps> = ({
 
       <style>
         {`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-6px); }
-        }
-
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }

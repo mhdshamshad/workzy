@@ -3,10 +3,11 @@ import { cn } from '@/lib/utils';
 
 interface WorkzyLogoProps {
   className?: string;
+  textClassName?: string;
   collapsed?: boolean;
 }
 
-export function WorkzyLogo({ collapsed = false, className }: WorkzyLogoProps) {
+export function WorkzyLogo({ collapsed = false, className, textClassName }: WorkzyLogoProps) {
   return (
     <span className={cn('inline-flex items-center gap-2', className)}>
       <img
@@ -16,7 +17,12 @@ export function WorkzyLogo({ collapsed = false, className }: WorkzyLogoProps) {
       />
 
       {!collapsed && (
-        <span className="font-display text-xl font-extrabold tracking-tight text-foreground">
+        <span
+          className={cn(
+            'font-display text-xl font-extrabold tracking-tight text-foreground',
+            textClassName
+          )}
+        >
           Work<span className="text-[#F5A623]">zy</span>
         </span>
       )}

@@ -33,7 +33,7 @@ export default function WorkerLayout() {
             setMobileSidebarOpen(true);
           }}
         />
-        <main className="flex-1 overflow-y-auto no-scrollbar bg-background min-w-0 overflow-x-hidden">
+        <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar bg-background min-w-0 overflow-x-hidden">
           <Suspense fallback={<AppLoader />}>
             <Outlet />
           </Suspense>

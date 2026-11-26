@@ -33,7 +33,7 @@ export default function AdminLayout() {
             setMobileSidebarOpen(true);
           }}
         />
-        <main className="flex-1 overflow-y-auto no-scrollbar bg-background overflow-x-hidden min-w-0">
+        <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar bg-background overflow-x-hidden min-w-0">
           <Suspense fallback={<AppLoader />}>
             <Outlet />
           </Suspense>
