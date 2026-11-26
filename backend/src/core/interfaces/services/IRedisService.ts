@@ -6,6 +6,7 @@ export interface IRedisService {
   clearPattern(pattern: string): Promise<void>;
   deleteMany(keys: string[]): Promise<void>;
   setIfNotExists(key: string, value: string, ttlSeconds: number): Promise<boolean>;
+  incr(key: string, ttlSeconds?: number): Promise<number>;
   hIncrBy(key: string, field: string, incrementBy: number): Promise<number>;
   hSet(key: string, field: string, value: string): Promise<void>;
   hGet(key: string, field: string): Promise<string | null>;

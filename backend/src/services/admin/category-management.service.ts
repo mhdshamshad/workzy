@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import mongoose from "mongoose";
 
-import { CATEGORY, HTTPSTATUS } from "@/constants";
+import { CATEGORY, HTTPSTATUS, REDIS_KEYS } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
@@ -40,7 +40,7 @@ export class CategoryManagementService implements ICategoryManagementService {
       ...sanitizedData,
       parentId: parentObjectId,
     });
-    await this._redisService.clearPattern("categories:list");
+    await this._redisService.clearPattern(REDIS_KEYS.CATEGORY.LIST_PREFIX);
     return CategoryResponseDTO.fromEntity(newCategory);
   }
 
@@ -81,7 +81,7 @@ export class CategoryManagementService implements ICategoryManagementService {
     if (removedUrls.length > 0) {
       void Promise.allSettled(removedUrls.map((url) => this._storageService.deleteFile(url)));
     }
-    await this._redisService.clearPattern("categories:list");
+    await this._redisService.clearPattern(REDIS_KEYS.CATEGORY.LIST_PREFIX);
     return CategoryResponseDTO.fromEntity(updatedCategory);
   }
 
@@ -100,7 +100,7 @@ export class CategoryManagementService implements ICategoryManagementService {
       throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
     const message = updatedCategory.isAvailable ? CATEGORY.UNBLOCKED : CATEGORY.BLOCKED;
-    await this._redisService.clearPattern("categories:list");
+    await this._redisService.clearPattern(REDIS_KEYS.CATEGORY.LIST_PREFIX);
 
     return { newStatus, message };
   }

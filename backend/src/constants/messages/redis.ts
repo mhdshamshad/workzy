@@ -12,4 +12,5 @@ export const REDIS = {
   HGETALL_ERROR: (key: string) => `Redis hash get all fields error for key ${key}:`,
   HSET_ERROR: (key: string) => `Redis HSET failed for key: ${key}`,
   NX_SET_ERROR: (key: string) => `Redis NX SET failed for key: ${key}`,
+  INCR_ERROR: (key: string) => `Redis INCR error for key ${key}:`,
 };

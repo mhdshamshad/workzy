@@ -70,6 +70,18 @@ export class RedisService implements IRedisService {
       return false;
     }
   }
+  async incr(key: string, ttlSeconds?: number): Promise<number> {
+    try {
+      const count = await redisClient.incr(key);
+      if (count === 1 && ttlSeconds !== undefined) {
+        await redisClient.expire(key, ttlSeconds);
+      }
+      return count;
+    } catch (error) {
+      logger.error(REDIS.INCR_ERROR(key), error);
+      return 0;
+    }
+  }
 
   async hSet(key: string, field: string, value: string): Promise<void> {
     try {
