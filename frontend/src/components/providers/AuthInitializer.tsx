@@ -16,7 +16,13 @@ export default function AuthInitializer({ children }: { children: React.ReactNod
   }, [dispatch, status]);
 
   if (status === 'idle' || status === 'loading') {
-    return <AppLoader title="Loading Workzy..." subtitle="Verifying your session..." />;
+    return (
+      <AppLoader
+        title="Loading Workzy..."
+        subtitle="Verifying your session..."
+        className="min-h-screen"
+      />
+    );
   }
 
   return <>{children}</>;

@@ -15,7 +15,15 @@ export default function App() {
     <BrowserRouter>
       <AuthSyncListener />
       <ScrollToTop />
-      <Suspense fallback={<AppLoader title="Loading page..." subtitle="Please wait a moment." />}>
+      <Suspense
+        fallback={
+          <AppLoader
+            title="Loading page..."
+            subtitle="Please wait a moment."
+            className="min-h-screen"
+          />
+        }
+      >
         <Routes>
           <Route path="/*" element={<UserRoutes />} />
           <Route path="/worker/*" element={<WorkerRoutes />} />

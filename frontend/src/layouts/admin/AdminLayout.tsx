@@ -34,7 +34,7 @@ export default function AdminLayout() {
           }}
         />
         <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar bg-background overflow-x-hidden min-w-0">
-          <Suspense fallback={<AppLoader />}>
+          <Suspense fallback={<AppLoader className="pb-16" />}>
             <Outlet />
           </Suspense>
         </main>

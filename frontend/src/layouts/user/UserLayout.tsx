@@ -14,7 +14,7 @@ export default function UserLayout() {
     <div className="flex min-h-screen flex-col bg-background w-full">
       <Header />
       <main className="flex-1 flex flex-col pt-16 overflow-x-hidden">
-        <Suspense fallback={<AppLoader />}>
+        <Suspense fallback={<AppLoader className="pb-16" />}>
           <Outlet />
         </Suspense>
       </main>
