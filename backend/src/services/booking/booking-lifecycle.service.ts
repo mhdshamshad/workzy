@@ -271,7 +271,7 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     }
     const redisKey = REDIS_KEYS.BOOKING.OTP(bookingId);
     await Promise.all([
-      this._redisService.setWithTTL(redisKey, otp, 3600),
+      this._redisService.set(redisKey, otp, 3600),
       this._emailService.sendEmail(user.email, otp),
     ]);
     void this._notificationService.createNotification(
@@ -612,7 +612,7 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     const otp = this._otpService.generateOTP();
     const redisKey = REDIS_KEYS.BOOKING.REWORK_OTP(bookingId);
     await Promise.all([
-      this._redisService.setWithTTL(redisKey, otp, 3600),
+      this._redisService.set(redisKey, otp, 3600),
       this._emailService.sendEmail(user.email, otp),
     ]);
     void this._notificationService.createNotification(

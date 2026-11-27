@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 
 import logger from "@/config/logger";
 import redisClient from "@/config/redisClient";
-import { REDIS, REDIS_EXPIRY } from "@/constants";
+import { REDIS } from "@/constants";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 
 @injectable()
@@ -16,19 +16,15 @@ export class RedisService implements IRedisService {
     }
   }
 
-  async set(key: string, value: string): Promise<void> {
+  async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
     try {
-      await redisClient.set(key, value);
+      if (ttlSeconds !== undefined) {
+        await redisClient.set(key, value, { EX: ttlSeconds });
+      } else {
+        await redisClient.set(key, value);
+      }
     } catch (error) {
       logger.error(REDIS.SET_ERROR(key), error);
-    }
-  }
-
-  async setWithTTL(key: string, value: string, ttlSeconds: number = REDIS_EXPIRY): Promise<void> {
-    try {
-      await redisClient.set(key, value, { EX: ttlSeconds });
-    } catch (error) {
-      logger.error(REDIS.SET_TTL_ERROR(key), error);
     }
   }
 

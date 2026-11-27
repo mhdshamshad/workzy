@@ -12,7 +12,7 @@ import {
   WORKER_JOIN_DOCUMENT_KEY_MAP,
   WORKER_STATUS,
   REDIS_KEYS,
-  REFRESH_TOKEN_TTL_SECONDS,
+  REFRESH_EXPIRY_SECONDS,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
@@ -252,10 +252,10 @@ export class WorkerService implements IWorkerService {
       const nowInSeconds = Math.floor(Date.now() / 1000);
       await Promise.all([
         this._redisService.set(REDIS_KEYS.AUTH.BLOCKED_USER(worker.userId.toString()), "1"),
-        this._redisService.setWithTTL(
+        this._redisService.set(
           REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(worker.userId.toString()),
           nowInSeconds.toString(),
-          REFRESH_TOKEN_TTL_SECONDS || 604800
+          REFRESH_EXPIRY_SECONDS
         ),
       ]);
     } else {

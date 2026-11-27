@@ -10,7 +10,7 @@ import {
   CLIENT_URL,
   EMAIL,
   HTTPSTATUS,
-  REFRESH_TOKEN_TTL_SECONDS,
+  REFRESH_EXPIRY_SECONDS,
   ROLE,
   Role,
   USER,
@@ -138,7 +138,7 @@ export class AuthController implements IAuthController {
         }
         if (decoded?.exp) {
           const ttlSeconds = Math.max(1, decoded.exp - Math.floor(Date.now() / 1000));
-          await this._redisService.setWithTTL(
+          await this._redisService.set(
             REDIS_KEYS.AUTH.BLACKLISTED_TOKEN(accessToken),
             "revoked",
             ttlSeconds
@@ -151,20 +151,19 @@ export class AuthController implements IAuthController {
 
     if (userId) {
       const nowInSeconds = Math.floor(Date.now() / 1000);
-      await this._redisService.setWithTTL(
+      await this._redisService.set(
         REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(userId),
         nowInSeconds.toString(),
-        REFRESH_TOKEN_TTL_SECONDS || 604800
+        REFRESH_EXPIRY_SECONDS
       );
     }
 
-    await clearRefreshTokenCookie(res);
+    clearRefreshTokenCookie(res);
     res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.LOGOUT_SUCCESS));
   });
 
   refreshToken = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { refreshToken } = req.cookies;
-
     if (!refreshToken) {
       throw new CustomError(AUTH.NO_REFRESH_TOKEN, HTTPSTATUS.UNAUTHORIZED);
     }

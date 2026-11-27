@@ -55,7 +55,7 @@ export class BookingDayService implements IBookingDayService {
     const redisKey = REDIS_KEYS.BOOKING.DAY_OTP(bookingId, dayIndex);
     const [user] = await Promise.all([
       this._userRepository.findById(booking.userId.toString()),
-      this._redisService.setWithTTL(redisKey, otp, 3600),
+      this._redisService.set(redisKey, otp, 3600),
     ]);
 
     if (!user) {

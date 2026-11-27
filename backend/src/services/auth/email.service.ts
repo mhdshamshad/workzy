@@ -1,7 +1,13 @@
 import { inject, injectable } from "inversify";
 
 import { transporter } from "@/config/nodemailer";
-import { AUTH, CLIENT_URL, EMAIL_OTP_EXPIRY, HTTPSTATUS, NODEMAILER_EMAIL } from "@/constants";
+import {
+  AUTH,
+  CLIENT_URL,
+  EMAIL_OTP_EXPIRY_SECONDS,
+  HTTPSTATUS,
+  NODEMAILER_EMAIL,
+} from "@/constants";
 import { REDIS_KEYS } from "@/constants/redis";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
@@ -22,17 +28,17 @@ export class EmailService implements IEmailService {
   async sendOtpEmail(userData: RegisterRequestDTO, otp: string): Promise<void> {
     const data = JSON.stringify({ userData, otp });
 
-    await this._redisService.setWithTTL(
+    await this._redisService.set(
       REDIS_KEYS.AUTH.OTP(userData.email),
       data,
-      EMAIL_OTP_EXPIRY
+      EMAIL_OTP_EXPIRY_SECONDS
     );
     try {
       await transporter.sendMail({
         from: NODEMAILER_EMAIL,
         to: userData.email,
         subject: "Your OTP for Verification - Workzy",
-        html: otpEmailTemplate(otp, EMAIL_OTP_EXPIRY / 60),
+        html: otpEmailTemplate(otp, EMAIL_OTP_EXPIRY_SECONDS / 60),
       });
     } catch (error) {
       console.error(AUTH.EMAIL_FAILED, error);
@@ -43,15 +49,15 @@ export class EmailService implements IEmailService {
   async sendResetEmailWithToken(email: string): Promise<void> {
     const token = this._tokenService.generateToken();
 
-    await this._redisService.setWithTTL(
+    await this._redisService.set(
       REDIS_KEYS.AUTH.FORGOT_PASSWORD(email),
       token,
-      EMAIL_OTP_EXPIRY
+      EMAIL_OTP_EXPIRY_SECONDS
     );
 
     const resetLink = `${CLIENT_URL}/reset-password?token=${token}&email=${email}`;
 
-    await this.sendResetEmail(email, resetLink, EMAIL_OTP_EXPIRY / 60);
+    await this.sendResetEmail(email, resetLink, EMAIL_OTP_EXPIRY_SECONDS / 60);
   }
 
   async sendResetEmail(email: string, resetLink: string, expiryTime: number): Promise<void> {
@@ -74,7 +80,7 @@ export class EmailService implements IEmailService {
         from: NODEMAILER_EMAIL,
         to: email,
         subject: "Your OTP for Verification - Workzy",
-        html: otpEmailTemplate(otp, EMAIL_OTP_EXPIRY / 60),
+        html: otpEmailTemplate(otp, EMAIL_OTP_EXPIRY_SECONDS / 60),
       });
     } catch (error) {
       console.error(AUTH.EMAIL_FAILED, error);

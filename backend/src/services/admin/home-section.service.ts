@@ -2,7 +2,7 @@ import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
 import logger from "@/config/logger";
-import { HOME_SECTION, HTTPSTATUS, PURPOSE_POLICY, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
+import { HOME_SECTION, HTTPSTATUS, PURPOSE_POLICY, REFRESH_EXPIRY_SECONDS } from "@/constants";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
 import {
@@ -194,11 +194,7 @@ export class HomeSectionService implements IHomeSectionService {
       sections: HomeSectionResponseDTO.fromEntities(rows),
       total,
     };
-    await this._redisService.setWithTTL(
-      cacheKey,
-      JSON.stringify(response),
-      REFRESH_TOKEN_TTL_SECONDS
-    );
+    await this._redisService.set(cacheKey, JSON.stringify(response), REFRESH_EXPIRY_SECONDS);
     return response;
   }
 

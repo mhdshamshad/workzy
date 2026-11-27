@@ -1,15 +1,12 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 
 import {
-  ACCESS_TOKEN,
+  ACCESS_TOKEN_SECRET,
   ACCESS_TOKEN_EXPIRY,
-  REFRESH_TOKEN,
+  REFRESH_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRY,
 } from "@/constants";
 import { AccessTokenPayload, RefreshTokenPayload } from "@/core/types/global/jwt";
-
-const ACCESS_TOKEN_SECRET = ACCESS_TOKEN || "access_secret";
-const REFRESH_TOKEN_SECRET = REFRESH_TOKEN || "refresh_secret";
 
 export const generateAccessToken = (payload: AccessTokenPayload): string => {
   return jwt.sign(payload, ACCESS_TOKEN_SECRET, {

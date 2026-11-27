@@ -319,7 +319,7 @@ export class SlotService implements ISlotService {
       reservedBy: new Types.ObjectId(userId),
       reservedUntil,
     });
-    await this._redisService.setWithTTL(lockKey, workerId, 60);
+    await this._redisService.set(lockKey, workerId, 60);
     return {
       slotId: newSlot._id.toString(),
       reservedUntil,

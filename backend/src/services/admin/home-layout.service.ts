@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { HOME_LAYOUT, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
+import { HOME_LAYOUT, HTTPSTATUS, REDIS_EXPIRY_SECONDS } from "@/constants";
 import { HomeSectionType, SINGLETON_HOME_TYPES } from "@/constants/home";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
@@ -27,11 +27,7 @@ export class HomeLayoutService implements IHomeLayoutService {
     }
     const homeLayout = await this._layoutRepo.getLayout();
     const response = HomeLayoutResponseDTO.fromEntity(homeLayout);
-    await this._redisService.setWithTTL(
-      cacheKey,
-      JSON.stringify(response),
-      REFRESH_TOKEN_TTL_SECONDS
-    );
+    await this._redisService.set(cacheKey, JSON.stringify(response), REDIS_EXPIRY_SECONDS);
     return response;
   }
   async saveLayout(items: SaveItem[]): Promise<HomeLayoutResponseDTO> {

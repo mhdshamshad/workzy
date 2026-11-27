@@ -6,11 +6,11 @@ import validator from "validator";
 import {
   AUTH,
   EMAIL,
-  EMAIL_OTP_EXPIRY,
+  EMAIL_OTP_EXPIRY_SECONDS,
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
+  REFRESH_EXPIRY_SECONDS,
   USER,
-  REFRESH_TOKEN_TTL_SECONDS,
 } from "@/constants";
 import { REDIS_KEYS } from "@/constants/redis";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
@@ -74,10 +74,10 @@ export class UserService implements IUserService {
       const nowInSeconds = Math.floor(Date.now() / 1000);
       await Promise.all([
         this._redisService.set(REDIS_KEYS.AUTH.BLOCKED_USER(userId), "1"),
-        this._redisService.setWithTTL(
+        this._redisService.set(
           REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(userId),
           nowInSeconds.toString(),
-          REFRESH_TOKEN_TTL_SECONDS || 604800
+          REFRESH_EXPIRY_SECONDS
         ),
       ]);
       void this._notificationService.createNotification(
@@ -199,10 +199,10 @@ export class UserService implements IUserService {
     }
     const otp = this._otpService.generateOTP();
     await Promise.all([
-      this._redisService.setWithTTL(
+      this._redisService.set(
         `otp:${phone}`,
         JSON.stringify({ otp, phone }),
-        EMAIL_OTP_EXPIRY
+        EMAIL_OTP_EXPIRY_SECONDS
       ),
       this._emailService.sendEmail(user.email, otp),
     ]);
@@ -219,10 +219,10 @@ export class UserService implements IUserService {
     }
     const otp = this._otpService.generateOTP();
     await Promise.all([
-      this._redisService.setWithTTL(
+      this._redisService.set(
         REDIS_KEYS.AUTH.OTP(email),
         JSON.stringify({ email, otp }),
-        EMAIL_OTP_EXPIRY
+        EMAIL_OTP_EXPIRY_SECONDS
       ),
       this._emailService.sendEmail(email, otp),
     ]);
@@ -237,10 +237,10 @@ export class UserService implements IUserService {
     }
     const newOtp = this._otpService.generateOTP();
 
-    await this._redisService.setWithTTL(
+    await this._redisService.set(
       REDIS_KEYS.AUTH.OTP(value),
       JSON.stringify({ otp: newOtp, type: value }),
-      EMAIL_OTP_EXPIRY
+      EMAIL_OTP_EXPIRY_SECONDS
     );
 
     if (type === "email") {

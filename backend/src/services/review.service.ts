@@ -1,7 +1,14 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { AUTH, BOOKING, BOOKING_STATUS, HTTPSTATUS, REVIEW } from "@/constants";
+import {
+  AUTH,
+  BOOKING,
+  BOOKING_STATUS,
+  HTTPSTATUS,
+  REDIS_EXPIRY_SECONDS,
+  REVIEW,
+} from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IReviewRepository } from "@/core/interfaces/repositories/IReviewRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -180,7 +187,7 @@ export class ReviewService implements IReviewService {
       data: await ReviewUserDto.fromEntities(data, this._storageService),
       nextCursor,
     };
-    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    await this._redisService.set(cacheKey, JSON.stringify(response), REDIS_EXPIRY_SECONDS);
     return response;
   }
 
@@ -202,7 +209,7 @@ export class ReviewService implements IReviewService {
       data: await ReviewWorkerDto.fromEntities(data, this._storageService),
       nextCursor,
     };
-    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    await this._redisService.set(cacheKey, JSON.stringify(response), REDIS_EXPIRY_SECONDS);
     return response;
   }
 
