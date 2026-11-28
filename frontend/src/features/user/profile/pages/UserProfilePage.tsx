@@ -58,7 +58,7 @@ export default function ProfilePage() {
   const handleProfileUpdate = async (data: ProfileFormType): Promise<string> => {
     try {
       const { message, user } = await updateProfile(data);
-      dispatch(updateUser(user));
+      dispatch(updateUser({ profile: user.profile, name: user.name }));
       return message;
     } catch (error) {
       toast.error(handleApiError(error));
@@ -71,13 +71,13 @@ export default function ProfilePage() {
       return;
     }
 
-    const res = await verifyOtp({
+    const { user, message } = await verifyOtp({
       type: otpData.type,
       contact: otpData.value,
       otp,
     });
-    dispatch(updateUser(res.user));
-    toast.success(res.message);
+    dispatch(updateUser({ email: user.email, phone: user?.phone }));
+    toast.success(message);
   };
 
   const handleResendOtp = async () => {
@@ -103,7 +103,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="section-container">
       <div className="p-4 lg:text-left md:text-center s:text-center">
         <PageHeader title="My Profile" description="Manage your personal information" />
       </div>

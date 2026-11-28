@@ -24,7 +24,12 @@ interface MapSelectorProps {
 export default function MapSelector({ onLocationSelect, onClose }: MapSelectorProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<MapboxMap | null>(null);
+  const onLocationSelectRef = useRef(onLocationSelect);
   const [mapLoadError, setMapLoadError] = useState(false);
+
+  useEffect(() => {
+    onLocationSelectRef.current = onLocationSelect;
+  }, [onLocationSelect]);
 
   useEffect(() => {
     let disposed = false;
@@ -105,10 +110,10 @@ export default function MapSelector({ onLocationSelect, onClose }: MapSelectorPr
               });
             }
 
-            onLocationSelect([lng, lat], addressComponents);
+            onLocationSelectRef.current([lng, lat], addressComponents);
           } catch (error) {
             console.error('Reverse geocoding failed:', error);
-            onLocationSelect([lng, lat]);
+            onLocationSelectRef.current([lng, lat]);
           }
         });
       } catch (error) {
@@ -139,7 +144,7 @@ export default function MapSelector({ onLocationSelect, onClose }: MapSelectorPr
         }
       }
     };
-  }, [onLocationSelect]);
+  }, []);
 
   return (
     <div className="mt-4">

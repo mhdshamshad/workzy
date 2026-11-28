@@ -1,11 +1,10 @@
 import { Camera, User } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 
-import { Skeleton } from '../ui/skeleton';
-
 type ImageShape = 'circle' | 'rounded' | 'square';
+type ImageStatus = 'loading' | 'loaded' | 'error';
 
 interface Props {
   src?: string;
@@ -26,32 +25,33 @@ const SHAPE_CLASS: Record<ImageShape, string> = {
   square: 'rounded-none',
 };
 
+const GRADIENTS = [
+  'from-pink-600 to-orange-500',
+  'from-blue-600 to-cyan-500',
+  'from-green-600 to-emerald-500',
+  'from-purple-600 to-indigo-500',
+  'from-amber-600 to-orange-500',
+  'from-rose-600 to-pink-500',
+  'from-sky-600 to-blue-500',
+];
+
 function getInitials(name: string) {
-  if (!name) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) {
     return '?';
   }
-  const parts = name.trim().split(' ');
   return parts.length === 1 ? parts[0][0].toUpperCase() : (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
 function getGradient(name: string) {
-  const gradients = [
-    'from-pink-600 to-orange-500',
-    'from-blue-600 to-cyan-500',
-    'from-green-600 to-emerald-500',
-    'from-purple-600 to-indigo-500',
-    'from-amber-600 to-orange-500',
-    'from-rose-600 to-pink-500',
-    'from-sky-600 to-blue-500',
-  ];
   if (!name) {
-    return gradients[0];
+    return GRADIENTS[0];
   }
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return gradients[Math.abs(hash) % gradients.length];
+  return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
 }
 
 export default function ProfileImage({
@@ -67,16 +67,26 @@ export default function ProfileImage({
   progress = 0,
 }: Props) {
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const [state, setState] = useState<{ src?: string; status: ImageStatus }>({
+    status: 'loading',
+  });
+
+  const status = state.src === src ? state.status : 'loading';
+
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete) {
+      setState({ src, status: img.naturalWidth > 0 ? 'loaded' : 'error' });
+    }
+  }, [src]);
 
   const shapeClass = SHAPE_CLASS[shape];
-  const showImage = src && !imgError && imgLoaded && !loading;
-  const showFallback = (!src || imgError) && !loading;
-  const showSkeleton = src && ((!imgLoaded && !imgError) || loading);
+  const showImage = Boolean(src) && status === 'loaded';
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file || !editable || !onChange) {
       return;
     }
@@ -85,34 +95,11 @@ export default function ProfileImage({
 
   return (
     <div
-      className={cn('group relative inline-block cursor-pointer', className)}
+      className={cn('group relative inline-block', onClickImage && 'cursor-pointer', className)}
       style={{ width: size, height: size }}
     >
-      {/* Skeleton while loading */}
-      {showSkeleton && (
-        <Skeleton
-          className={cn('absolute inset-0', shapeClass)}
-          style={{ width: size, height: size }}
-        />
-      )}
-
-      {/* Image */}
-      {src && (
-        <img
-          src={src}
-          alt={name || 'Profile'}
-          onClick={onClickImage}
-          onLoad={() => setImgLoaded(true)}
-          onError={() => setImgError(true)}
-          loading="lazy"
-          decoding="async"
-          style={{ width: size, height: size, display: showImage ? 'block' : 'none' }}
-          className={cn('object-cover border-2 border-white/10', shapeClass)}
-        />
-      )}
-
-      {/* Fallback initials */}
-      {showFallback && (
+      {/* Initials fallback until image is loaded */}
+      {!showImage && (
         <div
           onClick={onClickImage}
           className={cn(
@@ -122,12 +109,28 @@ export default function ProfileImage({
           )}
           style={{ width: size, height: size, fontSize: size * 0.35 }}
         >
-          {name ? (
-            <span style={{ fontSize: size * 0.35 }}>{getInitials(name)}</span>
-          ) : (
-            <User size={size * 0.4} />
-          )}
+          {name ? getInitials(name) : <User size={size * 0.4} />}
         </div>
+      )}
+
+      {/* Image fades in once loaded */}
+      {src && status !== 'error' && (
+        <img
+          ref={imgRef}
+          src={src}
+          alt={name || 'Profile'}
+          onClick={onClickImage}
+          onLoad={() => setState({ src, status: 'loaded' })}
+          onError={() => setState({ src, status: 'error' })}
+          loading="lazy"
+          decoding="async"
+          style={{ width: size, height: size }}
+          className={cn(
+            'absolute inset-0 object-cover border-2 border-white/10 transition-opacity duration-200',
+            showImage ? 'opacity-100' : 'opacity-0 pointer-events-none',
+            shapeClass
+          )}
+        />
       )}
 
       {/* Upload progress overlay */}
@@ -162,7 +165,7 @@ export default function ProfileImage({
             onClick={() => fileRef.current?.click()}
             className={cn(
               'absolute bottom-0.5 right-0.5 z-30 rounded-full border border-border bg-background p-1.5 shadow-sm',
-              'opacity-0 transition-opacity group-hover:opacity-100'
+              '[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity'
             )}
           >
             <Camera size={14} className="text-foreground" />

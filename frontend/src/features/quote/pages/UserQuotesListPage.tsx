@@ -63,7 +63,7 @@ export default function UserQuotesListPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
+    <div className="section-container">
       <div className="mb-6">
         <PageHeader
           title="My Quotes"
