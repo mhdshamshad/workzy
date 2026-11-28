@@ -27,7 +27,6 @@ import { IBookingLifecycleService } from "@/core/interfaces/services/IBookingLif
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
-import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
@@ -38,7 +37,9 @@ import {
   RequestReworkDTO,
   ScheduleReworkSlotDTO,
 } from "@/dtos/requests/booking.dto";
+import { otpEmailTemplate } from "@/templates/emails/otpEmailTemplate";
 import { IBooking, IEvidence, IRework } from "@/types/booking/booking.entity";
+import { generateOtp6Digit } from "@/utils/auth/otp.util";
 import {
   assertWorkerOwnership,
   createStatusHistoryEntry,
@@ -55,7 +56,6 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
-    @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     @inject(TYPES.MessageService) private _messageService: IMessageService,
@@ -243,7 +243,7 @@ export class BookingLifecycleService implements IBookingLifecycleService {
   }
 
   async markReached(bookingId: string, workerId: string): Promise<void> {
-    const otp = this._otpService.generateOTP();
+    const otp = generateOtp6Digit();
     logger.info(`Generated OTP ${otp} for booking ${bookingId}`);
     const booking = await this._bookingRepository.findOneAndUpdate(
       {
@@ -271,8 +271,16 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     }
     const redisKey = REDIS_KEYS.BOOKING.OTP(bookingId);
     await Promise.all([
-      this._redisService.setWithTTL(redisKey, otp, 3600),
-      this._emailService.sendEmail(user.email, otp),
+      this._redisService.set(redisKey, otp, 3600),
+      this._emailService.sendEmail({
+        to: user.email,
+        subject: "Worker Arrival OTP - Workzy",
+        html: otpEmailTemplate(otp, 60, {
+          title: "Job Start Verification OTP",
+          description: `Share this code with your Workzy professional to start the job (Booking ${booking.bookingId}).`,
+        }),
+        text: `Your Workzy job start OTP is: ${otp}. Valid for 60 minutes.`,
+      }),
     ]);
     void this._notificationService.createNotification(
       booking.userId.toString(),
@@ -288,7 +296,7 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     }
     const redisKey = REDIS_KEYS.BOOKING.OTP(bookingId);
     const storedOtp = await this._redisService.get(redisKey);
-    if (!storedOtp || storedOtp !== otp) {
+    if (!storedOtp || otp !== storedOtp) {
       throw new CustomError(BOOKING.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
     }
     await this._bookingRepository.update(bookingId, {
@@ -483,35 +491,45 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     }
     await this._unitOfWork.execute(async (options) => {
       const reworkDate = new Date(data.date);
-      const slot = await this._slotRepository.create({
-        workerId: new Types.ObjectId(workerId),
-        serviceId: booking.serviceId,
-        bookingId: new Types.ObjectId(bookingId),
-        date: reworkDate,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        duration: booking.duration || 60,
-        status: SLOT_STATUS.BOOKED,
-        location: booking.address?.location,
-      },options);
-
-      await this._bookingRepository.update(bookingId, {
-        "rework.status": REWORK_STATUS.SCHEDULED,
-        "rework.scheduledSlot": {
-          slotId: slot._id,
+      const slot = await this._slotRepository.create(
+        {
+          workerId: new Types.ObjectId(workerId),
+          serviceId: booking.serviceId,
+          bookingId: new Types.ObjectId(bookingId),
           date: reworkDate,
           startTime: data.startTime,
           endTime: data.endTime,
+          duration: booking.duration || 60,
+          status: SLOT_STATUS.BOOKED,
+          location: booking.address?.location,
         },
-        $push: {
-          statusHistory: createStatusHistoryEntry(
-            BOOKING_STATUS.REWORK,
-            ROLE.WORKER,
-            BOOKING_STATUS_MESSAGES.REWORK_SCHEDULED(data.date, `${data.startTime} - ${data.endTime}`)
-          ),
+        options
+      );
+
+      await this._bookingRepository.update(
+        bookingId,
+        {
+          "rework.status": REWORK_STATUS.SCHEDULED,
+          "rework.scheduledSlot": {
+            slotId: slot._id,
+            date: reworkDate,
+            startTime: data.startTime,
+            endTime: data.endTime,
+          },
+          $push: {
+            statusHistory: createStatusHistoryEntry(
+              BOOKING_STATUS.REWORK,
+              ROLE.WORKER,
+              BOOKING_STATUS_MESSAGES.REWORK_SCHEDULED(
+                data.date,
+                `${data.startTime} - ${data.endTime}`
+              )
+            ),
+          },
         },
-      } ,options);
-    })
+        options
+      );
+    });
 
     void this._notificationService.createNotification(
       booking.userId.toString(),
@@ -539,38 +557,45 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     }
     await this._unitOfWork.execute(async (options) => {
       const reworkDate = new Date(data.date);
-      const slot = await this._slotRepository.create({
-        workerId: new Types.ObjectId(workerId),
-        serviceId: booking.serviceId,
-        bookingId: new Types.ObjectId(bookingId),
-        date: reworkDate,
-        startTime: data.startTime,
-        endTime: data.endTime,
-        duration: booking.duration || 60,
-        status: SLOT_STATUS.BOOKED,
-        location: booking.address?.location,
-      },options);
-      
-      await this._bookingRepository.update(bookingId, {
-        "rework.status": REWORK_STATUS.SCHEDULED,
-        "rework.scheduledSlot": {
-          slotId: slot._id,
+      const slot = await this._slotRepository.create(
+        {
+          workerId: new Types.ObjectId(workerId),
+          serviceId: booking.serviceId,
+          bookingId: new Types.ObjectId(bookingId),
           date: reworkDate,
           startTime: data.startTime,
           endTime: data.endTime,
+          duration: booking.duration || 60,
+          status: SLOT_STATUS.BOOKED,
+          location: booking.address?.location,
         },
-        $push: {
-          statusHistory: createStatusHistoryEntry(
-            BOOKING_STATUS.REWORK,
-            ROLE.WORKER,
-            BOOKING_STATUS_MESSAGES.REWORK_RESCHEDULED(
-              data.date,
-              `${data.startTime} - ${data.endTime}`
-            )
-          ),
+        options
+      );
+
+      await this._bookingRepository.update(
+        bookingId,
+        {
+          "rework.status": REWORK_STATUS.SCHEDULED,
+          "rework.scheduledSlot": {
+            slotId: slot._id,
+            date: reworkDate,
+            startTime: data.startTime,
+            endTime: data.endTime,
+          },
+          $push: {
+            statusHistory: createStatusHistoryEntry(
+              BOOKING_STATUS.REWORK,
+              ROLE.WORKER,
+              BOOKING_STATUS_MESSAGES.REWORK_RESCHEDULED(
+                data.date,
+                `${data.startTime} - ${data.endTime}`
+              )
+            ),
+          },
         },
-      } ,options);
-    })
+        options
+      );
+    });
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.REWORK_RESCHEDULED(
@@ -592,11 +617,19 @@ export class BookingLifecycleService implements IBookingLifecycleService {
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
-    const otp = this._otpService.generateOTP();
+    const otp = generateOtp6Digit();
     const redisKey = REDIS_KEYS.BOOKING.REWORK_OTP(bookingId);
     await Promise.all([
-      this._redisService.setWithTTL(redisKey, otp, 3600),
-      this._emailService.sendEmail(user.email, otp),
+      this._redisService.set(redisKey, otp, 3600),
+      this._emailService.sendEmail({
+        to: user.email,
+        subject: "Rework Completion OTP - Workzy",
+        html: otpEmailTemplate(otp, 60, {
+          title: "Rework Completion OTP",
+          description: `Share this code with your Workzy professional only after confirming the rework is complete (Booking ${booking.bookingId}).`,
+        }),
+        text: `Your Workzy rework completion OTP is: ${otp}. Valid for 60 minutes.`,
+      }),
     ]);
     void this._notificationService.createNotification(
       booking.userId.toString(),
@@ -618,7 +651,7 @@ export class BookingLifecycleService implements IBookingLifecycleService {
 
     const redisKey = REDIS_KEYS.BOOKING.REWORK_OTP(bookingId);
     const storedOtp = await this._redisService.get(redisKey);
-    if (!storedOtp || storedOtp !== data.otp) {
+    if (!storedOtp || data.otp !== storedOtp) {
       throw new CustomError(BOOKING.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
     }
     await this._slotRepository.deleteMany({

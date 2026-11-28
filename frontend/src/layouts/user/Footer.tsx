@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
+import { WorkzyLogo } from '@/components/atoms/WorkzyLogo';
 import CategoryService from '@/services/category.service';
 import { useAppSelector } from '@/store/hooks';
 
@@ -37,12 +38,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           <div>
-            <Link
-              to="/"
-              onClick={scrollTop}
-              className="inline-block text-3xl font-bold bg-linear-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-4"
-            >
-              Workzy
+            <Link to="/" onClick={scrollTop} className="inline-flex mb-4">
+              <WorkzyLogo textClassName="text-white" />
             </Link>
             <p className="text-sm leading-relaxed">
               Professional services at your doorstep. Book trusted professionals with secure

@@ -1,13 +1,20 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { AUTH, BOOKING, BOOKING_STATUS, HTTPSTATUS, REVIEW } from "@/constants";
+import {
+  AUTH,
+  BOOKING,
+  BOOKING_STATUS,
+  HTTPSTATUS,
+  REDIS_EXPIRY_SECONDS,
+  REVIEW,
+} from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IReviewRepository } from "@/core/interfaces/repositories/IReviewRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IReviewService } from "@/core/interfaces/services/IReviewService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { CreateReviewDto, UpdateReviewDto, ReviewReplyDto } from "@/dtos/requests/review.dto";
@@ -29,7 +36,7 @@ export class ReviewService implements IReviewService {
     @inject(TYPES.ReviewRepository) private _reviewRepo: IReviewRepository,
     @inject(TYPES.BookingRepository) private _bookingRepo: IBookingRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.StorageService) private _storageService: IStorageService,
     @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
@@ -94,7 +101,7 @@ export class ReviewService implements IReviewService {
     }
     await this._redisService.clearPattern("reviews");
     if (removedUrls.length > 0) {
-      void Promise.allSettled(removedUrls.map((url) => this._s3Service.deleteFile(url))).then(
+      void Promise.allSettled(removedUrls.map((url) => this._storageService.deleteFile(url))).then(
         () => {}
       );
     }
@@ -157,7 +164,7 @@ export class ReviewService implements IReviewService {
   async listReviews(input: ReviewListQuery): Promise<CursorPaginatedResult<ReviewAdminDto>> {
     const { data, nextCursor } = await this._reviewRepo.getAllReviews(input);
     return {
-      data: await ReviewAdminDto.fromEntities(data, this._s3Service),
+      data: await ReviewAdminDto.fromEntities(data, this._storageService),
       nextCursor,
     };
   }
@@ -177,10 +184,10 @@ export class ReviewService implements IReviewService {
       ...input,
     });
     const response = {
-      data: await ReviewUserDto.fromEntities(data, this._s3Service),
+      data: await ReviewUserDto.fromEntities(data, this._storageService),
       nextCursor,
     };
-    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    await this._redisService.set(cacheKey, JSON.stringify(response), REDIS_EXPIRY_SECONDS);
     return response;
   }
 
@@ -199,10 +206,10 @@ export class ReviewService implements IReviewService {
       ...input,
     });
     const response = {
-      data: await ReviewWorkerDto.fromEntities(data, this._s3Service),
+      data: await ReviewWorkerDto.fromEntities(data, this._storageService),
       nextCursor,
     };
-    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    await this._redisService.set(cacheKey, JSON.stringify(response), REDIS_EXPIRY_SECONDS);
     return response;
   }
 

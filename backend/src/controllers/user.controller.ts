@@ -4,7 +4,6 @@ import { inject, injectable } from "inversify";
 
 import { AUTH, HTTPSTATUS, USER } from "@/constants";
 import { IUserController } from "@/core/interfaces/controllers/IUserController";
-import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { TYPES } from "@/di/types";
 import {
@@ -17,10 +16,7 @@ import CustomError from "@/utils/customError";
 
 @injectable()
 export class UserController implements IUserController {
-  constructor(
-    @inject(TYPES.UserService) private _userService: IUserService,
-    @inject(TYPES.OTPService) private _otpService: IOTPService
-  ) {}
+  constructor(@inject(TYPES.UserService) private _userService: IUserService) {}
 
   uploadImage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);

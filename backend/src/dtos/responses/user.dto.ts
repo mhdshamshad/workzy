@@ -1,6 +1,6 @@
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IAdress, ILocation, IUser } from "@/types/user/user.entity";
-import { resolveS3Url } from "@/utils/s3.utils";
+import { resolveStorageUrl } from "@/utils/storage.utils";
 
 export class UserProfileResponseDto {
   id!: string;
@@ -13,7 +13,10 @@ export class UserProfileResponseDto {
   createdAt!: Date;
   profile?: { address?: IAdress; location: ILocation };
 
-  static async fromEntity(entity: IUser, s3Service: IS3Service): Promise<UserProfileResponseDto> {
+  static async fromEntity(
+    entity: IUser,
+    storageService: IStorageService
+  ): Promise<UserProfileResponseDto> {
     const dto = new UserProfileResponseDto();
 
     dto.id = entity._id.toString();
@@ -24,7 +27,7 @@ export class UserProfileResponseDto {
     dto.isBlocked = entity.isBlocked;
     dto.createdAt = entity.createdAt;
     dto.profile = entity.profile;
-    dto.profileImage = await resolveS3Url(entity.profileImage, s3Service);
+    dto.profileImage = await resolveStorageUrl(entity.profileImage, storageService);
 
     return dto;
   }

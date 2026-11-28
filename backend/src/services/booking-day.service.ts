@@ -18,12 +18,13 @@ import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository"
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IBookingDayService } from "@/core/interfaces/services/IBookingDayService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
-import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { DayCompleteDTO } from "@/dtos/requests/booking.dto";
+import { otpEmailTemplate } from "@/templates/emails/otpEmailTemplate";
 import { IBooking, IDailyLog, IEvidence } from "@/types/booking/booking.entity";
+import { generateOtp6Digit } from "@/utils/auth/otp.util";
 import {
   assertWorkerOwnership,
   createStatusHistoryEntry,
@@ -38,7 +39,6 @@ export class BookingDayService implements IBookingDayService {
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.SlotRepository) private _slotRepository: ISlotRepository,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
-    @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
@@ -51,21 +51,26 @@ export class BookingDayService implements IBookingDayService {
     if (log.status === BOOKING_DAY_STATUS.CHECKED_IN) {
       throw new CustomError(BOOKING.DAY_ALREADY_CHECKED_IN, HTTPSTATUS.BAD_REQUEST);
     }
-    const otp = this._otpService.generateOTP();
+    const otp = generateOtp6Digit();
     const redisKey = REDIS_KEYS.BOOKING.DAY_OTP(bookingId, dayIndex);
     const [user] = await Promise.all([
       this._userRepository.findById(booking.userId.toString()),
-      this._redisService.setWithTTL(redisKey, otp, 3600),
+      this._redisService.set(redisKey, otp, 3600),
     ]);
 
     if (!user) {
       throw new CustomError(BOOKING.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
     logger.info(`Generated Day ${dayIndex} OTP ${otp} for booking ${booking.bookingId}`);
-    await this._emailService.sendEmail(
-      user.email,
-      `Your OTP for Project Day ${dayIndex} is ${otp}`
-    );
+    await this._emailService.sendEmail({
+      to: user.email,
+      subject: `Project Day ${dayIndex} Verification OTP - Workzy`,
+      html: otpEmailTemplate(otp, 60, {
+        title: `Project Day ${dayIndex} Check-In OTP`,
+        description: `Share this code with your Workzy professional to verify check-in for Project Day ${dayIndex} (Booking ${booking.bookingId}).`,
+      }),
+      text: `Your OTP for Project Day ${dayIndex} is ${otp}. Valid for 60 minutes.`,
+    });
   }
 
   async verifyDayOtp(
@@ -81,7 +86,7 @@ export class BookingDayService implements IBookingDayService {
     const redisKey = REDIS_KEYS.BOOKING.DAY_OTP(bookingId, dayIndex);
     const cachedOtp = await this._redisService.get(redisKey);
 
-    if (!cachedOtp || cachedOtp !== otp) {
+    if (!cachedOtp || otp !== cachedOtp) {
       throw new CustomError(BOOKING.DAY_OTP_MISMATCH, HTTPSTATUS.BAD_REQUEST);
     }
 

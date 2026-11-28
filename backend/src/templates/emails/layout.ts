@@ -1,24 +1,32 @@
+const WORKZY_LOGO_URL =
+  "https://workzy-app-storage.s3.ap-south-1.amazonaws.com/public/home/workzy-icon-logo.png";
+
 export function emailLayout(content: string) {
   return `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9;">
-      
-      <!-- Header -->
-      <div style="background-color: #007bff; color: #ffffff; text-align: center; padding: 20px; border-radius: 8px 8px 0 0;">
-          <h1 style="margin: 0; font-size: 24px;">Workzy</h1>
-      </div>
+    <div style="background-color: #f8fafc; padding: 24px 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+      <div style="max-width: 540px; margin: 0 auto; padding: 28px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px;">
+        <div style="padding-bottom: 18px; margin-bottom: 22px; border-bottom: 1px solid #e2e8f0;">
+          <img
+            src="${WORKZY_LOGO_URL}"
+            alt="Workzy"
+            width="30"
+            height="30"
+            style="vertical-align: middle; border-radius: 6px; margin-right: 10px; display: inline-block;"
+          />
+          <span style="font-size: 18px; font-weight: 700; color: #0f172a; vertical-align: middle;">
+            Workzy
+          </span>
+        </div>
 
-      <!-- Dynamic Content -->
-      <div style="padding: 20px; color: #333333;">
+        <div>
           ${content}
-      </div>
+        </div>
 
-      <!-- Footer -->
-      <div style="text-align: center; padding: 20px; font-size: 14px; color: #777777; background-color: #f4f4f4; border-radius: 0 0 8px 8px;">
-          <p style="margin: 0;">Best regards,<br>The Workzy Team</p>
-          <p style="margin: 10px 0 0;"><a href="https://www.workzy.com" style="color: #007bff; text-decoration: none;">Visit our website</a></p>
-          <p style="margin: 10px 0 0; font-size: 12px;">© ${new Date().getFullYear()} Workzy. All rights reserved.</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0 16px;" />
+        <p style="color: #94a3b8; font-size: 12px; line-height: 1.5; margin: 0;">
+          Workzy &bull; Automated Security Notification &copy; ${new Date().getFullYear()}
+        </p>
       </div>
-
     </div>
   `;
 }

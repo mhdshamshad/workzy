@@ -42,7 +42,9 @@ export default function RequestReworkModal({ isOpen, onClose, booking }: Props) 
   });
 
   useEffect(() => {
-    if (!isOpen) {reset();}
+    if (!isOpen) {
+      reset();
+    }
   }, [isOpen, reset]);
 
   const onSubmit = async (data: RequestReworkFormType) => {

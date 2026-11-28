@@ -5,7 +5,7 @@ import ErrorState from '@/components/molecules/ErrorState';
 import WorkerProfileHeader from '@/components/organisms/WorkerProfileHeader';
 import { useGetOrCreateChat } from '@/features/chat/hooks/useChats';
 import { useWorkerProfile } from '@/features/profile/hooks/useWorkerProfile';
-import WorkerProfileLayoutSkeleton from '@/features/worker/profile/components/WorkeAboutSkeleton';
+import WorkerProfileLayoutSkeleton from '@/features/worker/profile/components/WorkerAboutSkeleton';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/store/hooks';
 

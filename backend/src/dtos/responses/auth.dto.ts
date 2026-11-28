@@ -1,7 +1,7 @@
 import { Role } from "@/constants";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IAdress, ILocation, IUser } from "@/types/user/user.entity";
-import { resolveS3Url } from "@/utils/s3.utils";
+import { resolveStorageUrl } from "@/utils/storage.utils";
 
 export class RegisterResponseDTO {
   id!: string;
@@ -29,7 +29,7 @@ export class LoginResponseDto {
 
   static async fromEntity(
     entity: IUser & { workerData?: { _id: string; displayName: string; profileImage?: string } },
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<LoginResponseDto> {
     const dto = new LoginResponseDto();
     dto.id = entity._id.toString();
@@ -37,7 +37,7 @@ export class LoginResponseDto {
     dto.email = entity.email;
     dto.role = entity.role;
     dto.phone = entity.phone;
-    dto.profileImage = await resolveS3Url(entity.profileImage, s3Service);
+    dto.profileImage = await resolveStorageUrl(entity.profileImage, storageService);
     dto.profile = entity.profile;
 
     if (entity.workerData) {

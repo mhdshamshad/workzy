@@ -1,5 +1,5 @@
 import otpImage from '@/assets/auth/otp.jpeg';
-import logo from '@/assets/icons/workzy-logo.svg';
+import logo from '@/assets/icons/workzy-icon-logo.png';
 import AuthLayout from '@/layouts/auth/AuthLayout';
 
 import OtpForm from '../components/OtpForm';

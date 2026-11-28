@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 
-import { REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
+import { REFRESH_EXPIRY_SECONDS } from "@/constants";
 import { HOME_SECTION_TYPE } from "@/constants/home";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
@@ -46,11 +46,7 @@ export class HomeService implements IHomeService {
     fullSections.sort((a, b) => a.order - b.order);
 
     const response = PublicHomeResponseDTO.fromEntities(fullSections);
-    await this._redisService.setWithTTL(
-      cacheKey,
-      JSON.stringify(response),
-      REFRESH_TOKEN_TTL_SECONDS
-    );
+    await this._redisService.set(cacheKey, JSON.stringify(response), REFRESH_EXPIRY_SECONDS);
     return response;
   }
 }

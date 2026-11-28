@@ -97,7 +97,6 @@ import { IHomeService } from "@/core/interfaces/services/IHomeService";
 import { ILeaveService } from "@/core/interfaces/services/ILeaveService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
-import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentGateway } from "@/core/interfaces/services/IPaymentGateway";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IPayoutService } from "@/core/interfaces/services/IPayoutService";
@@ -105,10 +104,9 @@ import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IReviewService } from "@/core/interfaces/services/IReviewService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
-import { ITokenService } from "@/core/interfaces/services/ITokenService";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWalletService } from "@/core/interfaces/services/IWalletService";
@@ -137,10 +135,7 @@ import { AdminBookingService } from "@/services/admin/booking.service";
 import { CategoryManagementService } from "@/services/admin/category-management.service";
 import { HomeLayoutService } from "@/services/admin/home-layout.service";
 import { HomeSectionService } from "@/services/admin/home-section.service";
-import { AuthService } from "@/services/auth/auth.service";
-import { EmailService } from "@/services/auth/email.service";
-import { OTPService } from "@/services/auth/otp.service";
-import { TokenService } from "@/services/auth/token.service";
+import { AuthService } from "@/services/auth.service";
 import { BookingExtraChargeService } from "@/services/booking/booking-extra-charge.service";
 import { BookingLifecycleService } from "@/services/booking/booking-lifecycle.service";
 import { BookingPricingService } from "@/services/booking/booking-pricing.service";
@@ -154,6 +149,7 @@ import { DisputeService } from "@/services/dispute.service";
 import { HomeService } from "@/services/home.service";
 import { LeaveService } from "@/services/leave.service";
 import { MessageService } from "@/services/message.service";
+import { NodemailerEmailService } from "@/services/nodemailer-email.service";
 import { NotificationService } from "@/services/notification.service";
 import { StripePaymentGateway } from "@/services/payment/stripe-payment-gateway.service";
 import { PaymentService } from "@/services/payment.service";
@@ -162,7 +158,7 @@ import { PresenceService } from "@/services/presence.service";
 import { QuoteService } from "@/services/quote.service";
 import { RedisService } from "@/services/redis.service";
 import { ReviewService } from "@/services/review.service";
-import { S3Service } from "@/services/s3.service";
+import { S3StorageService } from "@/services/s3-storage.service";
 import { ServiceManagement } from "@/services/service-management.service";
 import { SlotService } from "@/services/slot.service";
 import { UnitOfWork } from "@/services/unit-of-work.service";
@@ -181,9 +177,7 @@ container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 container.bind<IUserService>(TYPES.UserService).to(UserService);
 container.bind<IUserController>(TYPES.UserController).to(UserController);
 
-container.bind<IOTPService>(TYPES.OTPService).to(OTPService);
-container.bind<IEmailService>(TYPES.EmailService).to(EmailService);
-container.bind<ITokenService>(TYPES.TokenService).to(TokenService);
+container.bind<IEmailService>(TYPES.EmailService).to(NodemailerEmailService);
 
 container.bind<IWorkerRepository>(TYPES.WorkerRepository).to(WorkerRepository);
 container.bind<IWorkerService>(TYPES.WorkerService).to(WorkerService);
@@ -207,7 +201,7 @@ container
   .bind<ICategoryManagementService>(TYPES.CategoryManagementService)
   .to(CategoryManagementService);
 
-container.bind<IS3Service>(TYPES.S3Service).to(S3Service);
+container.bind<IStorageService>(TYPES.StorageService).to(S3StorageService);
 container.bind<IUploadController>(TYPES.UploadController).to(UploadController);
 
 container.bind<IRedisService>(TYPES.RedisService).to(RedisService);

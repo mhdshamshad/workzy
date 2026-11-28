@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
@@ -5,52 +7,98 @@ import { Profile } from "passport";
 import validator from "validator";
 
 import logger from "@/config/logger";
-import { AUTH, CLIENT_URL, EMAIL, HTTPSTATUS, ROLE, Role, USER, WORKER } from "@/constants";
+import {
+  AUTH,
+  CLIENT_URL,
+  EMAIL,
+  EMAIL_OTP_EXPIRY_SECONDS,
+  HTTPSTATUS,
+  IS_PROD,
+  REFRESH_EXPIRY_SECONDS,
+  ROLE,
+  Role,
+  USER,
+  WORKER,
+} from "@/constants";
 import { REDIS_KEYS } from "@/constants/redis";
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
-import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { AccessTokenPayload } from "@/core/types/global/jwt";
 import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
+import { otpEmailTemplate } from "@/templates/emails/otpEmailTemplate";
+import { resetPasswordTemplate } from "@/templates/emails/resetPasswordTemplate";
 import { ApiResponse } from "@/utils/apiResponse";
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/auth/cookieUtils";
-import { generateAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
+import { generateAccessToken, verifyAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
+import { generateOtp6Digit } from "@/utils/auth/otp.util";
+import { hashPassword } from "@/utils/auth/password.util";
 import CustomError from "@/utils/customError";
+
+interface PendingRegistration {
+  name: string;
+  email: string;
+  password: string;
+  otp: string;
+}
 
 @injectable()
 export class AuthController implements IAuthController {
   constructor(
     @inject(TYPES.AuthService) private _authService: IAuthService,
-    @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
-    @inject(TYPES.TokenService) private _tokenService: ITokenService,
     @inject(TYPES.WorkerService) private _workerService: IWorkerService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
     @inject(TYPES.PresenceService) private _presenceService: IPresenceService,
     @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
 
   // Register a new user
   register = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userData = req.body as RegisterRequestDTO;
+    const { email, name, password } = req.body as RegisterRequestDTO;
 
-    const existingUser = await this._authService.findUserByEmail(userData.email);
+    const existingUser = await this._authService.findUserByEmail(email);
     if (existingUser) {
       throw new CustomError(USER.EXISTS, HTTPSTATUS.BAD_REQUEST);
     }
 
-    const otp = this._otpService.generateOTP();
+    const otp = generateOtp6Digit();
+    const [passwordHash, emailSent] = await Promise.all([
+      hashPassword(password),
+      this._emailService.sendEmail({
+        to: email,
+        subject: "Verify your Workzy account",
+        html: otpEmailTemplate(otp, EMAIL_OTP_EXPIRY_SECONDS / 60, {
+          title: "Verify your Workzy account",
+          description:
+            "Welcome to Workzy! Use the verification code below to complete your signup.",
+        }),
+        text: `Your Workzy verification code is: ${otp}. It expires in ${EMAIL_OTP_EXPIRY_SECONDS / 60} minutes.`,
+      }),
+    ]);
 
-    await this._emailService.sendOtpEmail(userData, otp);
+    if (!emailSent) {
+      throw new CustomError(AUTH.EMAIL_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+    const pendingData: PendingRegistration = {
+      name,
+      email,
+      password: passwordHash,
+      otp,
+    };
 
-    logger.info(`OTP sent to user: ${userData.email}`);
+    await this._redisService.set(
+      REDIS_KEYS.AUTH.OTP(email),
+      JSON.stringify(pendingData),
+      EMAIL_OTP_EXPIRY_SECONDS
+    );
+
+    if (!IS_PROD) {
+      logger.info(`OTP sent to user: ${email} :${otp}`);
+    }
 
     res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.OTP_SENT));
   });
@@ -59,7 +107,17 @@ export class AuthController implements IAuthController {
   verifyOTP = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, otp } = req.body;
 
-    const userData = await this._otpService.verifyAndRetrieveUser(email, otp);
+    logger.info(JSON.stringify({ body: req.body }));
+
+    const rawPending = await this._redisService.get(REDIS_KEYS.AUTH.OTP(email));
+    if (!rawPending) {
+      throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const { otp: pendingOtp, ...userData } = JSON.parse(rawPending) as PendingRegistration;
+    if (otp !== pendingOtp) {
+      throw new CustomError(AUTH.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
+    }
 
     const user = await this._authService.register(userData);
 
@@ -76,14 +134,38 @@ export class AuthController implements IAuthController {
     if (!validator.isEmail(email)) {
       throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
     }
+    const otpKey = REDIS_KEYS.AUTH.OTP(email);
+    const rawPending = await this._redisService.get(otpKey);
 
-    await this._otpService.resendOtp(email);
+    if (!rawPending) {
+      throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const pending = JSON.parse(rawPending) as PendingRegistration;
+    pending.otp = generateOtp6Digit();
+
+    const sent = await this._emailService.sendEmail({
+      to: email,
+      subject: "Your new Workzy verification code",
+      html: otpEmailTemplate(pending.otp, EMAIL_OTP_EXPIRY_SECONDS / 60, {
+        title: "New Verification Code",
+        description: "Use the new code below to complete your Workzy account verification.",
+      }),
+      text: `Your new Workzy verification code is: ${pending.otp}. It expires in ${EMAIL_OTP_EXPIRY_SECONDS / 60} minutes.`,
+    });
+
+    if (!sent) {
+      throw new CustomError(AUTH.EMAIL_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    await this._redisService.set(otpKey, JSON.stringify(pending), EMAIL_OTP_EXPIRY_SECONDS);
 
     res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.OTP_RESENT));
   });
 
   login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const user = await this._authService.login(req.body as LoginRequestDTO);
+    await this._redisService.delete(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(user.id.toString()));
     setRefreshTokenCookie(res, { id: user.id.toString(), role: user.role as Role });
 
     const accessToken = generateAccessToken({
@@ -96,11 +178,13 @@ export class AuthController implements IAuthController {
 
   logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { refreshToken } = req.cookies;
+    let userId: string | null = null;
+
     if (refreshToken) {
       try {
         const decodedToken = verifyRefreshToken(refreshToken);
         if (decodedToken?.user?.id) {
-          const userId = decodedToken.user.id;
+          userId = decodedToken.user.id;
           await this._presenceService.forceOffline(userId);
           if (decodedToken.user.role === ROLE.WORKER) {
             const worker = await this._workerService.getWorkerByUserId(userId);
@@ -113,13 +197,44 @@ export class AuthController implements IAuthController {
         logger.error("Error clearing presence during logout:", err);
       }
     }
-    await clearRefreshTokenCookie(res);
+
+    const authHeader = req.headers.authorization;
+    const accessToken = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+
+    if (accessToken) {
+      try {
+        const decoded = verifyAccessToken(accessToken);
+        if (decoded?.id && !userId) {
+          userId = decoded.id;
+        }
+        if (decoded?.exp) {
+          const ttlSeconds = Math.max(1, decoded.exp - Math.floor(Date.now() / 1000));
+          await this._redisService.set(
+            REDIS_KEYS.AUTH.BLACKLISTED_TOKEN(accessToken),
+            "revoked",
+            ttlSeconds
+          );
+        }
+      } catch (err) {
+        logger.debug("Access token during logout could not be decoded or was expired:", err);
+      }
+    }
+
+    if (userId) {
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      await this._redisService.set(
+        REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(userId),
+        nowInSeconds.toString(),
+        REFRESH_EXPIRY_SECONDS
+      );
+    }
+
+    clearRefreshTokenCookie(res);
     res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.LOGOUT_SUCCESS));
   });
 
   refreshToken = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { refreshToken } = req.cookies;
-
     if (!refreshToken) {
       throw new CustomError(AUTH.NO_REFRESH_TOKEN, HTTPSTATUS.UNAUTHORIZED);
     }
@@ -131,6 +246,12 @@ export class AuthController implements IAuthController {
     }
     const userId = decodedToken.user.id;
     const role = decodedToken.user.role;
+
+    const isLoggedOut = await this._redisService.get(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(userId));
+    if (isLoggedOut && decodedToken.iat && decodedToken.iat < Number(isLoggedOut)) {
+      clearRefreshTokenCookie(res);
+      throw new CustomError(AUTH.INVALID_TOKEN, HTTPSTATUS.UNAUTHORIZED);
+    }
 
     const isBlocked = await this._redisService.get(REDIS_KEYS.AUTH.BLOCKED_USER(userId));
     if (isBlocked) {
@@ -172,9 +293,23 @@ export class AuthController implements IAuthController {
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
+    const token = crypto.randomBytes(32).toString("hex");
+    await this._redisService.set(
+      REDIS_KEYS.AUTH.FORGOT_PASSWORD(email),
+      token,
+      EMAIL_OTP_EXPIRY_SECONDS
+    );
+    const resetLink = `${CLIENT_URL}/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+    const sent = await this._emailService.sendEmail({
+      to: email,
+      subject: "Password Reset Request - Workzy",
+      html: resetPasswordTemplate(resetLink, EMAIL_OTP_EXPIRY_SECONDS / 60),
+      text: `Reset your Workzy password using this link: ${resetLink} (valid for ${EMAIL_OTP_EXPIRY_SECONDS / 60} minutes).`,
+    });
 
-    await this._emailService.sendResetEmailWithToken(email);
-
+    if (!sent) {
+      throw new CustomError(AUTH.EMAIL_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
     res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.FORGOT_PASS_EMAIL_SENT));
   });
 
@@ -185,9 +320,9 @@ export class AuthController implements IAuthController {
     if (!password || !strongPasswordRegex.test(password)) {
       throw new CustomError(AUTH.WEAK_PASSWORD, HTTPSTATUS.BAD_REQUEST);
     }
+    const storedToken = await this._redisService.get(REDIS_KEYS.AUTH.FORGOT_PASSWORD(email));
 
-    const isValid = await this._tokenService.validateToken(email, token);
-    if (!isValid) {
+    if (!storedToken || token !== storedToken) {
       throw new CustomError(AUTH.TOKEN_EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }
 
@@ -218,6 +353,7 @@ export class AuthController implements IAuthController {
     if (isBlocked) {
       return res.redirect(`${CLIENT_URL}/auth/google/callback?error=blocked`);
     }
+    await this._redisService.delete(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(user.id.toString()));
     setRefreshTokenCookie(res, { id: user.id, role: user.role as Role });
 
     res.redirect(`${CLIENT_URL}/auth/google/callback`);

@@ -2,7 +2,7 @@ import { createLogger, format, transports } from "winston";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
-import { NODE_ENV } from "@/constants";
+import { IS_PROD } from "@/constants";
 
 const customColors = {
   error: "brightRed",
@@ -12,11 +12,9 @@ const customColors = {
   debug: "brightBlue",
 };
 
-const isProd = NODE_ENV === "production";
-
 winston.addColors(customColors);
 const logger = createLogger({
-  level: isProd ? "info" : "debug",
+  level: IS_PROD ? "info" : "debug",
   format: format.combine(
     format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     format.errors({ stack: true }),

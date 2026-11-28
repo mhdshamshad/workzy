@@ -1,6 +1,5 @@
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
-import userprofile from '@/assets/images/userprofile.avif';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
 interface Props {
@@ -9,8 +8,6 @@ interface Props {
   image: string | undefined;
 }
 export default function ProfileImageModal({ open, onOpenChange, image }: Props) {
-  const profileImage = image || userprofile;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="p-0 border-none bg-transparent shadow-none flex items-center justify-center max-w-3xl">
@@ -20,7 +17,7 @@ export default function ProfileImageModal({ open, onOpenChange, image }: Props) 
         </VisuallyHidden>
 
         <img
-          src={profileImage}
+          src={image}
           alt="Profile"
           className="max-h-[85vh] max-w-full object-contain rounded-xl"
         />

@@ -9,7 +9,7 @@ export const USER = {
   SIGNUP_EXPIRED: "Signup session expired",
   PASSWORD_UPDATE_SUCCESS: "Password updated successfully",
   UNBLOCKED: "User unblocked successfully",
-  BLOCKEDSUCCESS: "User blocked successfully",
+  BLOCKED_SUCCESS: "User blocked successfully",
   UPDATE_FAILED: "Failed to update user profile",
   PROFILE_SUCCESS: "Profile updated successfully",
 };

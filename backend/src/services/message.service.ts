@@ -6,7 +6,7 @@ import { MESSAGE_TYPE, MessageType, SenderRole } from "@/constants/chat";
 import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository";
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { TYPES } from "@/di/types";
 import { ChatMessageResponseDTO } from "@/dtos/responses/chatMessage.dto";
 import { getIO } from "@/socket/socket";
@@ -21,13 +21,13 @@ export class MessageService implements IMessageService {
   constructor(
     @inject(TYPES.MessageRepository) private _messageRepository: IMessageRepository,
     @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.StorageService) private _storageService: IStorageService
   ) {}
 
   async getMessages(input: MessageQuery): Promise<CursorPaginatedResult<ChatMessageResponseDTO>> {
     const { data, nextCursor, prevCursor } = await this._messageRepository.getMessages(input);
     return {
-      data: await ChatMessageResponseDTO.fromEntities(data, this._s3Service, input.role),
+      data: await ChatMessageResponseDTO.fromEntities(data, this._storageService, input.role),
       nextCursor,
       prevCursor,
     };
@@ -79,7 +79,7 @@ export class MessageService implements IMessageService {
       },
     });
 
-    return await ChatMessageResponseDTO.fromEntity(messageDoc, this._s3Service, role);
+    return await ChatMessageResponseDTO.fromEntity(messageDoc, this._storageService, role);
   }
 
   async markMessageAsDelivered(
@@ -88,7 +88,7 @@ export class MessageService implements IMessageService {
   ): Promise<ChatMessageResponseDTO | null> {
     const updated = await this._messageRepository.markMessageAsDelivered(messageId, role);
     if (!updated) return null;
-    return await ChatMessageResponseDTO.fromEntity(updated, this._s3Service, role);
+    return await ChatMessageResponseDTO.fromEntity(updated, this._storageService, role);
   }
 
   async markRoomMessagesAsDelivered(chatId: string, role: SenderRole): Promise<number> {

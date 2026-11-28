@@ -1,7 +1,15 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { CATEGORY, DOCUMENT_STATUS, HTTPSTATUS, SERVICE, SERVICE_TYPE, WORKER } from "@/constants";
+import {
+  CATEGORY,
+  DOCUMENT_STATUS,
+  HTTPSTATUS,
+  REDIS_EXPIRY_SECONDS,
+  SERVICE,
+  SERVICE_TYPE,
+  WORKER,
+} from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -204,7 +212,7 @@ export class ServiceManagement implements IServiceManagement {
     }
     const { data, nextCursor } = await this._serviceRepository.listWorkerServices(workerId, query);
     const result = { nextCursor, data: ServiceResponseDto.fromEntities(data) };
-    await this._redisService.setWithTTL(cacheKey, JSON.stringify(result));
+    await this._redisService.set(cacheKey, JSON.stringify(result), REDIS_EXPIRY_SECONDS);
     return result;
   }
 

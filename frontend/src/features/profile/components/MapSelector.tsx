@@ -1,14 +1,20 @@
-import mapboxgl from 'mapbox-gl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MAPBOX_TOKEN } from '@/constants';
 import type { Address } from '@/types/user';
 
+import type { Map as MapboxMap } from 'mapbox-gl';
+
 type MapboxContextItem = {
   id: string;
   text: string;
 };
+
+const INDIA_BOUNDS: [[number, number], [number, number]] = [
+  [68.1, 6.5], // Southwest
+  [97.5, 37.2], // Northeast
+];
 
 interface MapSelectorProps {
   onLocationSelect: (coordinates: [number, number], address?: Address) => void;
@@ -17,38 +23,40 @@ interface MapSelectorProps {
 
 export default function MapSelector({ onLocationSelect, onClose }: MapSelectorProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
+  const mapInstanceRef = useRef<MapboxMap | null>(null);
+  const onLocationSelectRef = useRef(onLocationSelect);
+  const [mapLoadError, setMapLoadError] = useState(false);
 
   useEffect(() => {
-    if (mapRef.current && !mapInstanceRef.current) {
-      mapboxgl.accessToken = MAPBOX_TOKEN || '';
+    onLocationSelectRef.current = onLocationSelect;
+  }, [onLocationSelect]);
 
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          const { latitude, longitude } = position.coords;
-          initializeMap([longitude, latitude]);
-        },
-        () => {
-          // Delhi for fallback
-          initializeMap([77.209, 28.6139]);
-        },
-        { timeout: 5000 }
-      );
+  useEffect(() => {
+    let disposed = false;
+    let map: MapboxMap | null = null;
 
-      const initializeMap = (center: [number, number]) => {
-        if (!mapRef.current || mapInstanceRef.current) {
+    const initializeMap = async (center: [number, number]) => {
+      try {
+        const { default: mapbox } = await import('mapbox-gl');
+        if (disposed || !mapRef.current || mapInstanceRef.current) {
           return;
         }
 
-        const map = new mapboxgl.Map({
+        mapbox.accessToken = MAPBOX_TOKEN || '';
+
+        map = new mapbox.Map({
           container: mapRef.current,
-          style: 'mapbox://styles/mapbox/streets-v11',
+          style: 'mapbox://styles/mapbox/streets-v12',
           center,
-          zoom: 10,
+          zoom: 5,
+          minZoom: 4,
+          maxZoom: 18,
+          maxBounds: INDIA_BOUNDS,
+          renderWorldCopies: false,
         });
 
         mapInstanceRef.current = map;
-        const geolocate = new mapboxgl.GeolocateControl({
+        const geolocate = new mapbox.GeolocateControl({
           positionOptions: {
             enableHighAccuracy: true,
           },
@@ -102,27 +110,41 @@ export default function MapSelector({ onLocationSelect, onClose }: MapSelectorPr
               });
             }
 
-            onLocationSelect([lng, lat], addressComponents);
+            onLocationSelectRef.current([lng, lat], addressComponents);
           } catch (error) {
             console.error('Reverse geocoding failed:', error);
-            onLocationSelect([lng, lat]);
+            onLocationSelectRef.current([lng, lat]);
           }
         });
-
-        return () => {
-          map.remove();
-          mapInstanceRef.current = null;
-        };
-      };
-    }
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
+      } catch (error) {
+        if (!disposed) {
+          console.error('Failed to initialize the Mapbox map:', error);
+          setMapLoadError(true);
+        }
       }
     };
-  }, [onLocationSelect]);
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+        void initializeMap([longitude, latitude]);
+      },
+      () => {
+        void initializeMap([78.9629, 20.5937]);
+      },
+      { timeout: 5000 }
+    );
+
+    return () => {
+      disposed = true;
+      if (map) {
+        map.remove();
+        if (mapInstanceRef.current === map) {
+          mapInstanceRef.current = null;
+        }
+      }
+    };
+  }, []);
 
   return (
     <div className="mt-4">
@@ -137,6 +159,11 @@ export default function MapSelector({ onLocationSelect, onClose }: MapSelectorPr
         </button>
       </div>
       <div ref={mapRef} className="w-full h-64 rounded-lg border" />
+      {mapLoadError && (
+        <p role="alert" className="mt-2 text-sm text-destructive">
+          The map could not be loaded. Please try again.
+        </p>
+      )}
     </div>
   );
 }

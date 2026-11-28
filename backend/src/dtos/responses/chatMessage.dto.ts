@@ -1,8 +1,8 @@
 import { Role, ROLE } from "@/constants";
 import { type MessageType, type SenderRole } from "@/constants/chat";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IChatMessage } from "@/types/chat/chatMessage.entity";
-import { resolveS3Url } from "@/utils/s3.utils";
+import { resolveStorageUrl } from "@/utils/storage.utils";
 
 type MessageStatus = "pending" | "sent" | "delivered" | "read";
 
@@ -30,7 +30,7 @@ export class ChatMessageResponseDTO {
 
   static async fromEntity(
     entity: IChatMessage,
-    s3Service: IS3Service,
+    storageService: IStorageService,
     role: SenderRole
   ): Promise<ChatMessageResponseDTO> {
     const dto = new ChatMessageResponseDTO();
@@ -43,7 +43,9 @@ export class ChatMessageResponseDTO {
     dto.role = entity.role;
 
     dto.content = isHideDeleted ? undefined : entity.content;
-    dto.mediaUrl = isHideDeleted ? undefined : await resolveS3Url(entity.mediaUrl, s3Service);
+    dto.mediaUrl = isHideDeleted
+      ? undefined
+      : await resolveStorageUrl(entity.mediaUrl, storageService);
     dto.bookingId = entity.bookingId?.toString();
     dto.replyTo =
       entity.replyTo && entity.replyTo?.messageId
@@ -62,10 +64,12 @@ export class ChatMessageResponseDTO {
   }
   static async fromEntities(
     entities: IChatMessage[],
-    s3Service: IS3Service,
+    storageService: IStorageService,
     role: SenderRole
   ): Promise<ChatMessageResponseDTO[]> {
-    return await Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service, role)));
+    return await Promise.all(
+      entities.map((entity) => this.fromEntity(entity, storageService, role))
+    );
   }
 }
 

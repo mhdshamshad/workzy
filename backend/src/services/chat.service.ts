@@ -6,7 +6,7 @@ import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository"
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
 import { IChatService } from "@/core/interfaces/services/IChatService";
 import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { TYPES } from "@/di/types";
 import { ChatResponseDTO, ChatRoomListItem } from "@/dtos/responses/chat.dto";
 import { IChat } from "@/types/chat/chat.entity";
@@ -19,7 +19,7 @@ export class ChatService implements IChatService {
   constructor(
     @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository,
     @inject(TYPES.MessageRepository) private _messageRepository: IMessageRepository,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.StorageService) private _storageService: IStorageService,
     @inject(TYPES.PresenceService) private _presenceService: IPresenceService
   ) {}
 
@@ -34,7 +34,7 @@ export class ChatService implements IChatService {
 
     const existing = await this._chatRepository.findByParticipants(userId, workerId);
     if (existing) {
-      return await ChatResponseDTO.fromEntity({ chat: existing }, this._s3Service);
+      return await ChatResponseDTO.fromEntity({ chat: existing }, this._storageService);
     }
     const newChat = await this._chatRepository.create({
       userId: new Types.ObjectId(userId),
@@ -44,7 +44,7 @@ export class ChatService implements IChatService {
     const populated = await this._chatRepository.findByChatId(newChat._id.toString());
     if (!populated) throw new CustomError(CHAT.NOT_FOUND);
 
-    return await ChatResponseDTO.fromEntity({ chat: populated }, this._s3Service);
+    return await ChatResponseDTO.fromEntity({ chat: populated }, this._storageService);
   }
 
   async authorizeChat(data: {
@@ -131,7 +131,7 @@ export class ChatService implements IChatService {
       presence = { userLastSeen, workerLastSeen };
     }
 
-    return await ChatResponseDTO.fromEntity({ chat }, this._s3Service, presence);
+    return await ChatResponseDTO.fromEntity({ chat }, this._storageService, presence);
   }
 
   async getChatRooms(input: ChatQuery): Promise<CursorPaginatedResult<ChatResponseDTO>> {
@@ -151,7 +151,7 @@ export class ChatService implements IChatService {
     }));
 
     return {
-      data: await ChatResponseDTO.fromEntities(chatRooms, this._s3Service),
+      data: await ChatResponseDTO.fromEntities(chatRooms, this._storageService),
       nextCursor,
     };
   }

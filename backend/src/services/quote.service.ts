@@ -20,8 +20,8 @@ import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerReposit
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { TYPES } from "@/di/types";
 import { CreateQuoteDto, UpdateQuoteDto } from "@/dtos/requests/quote.dto";
 import { QuoteListItemDto, WorkerQuoteStatsDto } from "@/dtos/responses/quote.dto";
@@ -37,7 +37,7 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 export class QuoteService implements IQuoteService {
   constructor(
     @inject(TYPES.SlotService) private _slotService: ISlotService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.StorageService) private _storageService: IStorageService,
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
@@ -264,7 +264,7 @@ export class QuoteService implements IQuoteService {
   async listQuotes(query: QuoteListQuery): Promise<CursorPaginatedResult<QuoteListItemDto>> {
     const { data, nextCursor } = await this._quoteRepository.listQuotes(query);
     return {
-      data: await QuoteListItemDto.fromEntities(data, this._s3Service),
+      data: await QuoteListItemDto.fromEntities(data, this._storageService),
       nextCursor,
     };
   }

@@ -72,14 +72,26 @@ AWS_REGION=your_aws_region
 AWS_S3_BUCKET=your_s3_bucket
 AWS_S3_ACCESSKEY=your_access_key
 AWS_S3_SECRET=your_secret_key
+AWS_S3_EXPIRY=3600
 
 # Payment Gateways
+STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 STRIPE_SECRET_KEY=your_stripe_secret
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 
 # JWT & Authentication
 ACCESS_TOKEN=your_access_token_secret
 REFRESH_TOKEN=your_refresh_token_secret
+
+ACCESS_TOKEN_EXPIRY = 10min
+REFRESH_TOKEN_EXPIRY = 7d
+
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/google/callback
+
+NODEMAILER_PASSWORD=your_email_password
+NODEMAILER_EMAIL=your_email@domain.com
 ```
 
 ### 3. Launch the Stack

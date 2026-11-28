@@ -1,11 +1,11 @@
 import { inject, injectable } from "inversify";
 import mongoose from "mongoose";
 
-import { CATEGORY, HTTPSTATUS } from "@/constants";
+import { CATEGORY, HTTPSTATUS, REDIS_KEYS } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { TYPES } from "@/di/types";
 import { CategoryRequestDTO } from "@/dtos/requests/category.dto";
 import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dto";
@@ -16,7 +16,7 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 export class CategoryManagementService implements ICategoryManagementService {
   constructor(
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.StorageService) private _storageService: IStorageService,
     @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
 
@@ -40,7 +40,7 @@ export class CategoryManagementService implements ICategoryManagementService {
       ...sanitizedData,
       parentId: parentObjectId,
     });
-    await this._redisService.clearPattern("categories:list");
+    await this._redisService.clearPattern(REDIS_KEYS.CATEGORY.LIST_PREFIX);
     return CategoryResponseDTO.fromEntity(newCategory);
   }
 
@@ -59,16 +59,14 @@ export class CategoryManagementService implements ICategoryManagementService {
     if (isAlreadyExists) {
       throw new CustomError(CATEGORY.EXISTS, HTTPSTATUS.FORBIDDEN);
     }
-
-    const filePromises: Promise<boolean>[] = [];
+    const removedUrls: string[] = [];
 
     if (category.imageUrl !== data.imageUrl) {
-      filePromises.push(this._s3Service.deleteFile(category.imageUrl));
+      removedUrls.push(category.imageUrl);
     }
     if (category.iconUrl !== data.iconUrl) {
-      filePromises.push(this._s3Service.deleteFile(category.iconUrl));
+      removedUrls.push(category.iconUrl);
     }
-    await Promise.all(filePromises);
 
     const parentObjectId = await this.validateAndResolveParent(parentId || null, category.level);
     const sanitizedData = this.sanitizeByLevel(rest);
@@ -80,7 +78,10 @@ export class CategoryManagementService implements ICategoryManagementService {
     if (!updatedCategory) {
       throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    await this._redisService.clearPattern("categories:list");
+    if (removedUrls.length > 0) {
+      void Promise.allSettled(removedUrls.map((url) => this._storageService.deleteFile(url)));
+    }
+    await this._redisService.clearPattern(REDIS_KEYS.CATEGORY.LIST_PREFIX);
     return CategoryResponseDTO.fromEntity(updatedCategory);
   }
 
@@ -99,7 +100,7 @@ export class CategoryManagementService implements ICategoryManagementService {
       throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
     const message = updatedCategory.isAvailable ? CATEGORY.UNBLOCKED : CATEGORY.BLOCKED;
-    await this._redisService.clearPattern("categories:list");
+    await this._redisService.clearPattern(REDIS_KEYS.CATEGORY.LIST_PREFIX);
 
     return { newStatus, message };
   }

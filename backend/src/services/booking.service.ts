@@ -13,7 +13,7 @@ import { IBookingPricingService } from "@/core/interfaces/services/IBookingPrici
 import { IBookingRescheduleService } from "@/core/interfaces/services/IBookingRescheduleService";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { TYPES } from "@/di/types";
 import {
   CancelRescheduleDto,
@@ -44,14 +44,14 @@ export class BookingService implements IBookingService {
     @inject(TYPES.BookingExtraChargeService)
     private _extraChargeService: IBookingExtraChargeService,
     @inject(TYPES.BookingLifecycleService) private _lifecycleService: IBookingLifecycleService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.StorageService) private _storageService: IStorageService,
     @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository
   ) {}
 
   async getBookings(input: BookingListQuery): Promise<CursorPaginatedResult<BookingListItemDTO>> {
     const { data, nextCursor } = await this._bookingRepository.getBookings(input);
     return {
-      data: await BookingListItemDTO.fromEntities(data, this._s3Service),
+      data: await BookingListItemDTO.fromEntities(data, this._storageService),
       nextCursor,
     };
   }
@@ -68,7 +68,7 @@ export class BookingService implements IBookingService {
     if (chat) {
       booking.chatId = chat._id.toString();
     }
-    return await BookingResponseDTO.fromEntity(booking, this._s3Service);
+    return await BookingResponseDTO.fromEntity(booking, this._storageService);
   }
 
   async createBooking(userId: string, data: CreatebookingDTO): Promise<{ url: string }> {

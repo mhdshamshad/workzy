@@ -1,8 +1,8 @@
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IReview } from "@/types/review/review.entity";
 import { ReviewListItem } from "@/types/review/review.projection";
 import { IReviewStats } from "@/types/worker/worker.entity";
-import { resolveS3Url } from "@/utils/s3.utils";
+import { resolveStorageUrl } from "@/utils/storage.utils";
 
 export class ReviewResponseDto {
   id!: string;
@@ -96,7 +96,10 @@ export class ReviewUserDto extends ReviewBaseDto {
     name: string;
     profileImage?: string;
   };
-  static async fromEntity(entity: ReviewListItem, s3Service: IS3Service): Promise<ReviewUserDto> {
+  static async fromEntity(
+    entity: ReviewListItem,
+    storageService: IStorageService
+  ): Promise<ReviewUserDto> {
     const dto = new ReviewUserDto();
     Object.assign(dto, ReviewUserDto.baseMap(entity));
     const worker = entity.workerId;
@@ -105,16 +108,16 @@ export class ReviewUserDto extends ReviewBaseDto {
       id: worker._id.toString(),
       name: entity.bookingId.snapshot.worker.name,
       profileImage: worker.profileImage
-        ? await resolveS3Url(worker.profileImage, s3Service)
+        ? await resolveStorageUrl(worker.profileImage, storageService)
         : undefined,
     };
     return dto;
   }
   static async fromEntities(
     entities: ReviewListItem[],
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<ReviewUserDto[]> {
-    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+    return Promise.all(entities.map((entity) => this.fromEntity(entity, storageService)));
   }
 }
 
@@ -124,7 +127,10 @@ export class ReviewWorkerDto extends ReviewBaseDto {
     name: string;
     profileImage?: string;
   };
-  static async fromEntity(entity: ReviewListItem, s3Service: IS3Service): Promise<ReviewWorkerDto> {
+  static async fromEntity(
+    entity: ReviewListItem,
+    storageService: IStorageService
+  ): Promise<ReviewWorkerDto> {
     const dto = new ReviewWorkerDto();
     Object.assign(dto, ReviewWorkerDto.baseMap(entity));
     const user = entity.userId;
@@ -133,16 +139,16 @@ export class ReviewWorkerDto extends ReviewBaseDto {
       id: user._id.toString(),
       name: entity.bookingId.snapshot.user.name,
       profileImage: user.profileImage
-        ? await resolveS3Url(user.profileImage, s3Service)
+        ? await resolveStorageUrl(user.profileImage, storageService)
         : undefined,
     };
     return dto;
   }
   static async fromEntities(
     entities: ReviewListItem[],
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<ReviewWorkerDto[]> {
-    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+    return Promise.all(entities.map((entity) => this.fromEntity(entity, storageService)));
   }
 }
 
@@ -158,7 +164,10 @@ export class ReviewAdminDto extends ReviewBaseDto {
     name: string;
     profileImage?: string;
   };
-  static async fromEntity(entity: ReviewListItem, s3Service: IS3Service): Promise<ReviewAdminDto> {
+  static async fromEntity(
+    entity: ReviewListItem,
+    storageService: IStorageService
+  ): Promise<ReviewAdminDto> {
     const dto = new ReviewAdminDto();
     Object.assign(dto, ReviewAdminDto.baseMap(entity));
     const user = entity.userId;
@@ -170,23 +179,23 @@ export class ReviewAdminDto extends ReviewBaseDto {
       id: worker._id.toString(),
       name: snapshot.worker.name,
       profileImage: worker.profileImage
-        ? await resolveS3Url(worker.profileImage, s3Service)
+        ? await resolveStorageUrl(worker.profileImage, storageService)
         : undefined,
     };
     dto.user = {
       id: user._id.toString(),
       name: snapshot.user.name,
       profileImage: user.profileImage
-        ? await resolveS3Url(user.profileImage, s3Service)
+        ? await resolveStorageUrl(user.profileImage, storageService)
         : undefined,
     };
     return dto;
   }
   static async fromEntities(
     entities: ReviewListItem[],
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<ReviewAdminDto[]> {
-    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+    return Promise.all(entities.map((entity) => this.fromEntity(entity, storageService)));
   }
 }
 

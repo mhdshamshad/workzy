@@ -13,7 +13,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -31,7 +31,7 @@ import { useAudioRecorder, formatDuration } from '../hooks/useAudioRecorder';
 import { useChatMediaUpload } from '../hooks/useChatMediaUpload';
 import { messageInputSchema, type MessageInputFormValues } from '../validation/messageInputSchema';
 
-import EmojiPickerPopover from './EmojiPickerPopover';
+const EmojiPickerPopover = lazy(() => import('./EmojiPickerPopover'));
 
 export interface SentMessagePayload {
   type: MessageType;
@@ -391,7 +391,7 @@ export default function MessageInput({
                 <p className="font-bold text-[12px] text-primary mb-1">
                   {replyTo.role === role ? 'You' : replyTo.role}
                 </p>
-                <p className="text-sm text-muted-foreground line-clamp-2 break-words">
+                <p className="text-sm text-muted-foreground line-clamp-2 wrap-break-word">
                   {replyTo.type === MESSAGE_TYPE.TEXT
                     ? replyTo.content
                     : replyTo.type === MESSAGE_TYPE.IMAGE
@@ -532,14 +532,16 @@ export default function MessageInput({
                 <Smile size={18} />
               </button>
               {emojiOpen && (
-                <EmojiPickerPopover
-                  onSelectEmoji={emoji => {
-                    const current = watch('content') || '';
-                    setValue('content', current + emoji, { shouldValidate: true });
-                    textareaRef.current?.focus();
-                  }}
-                  onClose={() => setEmojiOpen(false)}
-                />
+                <Suspense fallback={null}>
+                  <EmojiPickerPopover
+                    onSelectEmoji={emoji => {
+                      const current = watch('content') || '';
+                      setValue('content', current + emoji, { shouldValidate: true });
+                      textareaRef.current?.focus();
+                    }}
+                    onClose={() => setEmojiOpen(false)}
+                  />
+                </Suspense>
               )}
             </div>
 

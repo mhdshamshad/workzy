@@ -1,6 +1,5 @@
 import { WORKER_API } from '@/constants';
 import { SERVICE_API } from '@/constants/apiRoutes/service.routes';
-import type { WorkerListParams } from '@/features/user/services/components/WorkerList';
 import type { ServiceFormType } from '@/features/worker/services/validation/ServiceFormData';
 import api from '@/lib/api/axios';
 import type { ApiResponse } from '@/types/api';
@@ -12,7 +11,7 @@ import type {
   ServiceFilters,
   WorkerServicesResponse,
 } from '@/types/service';
-import type { PublicWorkerListItem } from '@/types/worker';
+import type { PublicWorkerListParams, PublicWorkerResponse } from '@/types/worker';
 
 interface SResponse {
   message: string;
@@ -71,9 +70,9 @@ const ServiceManagement = {
   },
   listWorkers: async (
     serviceId: string,
-    params: WorkerListParams
-  ): Promise<{ total: number; workers: PublicWorkerListItem[] }> => {
-    const res = await api.get<ApiResponse<{ total: number; workers: PublicWorkerListItem[] }>>(
+    params: PublicWorkerListParams
+  ): Promise<PublicWorkerResponse> => {
+    const res = await api.get<ApiResponse<PublicWorkerResponse>>(
       WORKER_API.LIST_BY_SERVICE(serviceId),
       { params }
     );

@@ -1,5 +1,5 @@
 import { DEFAULT_WORKER_COVER_IMAGE, WorkerStatus } from "@/constants";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import {
   IAvailabilitySlots,
   IGeoLocation,
@@ -85,7 +85,7 @@ export class WorkerDetailsResponseDto {
 
   static async fromEntity(
     entity: IWorker,
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<WorkerDetailsResponseDto> {
     const dto = new WorkerDetailsResponseDto();
 
@@ -102,7 +102,7 @@ export class WorkerDetailsResponseDto {
       entity.documents.map(
         async (doc): Promise<WorkerDocumentDto> => ({
           id: doc._id?.toString() ?? "",
-          url: await s3Service.generateSignedUrl(doc.url),
+          url: await storageService.generateSignedUrl(doc.url),
           status: doc.status,
           type: doc.type,
           uploadedAt: doc.uploadedAt,

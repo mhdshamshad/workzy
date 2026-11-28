@@ -18,7 +18,7 @@ import { IWalletRepository } from "@/core/interfaces/repositories/IWalletReposit
 import { IWalletTransactionRepository } from "@/core/interfaces/repositories/IWalletTransactionRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IPayoutService } from "@/core/interfaces/services/IPayoutService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import {
@@ -48,7 +48,7 @@ export class PayoutService implements IPayoutService {
     private _walletTransactionRepo: IWalletTransactionRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.StorageService) private _storageService: IStorageService
   ) {}
 
   async updateBankDetails(workerId: string, data: BankDetailsDto): Promise<WalletResponseDto> {
@@ -190,7 +190,7 @@ export class PayoutService implements IPayoutService {
     const { data, nextCursor } = await this._payoutRepository.findPayoutRequests(query);
 
     return {
-      data: await PayoutResponseDto.fromEntities(data, this._s3Service),
+      data: await PayoutResponseDto.fromEntities(data, this._storageService),
       nextCursor,
     };
   }

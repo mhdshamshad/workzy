@@ -1,8 +1,8 @@
 import { QuoteStatus } from "@/constants";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IBookingSlot } from "@/types/booking/booking.entity";
 import { QuoteListItem } from "@/types/quote/quote.projection";
-import { resolveS3Url } from "@/utils/s3.utils";
+import { resolveStorageUrl } from "@/utils/storage.utils";
 
 export class QuoteListItemDto {
   id!: string;
@@ -29,7 +29,10 @@ export class QuoteListItemDto {
     iconUrl: string;
   };
 
-  static async fromEntity(entity: QuoteListItem, s3Service: IS3Service): Promise<QuoteListItemDto> {
+  static async fromEntity(
+    entity: QuoteListItem,
+    storageService: IStorageService
+  ): Promise<QuoteListItemDto> {
     const dto = new QuoteListItemDto();
 
     dto.id = entity._id.toString();
@@ -44,7 +47,7 @@ export class QuoteListItemDto {
     dto.user = {
       id: entity.userId._id.toString(),
       name: entity.userId.name,
-      profileImage: await resolveS3Url(entity.userId.profileImage, s3Service),
+      profileImage: await resolveStorageUrl(entity.userId.profileImage, storageService),
     };
     dto.worker = {
       id: entity.workerId._id.toString(),
@@ -62,9 +65,9 @@ export class QuoteListItemDto {
 
   static async fromEntities(
     entities: QuoteListItem[],
-    s3Service: IS3Service
+    storageService: IStorageService
   ): Promise<QuoteListItemDto[]> {
-    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+    return Promise.all(entities.map((entity) => this.fromEntity(entity, storageService)));
   }
 }
 

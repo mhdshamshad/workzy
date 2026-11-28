@@ -18,6 +18,7 @@ import {
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
+import { WorkzyLogo } from '@/components/atoms/WorkzyLogo';
 import type { SelectedLocation } from '@/components/molecules/LocationSearchModal';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import SearchInput from '@/components/molecules/SearchInput';
@@ -35,11 +36,13 @@ import ModeToggle from '@/components/ui/ModeToggle';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ROLE } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
+import { queryClient } from '@/lib/react-query/queryClient';
 import { logoutService, switchRoleService } from '@/services/auth.service';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearUser, setCredentials } from '@/store/slices/authSlice';
 import { setLocation } from '@/store/slices/locationSlice';
 import type { CategorySuggestion } from '@/types/category';
+import { broadcastAuthEvent } from '@/utils/crossTabAuth';
 import { syncUserLocation } from '@/utils/locationSync';
 
 const LocationSearchModal = lazy(() => import('@/components/molecules/LocationSearchModal'));
@@ -101,6 +104,8 @@ export default function Header() {
     } finally {
       dispatch(clearUser());
       setAxiosToken(null);
+      queryClient.clear();
+      broadcastAuthEvent({ type: 'LOGOUT' });
       navigate('/login');
       setMobileMenuOpen(false);
     }
@@ -168,12 +173,8 @@ export default function Header() {
       <header className="fixed left-0 right-0 top-0 z-50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
-            <Link
-              to="/"
-              onClick={() => handleNavClick('/')}
-              className="text-xl lg:text-2xl font-bold bg-linear-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent shrink-0"
-            >
-              Workzy
+            <Link to="/" onClick={() => handleNavClick('/')}>
+              <WorkzyLogo />
             </Link>
             <nav className="hidden lg:flex items-center gap-1">
               {NAV_LINKS.map(link => (

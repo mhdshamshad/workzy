@@ -1,6 +1,33 @@
 import dayjs from 'dayjs';
-import * as LucideIcons from 'lucide-react';
-import { Bell, CheckCheck, Loader2, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  Ban,
+  Bell,
+  CalendarCheck,
+  CalendarPlus,
+  CalendarX,
+  CheckCheck,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  DollarSign,
+  FileText,
+  FileWarning,
+  Gavel,
+  Loader2,
+  MapPin,
+  PlayCircle,
+  Receipt,
+  Scale,
+  ShieldAlert,
+  ShieldCheck,
+  ThumbsUp,
+  Truck,
+  Unlock,
+  X,
+  XCircle,
+  type LucideIcon,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +44,31 @@ import {
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 
-import type { ComponentType } from 'react';
-
-type LucideIconComponent = ComponentType<React.SVGProps<SVGSVGElement>>;
-const lucideIconMap = LucideIcons as unknown as Record<string, LucideIconComponent | undefined>;
+const NOTIFICATION_ICON_MAP: Record<string, LucideIcon | undefined> = {
+  AlertTriangle,
+  Ban,
+  Bell,
+  CalendarCheck,
+  CalendarPlus,
+  CalendarX,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  DollarSign,
+  FileText,
+  FileWarning,
+  Gavel,
+  MapPin,
+  PlayCircle,
+  Receipt,
+  Scale,
+  ShieldAlert,
+  ShieldCheck,
+  ThumbsUp,
+  Truck,
+  Unlock,
+  XCircle,
+};
 
 export function NotificationsDropdown({ role = ROLE.USER }: { role?: Role }) {
   const [open, setOpen] = useState(false);
@@ -28,7 +76,7 @@ export function NotificationsDropdown({ role = ROLE.USER }: { role?: Role }) {
   useNotificationCount(role);
 
   const { notifications, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useNotifications(role, filter === 'unread' ? 'false' : undefined);
+    useNotifications(role, filter === 'unread' ? 'false' : undefined, open);
   const { markAsRead, markAllAsRead } = useNotificationActions(role);
 
   const unreadCount = useAppSelector((s: RootState) => s.notification.unreadCount);
@@ -51,7 +99,7 @@ export function NotificationsDropdown({ role = ROLE.USER }: { role?: Role }) {
 
   const renderIcon = (type: string) => {
     const { icon, color } = getNotificationConfig(type);
-    const IconCmp: LucideIconComponent = lucideIconMap[icon] ?? Bell;
+    const IconCmp = NOTIFICATION_ICON_MAP[icon] ?? Bell;
     return (
       <div
         className="flex items-center justify-center h-10 w-10 rounded-full shrink-0 shadow-sm border border-black/5 dark:border-white/5"

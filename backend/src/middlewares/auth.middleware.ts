@@ -1,17 +1,28 @@
 import { NextFunction, Request, Response } from "express";
 
 import logger from "@/config/logger";
-import { AUTH, HTTPSTATUS, Role } from "@/constants";
+import redisClient from "@/config/redisClient";
+import { AUTH, HTTPSTATUS, REDIS_KEYS, Role, USER } from "@/constants";
 import { verifyAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
 import CustomError from "@/utils/customError";
 
-export const validateRefreshToken = (req: Request, _res: Response, next: NextFunction) => {
+export const validateRefreshToken = async (req: Request, _res: Response, next: NextFunction) => {
   try {
     const token = req.cookies.refreshToken;
     if (!token) {
       return next(new CustomError(AUTH.NO_REFRESH_TOKEN, HTTPSTATUS.UNAUTHORIZED));
     }
     const decoded = verifyRefreshToken(token);
+
+    if (redisClient.isOpen && decoded.user?.id && decoded.iat) {
+      const loggedOutAt = await redisClient.get(
+        REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(decoded.user.id)
+      );
+      if (loggedOutAt && decoded.iat < Number(loggedOutAt)) {
+        return next(new CustomError(AUTH.NO_REFRESH_TOKEN, HTTPSTATUS.UNAUTHORIZED));
+      }
+    }
+
     req.user = {
       id: decoded.user.id,
       role: decoded.user.role,
@@ -31,6 +42,28 @@ export const authenticate = (roles: Array<Role>) => {
       }
 
       const decoded = verifyAccessToken(token);
+
+      if (redisClient.isOpen) {
+        const isBlacklisted = await redisClient.get(REDIS_KEYS.AUTH.BLACKLISTED_TOKEN(token));
+        if (isBlacklisted) {
+          return next(new CustomError(AUTH.TOKEN_INVALID, HTTPSTATUS.UNAUTHORIZED));
+        }
+
+        if (decoded.id && decoded.iat) {
+          const loggedOutAt = await redisClient.get(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(decoded.id));
+          if (loggedOutAt && decoded.iat < Number(loggedOutAt)) {
+            return next(new CustomError(AUTH.TOKEN_INVALID, HTTPSTATUS.UNAUTHORIZED));
+          }
+        }
+
+        if (decoded.id) {
+          const isBlocked = await redisClient.get(REDIS_KEYS.AUTH.BLOCKED_USER(decoded.id));
+          if (isBlocked) {
+            return next(new CustomError(USER.BLOCKED, HTTPSTATUS.FORBIDDEN));
+          }
+        }
+      }
+
       req.user = decoded;
 
       if (roles.length && (!req.user || !roles.includes(req.user?.role))) {
@@ -44,7 +77,7 @@ export const authenticate = (roles: Array<Role>) => {
   };
 };
 
-export const optionalAuth = (req: Request, _res: Response, next: NextFunction) => {
+export const optionalAuth = async (req: Request, _res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
 
@@ -52,6 +85,28 @@ export const optionalAuth = (req: Request, _res: Response, next: NextFunction) =
       return next();
     }
     const decoded = verifyAccessToken(token);
+
+    if (redisClient.isOpen) {
+      const isBlacklisted = await redisClient.get(REDIS_KEYS.AUTH.BLACKLISTED_TOKEN(token));
+      if (isBlacklisted) {
+        return next();
+      }
+
+      if (decoded.id && decoded.iat) {
+        const loggedOutAt = await redisClient.get(REDIS_KEYS.AUTH.USER_LOGGED_OUT_AT(decoded.id));
+        if (loggedOutAt && decoded.iat < Number(loggedOutAt)) {
+          return next();
+        }
+      }
+
+      if (decoded.id) {
+        const isBlocked = await redisClient.get(REDIS_KEYS.AUTH.BLOCKED_USER(decoded.id));
+        if (isBlocked) {
+          return next();
+        }
+      }
+    }
+
     req.user = decoded;
 
     return next();

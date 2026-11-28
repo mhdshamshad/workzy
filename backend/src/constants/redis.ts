@@ -40,5 +40,7 @@ export const REDIS_KEYS = {
     OTP: (email: string) => `otp:${email}`,
     FORGOT_PASSWORD: (email: string) => `forgotPassword:${email}`,
     BLOCKED_USER: (userId: string) => `blocked_user:${userId}`,
+    USER_LOGGED_OUT_AT: (userId: string) => `auth:logged_out_at:${userId}`,
+    BLACKLISTED_TOKEN: (token: string) => `auth:blacklisted_token:${token}`,
   },
 } as const;

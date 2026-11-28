@@ -136,6 +136,20 @@ api.interceptors.response.use(
     const backendMessage = responseData?.message;
     const backendErrors = responseData?.errors;
 
+    if (status === 403) {
+      const isBlocked =
+        backendMessage?.toLowerCase().includes('blocked') ||
+        backendMessage?.toLowerCase().includes('suspended');
+
+      if (isBlocked) {
+        window.dispatchEvent(
+          new CustomEvent('auth:blocked', {
+            detail: { message: backendMessage || 'This account is blocked by Admin.' },
+          })
+        );
+      }
+    }
+
     let finalMessage = backendMessage;
     if (!finalMessage) {
       if (!error.response) {

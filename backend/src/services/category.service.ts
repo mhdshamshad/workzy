@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import mongoose from "mongoose";
 
-import { CATEGORY, HTTPSTATUS } from "@/constants";
+import { CATEGORY, HTTPSTATUS, REDIS_EXPIRY_SECONDS } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
@@ -55,7 +55,7 @@ export class CategoryService implements ICategoryService {
 
     const categories = CategoryResponseDTO.fromEntities(categoriesRow as ICategory[]);
     const response = { categories, total };
-    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    await this._redisService.set(cacheKey, JSON.stringify(response));
 
     return response;
   }
@@ -111,7 +111,7 @@ export class CategoryService implements ICategoryService {
     const categoriesFiltered = await this._categoryRepository.findCategoriesByLevel(1, null);
     const response = CategoryTrendingResponseDTO.fromEntities(categoriesFiltered.slice(0, limit));
 
-    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response), 600);
+    await this._redisService.set(cacheKey, JSON.stringify(response), 600);
     return response;
   }
 
@@ -128,7 +128,7 @@ export class CategoryService implements ICategoryService {
     const { data, nextCursor } = await this._categoryRepository.findPublicCategories(filters);
     const categories = PublicCategoryResponseDTO.fromEntities(data);
     const response = { categories, nextCursor };
-    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    await this._redisService.set(cacheKey, JSON.stringify(response), REDIS_EXPIRY_SECONDS);
 
     return response;
   }

@@ -20,7 +20,7 @@ import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/Joi
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 
-import become_wokrer_img from '../assets/images/become_wokrer.webp';
+import become_worker_img from '../assets/images/become_worker.webp';
 import workerImg from '../assets/images/worker_image.webp';
 
 const BecomeWorkerForm = lazy(() => import('@/features/user/JoinUs/components/BecomeWorkerForm'));
@@ -278,10 +278,10 @@ export default function JoinUsPage() {
             <div className="relative">
               <div className="relative flex items-center justify-center">
                 <img
-                  src={become_wokrer_img}
+                  src={become_worker_img}
                   alt="Workzy app demonstration"
-                  width="620"
-                  height="450"
+                  width={1240}
+                  height={900}
                   loading="lazy"
                   className="w-full max-w-155 object-contain"
                 />

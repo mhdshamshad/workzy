@@ -7,7 +7,7 @@ import { REDIS_KEYS } from "@/constants/redis";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
@@ -21,7 +21,7 @@ export class AuthService implements IAuthService {
   constructor(
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.WorkerService) private _workerService: IWorkerService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.StorageService) private _storageService: IStorageService,
     @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
 
@@ -32,12 +32,11 @@ export class AuthService implements IAuthService {
 
   async register(registerDto: RegisterRequestDTO): Promise<RegisterResponseDTO> {
     const { name, email, password } = registerDto;
-    const hashedPassword = await hash(password, 10);
 
     const user = await this._userRepository.create({
       name,
       email,
-      password: hashedPassword,
+      password,
     });
 
     const userData = plainToInstance(RegisterResponseDTO, user, {
@@ -77,7 +76,7 @@ export class AuthService implements IAuthService {
       }
     }
 
-    return await LoginResponseDto.fromEntity(userObj, this._s3Service);
+    return await LoginResponseDto.fromEntity(userObj, this._storageService);
   }
 
   async isUserBlocked(userId: string): Promise<boolean> {
@@ -137,7 +136,7 @@ export class AuthService implements IAuthService {
         };
       }
     }
-    return await LoginResponseDto.fromEntity(userObj, this._s3Service);
+    return await LoginResponseDto.fromEntity(userObj, this._storageService);
   }
 
   async getUserInfo(userId: string, role: Role): Promise<LoginResponseDto | null> {
@@ -159,6 +158,6 @@ export class AuthService implements IAuthService {
       role,
     };
 
-    return LoginResponseDto.fromEntity(userObj, this._s3Service);
+    return LoginResponseDto.fromEntity(userObj, this._storageService);
   }
 }

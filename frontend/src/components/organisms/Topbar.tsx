@@ -1,6 +1,6 @@
 import { Bell, Sun, Moon, Menu } from 'lucide-react';
 
-import workzyLogo from '@/assets/icons/logo_image.svg';
+import { WorkzyLogo } from '@/components/atoms/WorkzyLogo';
 import { useTheme } from '@/context/theme/use-theme';
 import { useAppSelector } from '@/store/hooks';
 
@@ -25,15 +25,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       >
         <Menu size={26} />
       </button>
-      <div className="lg:hidden flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-        <img
-          src={workzyLogo}
-          alt="Workzy Logo"
-          width={32}
-          height={32}
-          className="h-8 w-8 object-contain"
-        />
-        <span className="font-semibold text-lg">WorkZy</span>
+      <div className="lg:hidden absolute left-1/2 -translate-x-1/2">
+        <WorkzyLogo />
       </div>
 
       <div className="flex-1" />
