@@ -17,10 +17,6 @@ export function resetPasswordTemplate(resetLink: string, expiryTime: number) {
     <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin: 0 0 12px;">
       This link is valid for <strong>${expiryTime} minutes</strong>. If you did not request a password reset, you can safely ignore this email.
     </p>
-    <p style="color: #94a3b8; font-size: 12px; line-height: 1.5; word-break: break-all; margin: 0;">
-      If the button doesn&apos;t work, copy and paste this link into your browser:<br />
-      <a href="${resetLink}" style="color: #2563eb; text-decoration: underline;">${resetLink}</a>
-    </p>
   `;
 
   return emailLayout(content);

@@ -32,12 +32,11 @@ export class AuthService implements IAuthService {
 
   async register(registerDto: RegisterRequestDTO): Promise<RegisterResponseDTO> {
     const { name, email, password } = registerDto;
-    const hashedPassword = await hash(password, 10);
 
     const user = await this._userRepository.create({
       name,
       email,
-      password: hashedPassword,
+      password,
     });
 
     const userData = plainToInstance(RegisterResponseDTO, user, {

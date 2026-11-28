@@ -16,10 +16,8 @@ import { REDIS_KEYS } from "@/constants/redis";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IDisputeRepository } from "@/core/interfaces/repositories/IDisputeRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
-import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
-import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IStorageService } from "@/core/interfaces/services/IStorageService";
 import { IUserService } from "@/core/interfaces/services/IUserService";
@@ -31,9 +29,11 @@ import {
 } from "@/dtos/requests/profile.dto";
 import { UsersResponseDTO } from "@/dtos/responses/admin/users.dto";
 import { UserProfileResponseDto } from "@/dtos/responses/user.dto";
+import { otpEmailTemplate } from "@/templates/emails/otpEmailTemplate";
 import { PaginatedResult } from "@/types/common/pagination";
 import { IUser } from "@/types/user/user.entity";
 import { UserListQuery } from "@/types/user/user.query";
+import { generateOtp6Digit } from "@/utils/auth/otp.util";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { extractKeyFromUrl } from "@/utils/upload";
@@ -42,8 +42,6 @@ import { extractKeyFromUrl } from "@/utils/upload";
 export class UserService implements IUserService {
   constructor(
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
-    @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
-    @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.StorageService) private _storageService: IStorageService,
@@ -197,15 +195,27 @@ export class UserService implements IUserService {
     if (existing) {
       throw new CustomError(AUTH.PHONE_BELONG_ANOTHER, HTTPSTATUS.BAD_REQUEST);
     }
-    const otp = this._otpService.generateOTP();
-    await Promise.all([
+    const otp = generateOtp6Digit();
+    const [_, sent] = await Promise.all([
       this._redisService.set(
         `otp:${phone}`,
         JSON.stringify({ otp, phone }),
         EMAIL_OTP_EXPIRY_SECONDS
       ),
-      this._emailService.sendEmail(user.email, otp),
+      this._emailService.sendEmail({
+        to: user.email,
+        subject: "Verify Phone Number Change - Workzy",
+        html: otpEmailTemplate(otp, EMAIL_OTP_EXPIRY_SECONDS / 60, {
+          title: "Verify Phone Number Change",
+          description: "Use the code below to confirm your new phone number on Workzy.",
+        }),
+        text: `Your Workzy verification OTP is: ${otp}`,
+      }),
     ]);
+    if (!sent) {
+      throw new CustomError(AUTH.EMAIL_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+
     return true;
   }
 
@@ -217,15 +227,27 @@ export class UserService implements IUserService {
     if (existing && existing._id.toString() !== userId) {
       throw new CustomError(EMAIL.BELONG_ANOTHER, HTTPSTATUS.BAD_REQUEST);
     }
-    const otp = this._otpService.generateOTP();
-    await Promise.all([
+    const otp = generateOtp6Digit();
+    const [_, sent] = await Promise.all([
       this._redisService.set(
         REDIS_KEYS.AUTH.OTP(email),
         JSON.stringify({ email, otp }),
         EMAIL_OTP_EXPIRY_SECONDS
       ),
-      this._emailService.sendEmail(email, otp),
+      this._emailService.sendEmail({
+        to: email,
+        subject: "Verify Email Change - Workzy",
+        html: otpEmailTemplate(otp, EMAIL_OTP_EXPIRY_SECONDS / 60, {
+          title: "Verify New Email Address",
+          description: "Use the code below to confirm your new email address on Workzy.",
+        }),
+        text: `Your Workzy email verification OTP is: ${otp}`,
+      }),
     ]);
+    if (!sent) {
+      throw new CustomError(AUTH.EMAIL_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+
     return true;
   }
 
@@ -235,25 +257,40 @@ export class UserService implements IUserService {
     if (!existingData) {
       throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }
-    const newOtp = this._otpService.generateOTP();
+    const newOtp = generateOtp6Digit();
 
     await this._redisService.set(
       REDIS_KEYS.AUTH.OTP(value),
       JSON.stringify({ otp: newOtp, type: value }),
       EMAIL_OTP_EXPIRY_SECONDS
     );
-
+    let recipient: string;
     if (type === "email") {
       if (!validator.isEmail(value)) {
         throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
       }
-      await this._emailService.sendEmail(value, newOtp);
+      recipient = value;
     } else if (type === "phone") {
       if (!validator.isMobilePhone(value)) {
         throw new CustomError(AUTH.INVALID_INPUT, HTTPSTATUS.BAD_REQUEST);
       }
-      await this._emailService.sendEmail(user.email, newOtp);
+      recipient = user.email;
+    } else {
+      throw new CustomError(AUTH.INVALID_INPUT, HTTPSTATUS.BAD_REQUEST);
     }
+    const sent = await this._emailService.sendEmail({
+      to: recipient,
+      subject: "Your New Verification OTP - Workzy",
+      html: otpEmailTemplate(newOtp, EMAIL_OTP_EXPIRY_SECONDS / 60, {
+        title: "New Verification Code",
+        description: `Use the new verification code below to confirm your ${type} update on Workzy.`,
+      }),
+      text: `Your new Workzy verification OTP is: ${newOtp}`,
+    });
+    if (!sent) {
+      throw new CustomError(AUTH.EMAIL_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+
     return true;
   }
 }

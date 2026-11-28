@@ -31,9 +31,7 @@ const TYPES = {
   CategoryManagementService: Symbol.for("CategoryManagementService"),
 
   // Miscellaneous / Utilities
-  OTPService: Symbol.for("IOTPService"),
   EmailService: Symbol.for("IEmailService"),
-  TokenService: Symbol.for("ITokenService"),
 
   // Upload
   UploadController: Symbol.for("UploadController"),
